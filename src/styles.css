@@ -47,3 +47,38 @@
 .sidebar-child-icon {
   @apply size-5! text-[20px]!;
 }
+
+.small-swal {
+  width: 400px !important;
+  max-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+.small-swal .swal2-html-container {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.small-swal .swal2-icon {
+  width: 4em;
+  height: 4em;
+}
+
+.small-swal .swal2-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 0;
+  margin-top: 18px;
+  font-size: 12px;
+}
+
+.swal2-popup {
+  font-size: 0.7rem !important;
+  border-bottom: 4px solid var(--color-slate-600) !important;
+  border-radius: 10px !important;
+}

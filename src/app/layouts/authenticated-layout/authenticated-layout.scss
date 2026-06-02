@@ -83,7 +83,6 @@
   flex-direction: column;
   
   .logo-title {
-    font-size: 18px;
     font-weight: 700;
     color: #d99414;
     line-height: 1.1;
@@ -176,8 +175,9 @@ mat-expansion-panel {
   }
 }
 
-::ng-deep .mat-expansion-indicator::after {
-  color: #cbd5e1;
+::ng-deep .mat-expansion-indicator {
+  color: #cbd5e1 !important;
+  transform: scale(0.75) !important;
 }
 
 /* Toolbar/Header Styling */

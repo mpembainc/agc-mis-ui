@@ -34,6 +34,9 @@ export class SwalService {
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Submit',
+      customClass: {
+        popup: 'small-swal',
+      }
     });
     return result;
   }
@@ -51,7 +54,7 @@ export class SwalService {
     return result;
   }
 
-  async successMessage(message: string, title = 'Successfully') {
+  async success(message: string, title = 'Successfully') {
     const result = await Swal.fire({
       title: title,
       text: message,
@@ -60,6 +63,9 @@ export class SwalService {
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes!',
+      customClass: {
+        popup: 'small-swal',
+      }
     });
     return result;
   }

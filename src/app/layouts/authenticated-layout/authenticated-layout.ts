@@ -60,7 +60,7 @@ export class AuthenticatedLayout implements OnDestroy {
   }
 
   async logout() {
-    const res = await this.swalService.confirm('Are you sure you want to sign out?', 'Logout');
+    const res = await this.swalService.confirm('Are you sure you want to sign out?', 'Logout', 'Yes, Logout');
     if (res.isConfirmed) {
       this.authService.logout();
     }

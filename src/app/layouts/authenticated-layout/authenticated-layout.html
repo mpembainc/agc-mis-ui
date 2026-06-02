@@ -2,13 +2,9 @@
   <mat-sidenav class="sidebar" #snav [mode]="isMobile() ? 'over' : 'side'" [opened]="!isMobile()"
     [fixedInViewport]="isMobile()" fixedTopGap="56">
     <div class="sidebar-content">
-      <div class="logo-container cursor-pointer" routerLink="/dashboard">
-        <div class="logo">
-          <img src="/images/logo.png" alt="logo" />
-        </div>
-        <div class="logo-text-container">
-          <span class="logo-title">AGC</span>
-          <span class="logo-subtitle">Attorney-General's<br>Chambers</span>
+      <div class="logo-container cursor-pointer bg-white" routerLink="/dashboard">
+        <div class="logo w-52! h-24!">
+          <img src="/images/agc-logo.png" alt="logo" />
         </div>
       </div>
 
@@ -73,7 +69,7 @@
         </button>
 
         <!-- Search Bar -->
-        <div class="search-container h-10">
+        <div class="search-container h-9.5">
           <input type="text" placeholder="Search anything..." class="placeholder:text-slate-600!" />
           <mat-icon class="search-icon h-4! w-5! text-[20px]! text-slate-600!">search</mat-icon>
         </div>
