@@ -24,6 +24,20 @@ body {
 }
 
 :root {
+  /* System Color Overrides to Gold & Navy Blue */
+  --mat-sys-primary: #d99414;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #fff9e6;
+  --mat-sys-on-primary-container: #aa6c0c;
+  --mat-sys-secondary: #0a1e35;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-background: #f5f8fa;
+  --mat-sys-surface: #ffffff;
+  --mat-sys-surface-container: #f5f8fa;
+  --mat-sys-on-surface: #0f172a;
+  --mat-sys-outline: #cbd5e1;
+  --mat-sys-outline-variant: #e2e8f0;
+
   @include mat.form-field-overrides(
     (
       container-height: 40px,

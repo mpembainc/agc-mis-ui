@@ -1,27 +1,27 @@
-  @use '@angular/material' as mat;
+@use '@angular/material' as mat;
 
 :host {
   @include mat.expansion-overrides(
     (
-      header-expanded-state-height: 43px,
-      header-collapsed-state-height: 43px,
-      actions-divider-color: orange,
+      header-expanded-state-height: 40px,
+      header-collapsed-state-height: 40px,
+      actions-divider-color: transparent,
       container-elevation-shadow: 0,
-      header-indicator-color: '#fff',
+      header-indicator-color: #cbd5e1,
       container-shape: 0,
-      header-text-size: 14.5px,
+      header-text-size: 14px,
       container-background-color: transparent
     )
   );
 
   @include mat.list-overrides(
     (
-      active-indicator-shape: 0px,
-      list-item-one-line-container-height: 43px,
+      active-indicator-shape: 4px,
+      list-item-one-line-container-height: 40px,
       list-item-leading-icon-size: 18px,
-      list-item-leading-icon-start-space: 10px,
-      list-item-leading-icon-end-space: 10px,
-      list-item-label-text-size: 14.5px,
+      list-item-leading-icon-start-space: 12px,
+      list-item-leading-icon-end-space: 12px,
+      list-item-label-text-size: 14px,
       list-item-label-text-font: 'Figtree, sans-serif',
     )
   );
@@ -32,22 +32,13 @@
    background-color: white !important;
 }
 
-mat-list-item {
-  font-size: 14.5px !important;
-}
-
 .sidebar {
-  background-color: #1a3253;
-  background-image: linear-gradient(rgba(26, 50, 83, 0.90), rgba(26, 50, 83, 0.90)), url('/images/tz-flag.webp');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  border-right: 1px solid #3f5e8b;
+  background-color: #0a1e35;
+  border-right: 1px solid #1e293b;
   box-shadow: 1px 0 3px rgba(0, 0, 0, 0.1);
-}
-
-.logo-container p {
-  color: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .mat-drawer {
@@ -59,59 +50,341 @@ mat-list-item {
   height: 100%;
 }
 
-.logo-container {
+.sidebar-content {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  height: 100%;
+}
+
+.logo-container {
+  display: flex;
   align-items: center;
-  padding-top: 20px;
-  padding-bottom: 10px;
+  gap: 12px;
+  padding: 0px 20px;
+  border-bottom: 1px solid #1e293b;
 }
 
 .logo {
-  width: 75px;
+  width: 84px;
+  height: 84px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+}
+
+.logo-text-container {
+  display: flex;
+  flex-direction: column;
+  
+  .logo-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #d99414;
+    line-height: 1.1;
+    font-family: 'Figtree', sans-serif;
+  }
+  
+  .logo-subtitle {
+    font-size: 10px;
+    color: #cbd5e1;
+    line-height: 1.1;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-family: 'Figtree', sans-serif;
+  }
+}
+
+mat-nav-list {
+  padding-top: 12px !important;
+  flex-grow: 1;
 }
 
 mat-list-item {
-  color: #e2e8f0;
-}
-
-mat-list-item span,
-mat-list-item mat-icon {
-  color: #e2e8f0;
-}
-
-mat-list-item.active {
-  background: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-}
-
-mat-list-item.active mat-icon,
-mat-list-item.active span {
-  color: #ffffff;
-}
-
-.mat-expansion-panel-header {
-  padding-left: 0;
-  padding-right: 16px;
-  color: #e2e8f0;
-
-  mat-panel-title {
-    color: #e2e8f0;
+  color: #cbd5e1;
+  margin: 2px 12px !important;
+  border-radius: 6px !important;
+  height: 40px !important;
+  transition: all 0.2s ease;
+  
+  span, mat-icon {
+    color: #cbd5e1;
   }
 
-  mat-icon {
-    margin-left: 10px;
-    margin-right: 10px;
-    font-size: 18px;
-    height: 18px;
-    width: 18px;
-    color: #e2e8f0;
+  &:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  &.active {
+    background: #d99414 !important;
+    color: #ffffff !important;
+    
+    span, mat-icon {
+      color: #ffffff !important;
+    }
+  }
+}
+
+.sidebar-child-icon {
+  display: none !important; /* Hide chevron for sub items as in screenshot */
+}
+
+/* Expansion panel styles in sidebar */
+mat-expansion-panel {
+  background: transparent !important;
+  box-shadow: none !important;
+  
+  mat-expansion-panel-header {
+    padding-left: 12px;
+    padding-right: 12px;
+    margin: 2px 12px !important;
+    border-radius: 6px !important;
+    color: #cbd5e1;
+    height: 40px !important;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    mat-panel-title {
+      color: #cbd5e1;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    mat-icon {
+      margin: 0 !important;
+      font-size: 18px;
+      height: 18px;
+      width: 18px;
+      color: #cbd5e1;
+    }
+  }
+  
+  mat-nav-list {
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+    
+    mat-list-item {
+      padding-left: 20px !important;
+      margin: 2px 12px 2px 24px !important;
+    }
   }
 }
 
 ::ng-deep .mat-expansion-indicator::after {
-  color: #e2e8f0;
+  color: #cbd5e1;
+}
+
+/* Toolbar/Header Styling */
+.mat-toolbar {
+  background-color: #0a1e35 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #1e293b !important;
+  height: 64px !important;
+  padding: 0 24px !important;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .menu-toggle-btn {
+    color: #ffffff !important;
+  }
+}
+
+/* Search Bar */
+.search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 380px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  padding: 2px 12px;
+
+  input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #0f172a;
+    font-size: 14px;
+    font-family: 'Figtree', sans-serif;
+    padding: 6px 30px 6px 0;
+
+    &::placeholder {
+      color: #94a3b8;
+    }
+  }
+
+  .search-icon {
+    position: absolute;
+    right: 12px;
+    color: #0a1e35;
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+}
+
+/* Badge Icon Container */
+.icon-badge-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  mat-icon {
+    color: #ffffff;
+    font-size: 22px;
+    height: 22px;
+    width: 22px;
+  }
+
+  .badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background-color: #ef4444; /* Red badge */
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 700;
+    height: 14px;
+    width: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* User profile button in header */
+.user-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 12px;
+  border-radius: 8px;
+  color: #ffffff;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .avatar-container {
+    position: relative;
+    width: 36px;
+    height: 36px;
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .online-indicator {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 10px;
+      height: 10px;
+      background-color: #22c55e;
+      border: 2px solid #0a1e35;
+      border-radius: 50%;
+    }
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    .user-name {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .user-role {
+      font-size: 10.5px;
+      color: #94a3b8;
+      line-height: 1.2;
+    }
+  }
+
+  .dropdown-icon {
+    color: #94a3b8;
+    margin: 0 !important;
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+}
+
+/* Bottom Sidebar Info Card */
+.sidebar-footer {
+  padding-bottom: 16px;
+  margin-top: auto;
+}
+
+.role-card {
+  margin: 0 16px !important;
+  padding: 10px 12px;
+  border: 1px solid #d99414;
+  border-radius: 8px;
+  background-color: rgba(217, 148, 20, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .role-icon {
+    color: #d99414;
+    font-size: 24px;
+    height: 24px;
+    width: 24px;
+  }
+
+  .role-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    .role-label {
+      font-size: 10px;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+    }
+
+    .role-value {
+      font-size: 12px;
+      font-weight: 600;
+      color: #d99414;
+      line-height: 1.2;
+    }
+  }
 }
 
 .page-outlet-container {
@@ -119,6 +392,8 @@ mat-list-item.active span {
   overflow: hidden;
   view-transition-name: page-content;
   contain: layout;
+  background-color: #f5f8fa;
+  min-height: calc(100vh - 64px);
 }
 
 .page-outlet-inner {
