@@ -1,0 +1,26 @@
+<div class="relative inline-flex z-50">
+  @if (materialButton) {
+    <button mat-flat-button [color]="'primary'" [class]="buttonClasses" type="button" [disabled]="disabled" (click)="togglePopover($event)">
+      <ng-content>{{ buttonLabel }}</ng-content>
+    </button>
+  } @else {
+    <button [class]="buttonClasses" type="button" [disabled]="disabled" (click)="togglePopover($event)">
+      <ng-content>{{ buttonLabel }}</ng-content>
+    </button>
+  }
+
+  @if (isOpen) {
+    <div @tooltipAnim class="absolute right-0 bottom-full mb-3 z-2200 w-80 drop-shadow-xl">
+      <div class="relative rounded-md border border-gray-200 bg-white p-4">
+        <!-- Caret -->
+        <div class="absolute right-5.5 -bottom-1.5! size-3 rotate-45 bg-white border-b border-r border-gray-200"></div>
+        <h4 class="text-base font-bold text-gray-800">{{ confirmTitle }}</h4>
+        <p class="mt-2 text-sm text-gray-700">{{ confirmMessage }}</p>
+        <div class="mt-4 flex items-center gap-2">
+          <button [class]="confirmButtonClasses" type="button" (click)="confirm($event)">{{ confirmButtonLabel }}</button>
+          <button [class]="cancelButtonClasses" type="button" (click)="cancel($event)">{{ cancelButtonLabel }}</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,126 @@
+  @use '@angular/material' as mat;
+
+:host {
+  @include mat.expansion-overrides(
+    (
+      header-expanded-state-height: 43px,
+      header-collapsed-state-height: 43px,
+      actions-divider-color: orange,
+      container-elevation-shadow: 0,
+      header-indicator-color: '#fff',
+      container-shape: 0,
+      header-text-size: 14.5px,
+      container-background-color: transparent
+    )
+  );
+
+  @include mat.list-overrides(
+    (
+      active-indicator-shape: 0px,
+      list-item-one-line-container-height: 43px,
+      list-item-leading-icon-size: 18px,
+      list-item-leading-icon-start-space: 10px,
+      list-item-leading-icon-end-space: 10px,
+      list-item-label-text-size: 14.5px,
+      list-item-label-text-font: 'Figtree, sans-serif',
+    )
+  );
+}
+
+::ng-deep .action-menu-panel .mat-mdc-menu-content {
+   padding: 0 !important;
+   background-color: white !important;
+}
+
+mat-list-item {
+  font-size: 14.5px !important;
+}
+
+.sidebar {
+  background-color: #1a3253;
+  background-image: linear-gradient(rgba(26, 50, 83, 0.90), rgba(26, 50, 83, 0.90)), url('/images/tz-flag.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-right: 1px solid #3f5e8b;
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.logo-container p {
+  color: #f1f5f9;
+}
+
+.mat-drawer {
+  width: 260px;
+  border-radius: 0;
+}
+
+.mat-drawer-container {
+  height: 100%;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 20px;
+  padding-bottom: 10px;
+}
+
+.logo {
+  width: 75px;
+}
+
+mat-list-item {
+  color: #e2e8f0;
+}
+
+mat-list-item span,
+mat-list-item mat-icon {
+  color: #e2e8f0;
+}
+
+mat-list-item.active {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+mat-list-item.active mat-icon,
+mat-list-item.active span {
+  color: #ffffff;
+}
+
+.mat-expansion-panel-header {
+  padding-left: 0;
+  padding-right: 16px;
+  color: #e2e8f0;
+
+  mat-panel-title {
+    color: #e2e8f0;
+  }
+
+  mat-icon {
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+    color: #e2e8f0;
+  }
+}
+
+::ng-deep .mat-expansion-indicator::after {
+  color: #e2e8f0;
+}
+
+.page-outlet-container {
+  position: relative;
+  overflow: hidden;
+  view-transition-name: page-content;
+  contain: layout;
+}
+
+.page-outlet-inner {
+  position: relative;
+}

@@ -1,0 +1,7 @@
+<span [class]="classList" [matTooltip]="tooltip ?? null">
+  @if (text !== undefined) {
+    {{ text }}
+  } @else {
+    <ng-content></ng-content>
+  }
+</span>

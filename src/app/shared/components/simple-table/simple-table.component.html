@@ -1,0 +1,27 @@
+<div class="overflow-hidden rounded-md border border-slate-200">
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-slate-200 text-sm">
+      <thead class="bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+        <tr>
+          @for (column of columns; track column) {
+            <th class="px-4 py-3" [style.width]="columnConfig[column]?.width">{{ column | uppercase }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-200 bg-white text-slate-700">
+        @for (row of rows; track row) {
+          <tr class="transition hover:bg-slate-50">
+            @for (cell of row; track cell) {
+              <td class="px-4 py-3">{{ cell }}</td>
+            }
+          </tr>
+        }
+        @if (rows.length === 0) {
+          <tr>
+            <td class="px-4 py-6 text-center text-slate-500" [attr.colspan]="columns.length">No data</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

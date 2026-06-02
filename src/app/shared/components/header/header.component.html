@@ -1,0 +1,20 @@
+<div class="flex flex-col gap-1" [class.mb-5]="!noMargin">
+    <div class="flex items-center gap-3">
+      @if(canGoBack) {
+        <button (click)="goBack()" class="p-1 border border-slate-200 pr-3 text-sm font-medium hover:bg-slate-100 rounded-full text-slate-500 transition-colors flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg> Back
+        </button>
+      }
+      
+      <div class="flex-1">
+        <h2 class="text-xl font-figtree! font-bold text-slate-800 leading-tight">{{ title }}</h2>
+        @if(subTitle) {
+          <p class="text-sm font-figtree! text-slate-500 mt-1">{{ subTitle }}</p>
+        }
+      </div>
+      
+      <div>
+        <ng-content></ng-content>
+      </div>
+    </div>
+</div>

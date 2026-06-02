@@ -1,0 +1,53 @@
+<!-- Trigger -->
+@if (buttonMode === 'button') {
+  <button mat-flat-button class="bg-slate-200! border! border-slate-300!" [matMenuTriggerFor]="rootMenu" [disabled]="disabled" #trigger="matMenuTrigger">
+    <span class="flex items-center gap-1">
+      @if (triggerIcon && triggerIcon !== 'more_vert') {
+        <mat-icon class="text-[18px]! h-4.5! w-4.5!">{{ triggerIcon }}</mat-icon>
+      }
+      <span class="text-[15px]">{{ triggerLabel || 'Actions' }}</span>
+      <mat-icon class="text-[18px]! h-4.5! w-4!">expand_more</mat-icon>
+    </span>
+  </button>
+} @else {
+  <button mat-icon-button
+     [matMenuTriggerFor]="rootMenu" [disabled]="disabled" #trigger="matMenuTrigger">
+     @if (triggerLabel) {
+        <span>{{ triggerLabel }}</span>
+      }
+      <mat-icon class="text-slate-600! w-5! text-[20px]!">{{ triggerIcon }}</mat-icon>
+  </button>
+}
+
+<!-- Root Menu -->
+<mat-menu #rootMenu="matMenu" class="action-menu-panel rounded-lg!">
+   @for (item of visibleItems(items); track $index) {
+      @if (item.dividerBefore) {
+         <div class="my-1 h-px bg-slate-200"></div>
+      }
+
+      <!-- Single item -->
+      <button mat-menu-item [disabled]="isDisabled(item)" (click)="onItemClick(item)" class="action-menu-item">
+         @if (item.template) {
+            <ng-container [ngTemplateOutlet]="item.template"
+               [ngTemplateOutletContext]="{ $implicit: item, ctx: context }"></ng-container>
+         } @else {
+            <div class="flex w-full items-center">
+               @if (iconOf(item)) {
+                  <mat-icon class="text-[20px]! h-5! w-5! mr-2!" [ngClass]="iconColorClass(item.color)">
+                     {{ iconOf(item) }}
+                  </mat-icon>
+               }
+               <span class="flex-1 text-[15px] text-figtree!">{{ labelOf(item) }}</span>
+               @if (hintOf(item)) {
+                  <span class="text-xs text-slate-400">{{ hintOf(item) }}</span>
+               }
+            </div>
+         }
+      </button>
+
+      @if (item.dividerAfter) {
+         <div class="my-1 h-px bg-slate-200"></div>
+      }
+   }
+</mat-menu>

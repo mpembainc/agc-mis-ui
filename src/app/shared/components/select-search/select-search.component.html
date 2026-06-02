@@ -1,0 +1,38 @@
+<mat-form-field appearance="outline" class="w-full" [subscriptSizing]="subscriptSizing">
+  @if(showLabel) {
+    <mat-label>{{ label }}</mat-label>
+  }
+  
+  <mat-select 
+    [value]="value" 
+    (selectionChange)="onSelectionChange($event)" 
+    placeholder="{{ placeholder }}">
+    
+    <mat-option>
+      <ngx-mat-select-search 
+        [formControl]="searchCtrl"
+        [clearSearchInput]="false"
+        placeholderLabel="Search..."
+        noEntriesFoundLabel="No results found">
+      </ngx-mat-select-search>
+    </mat-option>
+
+    <ng-container 
+      appScrollTracker 
+      (scrollEnd)="onScrollToEnd()"> 
+      
+      @for (option of options$ | async; track getValue(option)) {
+        <mat-option [value]="getValue(option)">
+          {{ getDisplayValue(option) }}
+        </mat-option>
+      }
+
+      @if (loading) {
+        <mat-option disabled class="flex justify-center items-center">
+          <mat-spinner diameter="20"></mat-spinner> Loading...
+        </mat-option>
+      }
+    </ng-container>
+
+  </mat-select>
+</mat-form-field>

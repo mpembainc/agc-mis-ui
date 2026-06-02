@@ -1,0 +1,42 @@
+<div class="px-6 py-4 border-b border-gray-200 sm:px-6">
+  <div class="flex items-center justify-between">
+    <h3 class="text-md font-semibold leading-6 text-gray-900 text-figtree uppercase">
+      {{ title }}
+    </h3>
+    <button
+      type="button"
+      mat-dialog-close
+      class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+    >
+      <span class="sr-only">Close</span>
+      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<div class="p-6">
+  <ng-content></ng-content>
+</div>
+
+<div class="px-6 py-4 bg-gray-50 border-t border-gray-200 sm:px-6 flex justify-end gap-3 rounded-b-xl">
+  <button mat-button mat-dialog-close type="button" class="px-6!" [disabled]="disableCancelButton">{{cancelButtonLabel}}</button>
+  @if (showPrimaryButton) {
+    @if (useConfirmTooltip) {
+      <app-confirm-tooltip
+        [buttonLabel]="primaryButtonLabel"
+        [confirmTitle]="confirmTooltipTitle"
+        [confirmMessage]="confirmTooltipMessage"
+        [confirmButtonLabel]="confirmTooltipButtonLabel"
+        [cancelButtonLabel]="confirmTooltipCancelLabel"
+        [disabled]="disablePrimaryButton"
+        (confirmed)="onConfirmed.emit()"
+      ></app-confirm-tooltip>
+    } @else {
+      <button mat-flat-button color="primary" type="submit" [disabled]="disablePrimaryButton" class="px-6!">
+        <i class="fa fa-save"></i> {{primaryButtonLabel}}
+      </button>
+    }
+  }
+</div>

@@ -1,0 +1,29 @@
+@use '@angular/material' as mat;
+
+:host {
+  @include mat.menu-overrides((
+    container-shape: 120px,
+    divider-color: red,
+  ));
+}
+
+/* Panel styling: keep Material overlay, add Tailwind-like vibe */
+:host ::ng-deep .action-menu-panel.mat-mdc-menu-panel {
+   min-width: 220px;
+   overflow: hidden;
+}
+
+:host ::ng-deep .action-menu-item.mat-mdc-menu-item {
+   height: 40px;
+}
+
+::ng-deep .action-menu-panel .mat-mdc-menu-content {
+   padding: 0 !important;
+   background-color: white !important;
+}
+
+.mat-mdc-icon-button {
+  width: 38px;
+  height: 38px;
+  padding: 7px;
+}

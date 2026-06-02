@@ -1,0 +1,105 @@
+<mat-sidenav-container>
+  <mat-sidenav class="sidebar" #snav [mode]="isMobile() ? 'over' : 'side'" [opened]="!isMobile()"
+    [fixedInViewport]="isMobile()" fixedTopGap="56">
+    <div class="logo-container border-b cursor-pointer border-gray-600" routerLink="/dashboard">
+      <div class="logo">
+        <img src="/images/logo.png" alt="logo" />
+      </div>
+      <p class="font-black mt-1 font-figtree">AGC-MIS</p>
+    </div>
+
+    <mat-nav-list>
+      <!-- *ngFor="let nav of menuItems" -->
+      @for (nav of menuItems; track $index; let i = $index) {
+      <ng-container>
+        <!-- Single item -->
+        @if (!nav.children) {
+          <mat-list-item [routerLink]="nav.route" class="font-figtree" routerLinkActive="current active"
+            [routerLinkActiveOptions]="{ exact: !!nav.exact }">
+            <mat-icon matListItemIcon class="text-white!">{{ nav.icon }}</mat-icon>
+            <span matLine>{{ nav.label }}</span>
+          </mat-list-item>
+        }
+
+        <!-- Parent with children -->
+        @if (nav.children) {
+          <mat-expansion-panel
+            [expanded]="expandedMenuIndex === i"
+            (opened)="expandedMenuIndex = i"
+            (closed)="expandedMenuIndex = expandedMenuIndex === i ? null : expandedMenuIndex"
+          >
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>{{ nav.icon }}</mat-icon>
+                {{ nav.label }}
+              </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <mat-nav-list>
+            @for (child of nav.children; track $index) {
+              @if (child.permissions) {
+              <mat-list-item [routerLink]="child.route"
+                routerLinkActive="current active" [routerLinkActiveOptions]="{ exact: !!child.exact }">
+                <mat-icon class="sidebar-child-icon">chevron_right</mat-icon>
+                <span matLine>{{ child.label }}</span>
+              </mat-list-item>
+              } @else {
+              <mat-list-item [routerLink]="child.route" routerLinkActive="current active" [routerLinkActiveOptions]="{ exact: !!child.exact }">
+                <mat-icon class="sidebar-child-icon">chevron_right</mat-icon>
+                <span matLine>{{ child.label }}</span>
+              </mat-list-item>
+              } 
+            }
+          </mat-nav-list>
+        </mat-expansion-panel>
+        }
+      </ng-container>
+      }
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar class="flex justify-between border-b border-gray-200">
+      <button matIconButton (click)="snav.toggle()"><mat-icon>menu</mat-icon></button>
+
+      <div class="flex items-center gap-4 font-quicksand">
+        <div class="flex items-center gap-1">
+          <div class="h-8 w-8 bg-slate-200 rounded-xl flex justify-center items-center">
+            <mat-icon class="text-slate-500!">person</mat-icon>
+          </div>
+          <button
+            [matMenuTriggerFor]="userMenu"
+            class="flex items-center gap-1 cursor-pointer bg-transparent border-0 px-2 py-1.5 rounded-lg hover:bg-slate-100 transition"
+            aria-label="User menu"
+          >
+            <div class="flex flex-col items-start">
+              <p class="font-semibold text-[14px] text-slate-700">Hossein Khamis</p>
+              <p class="text-xs text-slate-500">hossein.khamis@ega.go.tz</p>
+            </div>
+            <mat-icon class="text-slate-800 font-bold">keyboard_arrow_down</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <mat-menu #userMenu="matMenu" xPosition="before" class="action-menu-panel" panelClass="bg-slate-100 rounded-lg!">
+        <button mat-menu-item [routerLink]="['/profile']" class="min-w-48">
+          <mat-icon class="text-[20px]! h-5! w-5! mr-2! text-slate-600">person</mat-icon>
+          <span class="font-medium text-slate-800">Profile</span>
+        </button>
+
+        <!-- <mat-divider></mat-divider> -->
+
+        <button mat-menu-item (click)="logout()" class="min-w-48">
+          <mat-icon class="text-[20px]! h-5! w-5! mr-2! text-slate-600">logout</mat-icon>
+          <span class="font-medium text-[15px] font-figtree text-slate-800">Logout</span>
+        </button>
+      </mat-menu>
+    </mat-toolbar>
+
+    <div class="p-5 page-outlet-container">
+      <div class="page-outlet-inner">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

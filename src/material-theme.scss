@@ -1,0 +1,58 @@
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Figtree,
+      density: 0,
+    )
+  );
+}
+
+body {
+  color-scheme: light;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  height: 100%;
+}
+
+:root {
+  @include mat.form-field-overrides(
+    (
+      container-height: 40px,
+      container-vertical-padding: 10px,
+      outlined-outline-color: #d0d5dd,
+      outlined-hover-outline-color: #b1b5c3,
+      outlined-label-text-size: 15px,
+      container-text-size: 15px,
+      container-text-font: 'Figtree',
+    )
+  );
+
+  @include mat.tooltip-overrides(
+    (
+      container-shape: 16px,
+      supporting-text-size: 12px,
+    )
+  );
+
+  @include mat.menu-overrides((
+    container-shape: 10px,
+    item-label-text-font: 'Figtree',
+    item-leading-spacing: 2px,
+    item-label-text-size: 15px
+  ));
+
+  @include mat.dialog-overrides(
+    (
+      container-shape: 10px,
+    )
+  );
+}

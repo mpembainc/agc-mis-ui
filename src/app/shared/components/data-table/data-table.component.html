@@ -1,0 +1,154 @@
+<div [class]="cardClass">
+  @if (
+  filterableColumns.length ||
+  isBackendSearch ||
+  filterTemplate ||
+  filters.length ||
+  headerActions.length
+  ) {
+  <div class="mb-2 flex justify-between items-end">
+    <div class="w-full flex items-center gap-2">
+      @if (filterableColumns.length || isBackendSearch) {
+        <mat-form-field subscriptSizing="dynamic" appearance="outline" [class]="searchClass">
+          <mat-label>{{ searchLabel }}</mat-label>
+          <input type="text" matInput (keyup)="applyFilter($event)" />
+        </mat-form-field>
+      }
+
+      <!-- Dynamic Filters -->
+      @if (filters.length) {
+      <form [formGroup]="filterForm" class="flex items-center gap-2">
+        @for (filter of filters; track filter.key) {
+          @if (filter.type === 'select') {
+          <div class="w-50">
+            <select-search subscriptSizing="dynamic" [label]="filter.label" [items]="filter.options || []" displayMember="label" valueMember="value"
+              [formControlName]="filter.key">
+            </select-search>
+          </div>
+          }
+          @if (filter.type === 'input') {
+            <mat-form-field subscriptSizing="dynamic" appearance="outline" class="w-50">
+              <mat-label>{{ filter.label }}</mat-label>
+              <input matInput [formControlName]="filter.key" [placeholder]="filter.placeholder || ''" />
+            </mat-form-field>
+          }
+        }
+      </form>
+      }
+
+      <!-- Other filters -->
+      @if (filterTemplate) {
+        <ng-container *ngTemplateOutlet="filterTemplate"></ng-container>
+      }
+    </div>
+
+    <!-- Table HeaderActions buttons -->
+    <div class="flex space-x-2 min-w-1/4 justify-end" [class.hidden]="!headerActions.length">
+      @for (action of headerActions; track action.label) {
+        @if (!action.hide) {
+          @if (action.permissions && action.permissions.length) {
+            <button mat-flat-button color="{{ action.color || 'primary' }}" (click)="action.onClick()"
+              *ngxPermissionsOnly="action.permissions">
+              @if (action.icon) {
+              <mat-icon>{{ action.icon }}</mat-icon>
+              }
+              {{ action.label }}
+            </button>
+            } @else {
+            <button mat-flat-button class="text-[15px]! font-figtree!" color="{{ action.color || 'primary' }}" (click)="action.onClick()">
+              @if (action.icon) {
+              <mat-icon class="mr-1!">{{ action.icon }}</mat-icon>
+              }
+              {{ action.label }}
+            </button>
+          }
+        }
+      }
+    </div>
+  </div>
+  }
+
+  @if (loading) {
+  <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+
+  <div [class]="classes">
+    <table mat-table [dataSource]="dataSource" class="w-full border-separate border-spacing-0">
+      @for (col of columns; track col.key) {
+      <ng-container [matColumnDef]="col.key">
+        <th mat-header-cell *matHeaderCellDef>{{ col.label }}</th>
+
+        <td mat-cell *matCellDef="let row; let i = index">
+          @if (columnTemplates[col.key]) {
+          <ng-container [ngTemplateOutlet]="columnTemplates[col.key]" [ngTemplateOutletContext]="{ $implicit: row }">
+          </ng-container>
+          } @else if (col.generated) {
+          {{ col.generated(row, i + pageIndex * pageSize) }}
+          } @else if (col.type === 'date') {
+          {{ row[col.key] | date: col.format ?? 'dd-MM-yyyy' }}
+          } @else if (col.type === 'image') {
+          <img [src]="row[col.key]" alt="" class="h-6 w-auto object-cover" loading="lazy" />
+          } @else {
+          {{ row[col.key] }}
+          }
+        </td>
+      </ng-container>
+      }
+
+      <!-- ACTIONS COLUMN (shown only if needed) -->
+      @if (showView || showEdit || showDelete || customActionsTpl || actionMenuItems.length) {
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+
+        <td mat-cell *matCellDef="let row">
+          <div class="flex items-center action-btns">
+            @if (showView) {
+            <button mat-icon-button color="primary" (click)="view.emit(row)" matTooltip="Show">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            }
+
+            @if (showEdit) {
+            <button mat-icon-button color="primary" (click)="edit.emit(row)" matTooltip="Edit">
+              <mat-icon>edit</mat-icon>
+            </button>
+            }
+
+            @if (showDelete) {
+            <button mat-icon-button color="warn" (click)="delete.emit(row)" matTooltip="Delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+            }
+
+            @if(actionMenuItems.length) {
+              <app-action-menu
+                [items]="actionMenuItems"
+                [context]="row">
+              </app-action-menu>
+            }
+            
+            @if (customActionsTpl) {
+            <ng-container [ngTemplateOutlet]="customActionsTpl" [ngTemplateOutletContext]="{ $implicit: row }">
+            </ng-container>
+            }
+          </div>
+        </td>
+      </ng-container>
+      }
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns; let i = index" [class]="rowClasses"></tr>
+
+      <!-- No Data Row -->
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell text-center" [attr.colspan]="columns.length + 1">No record found.</td>
+      </tr>
+    </table>
+
+    @if (!hidePagination) {
+    <mat-paginator [length]="totalItems" [pageSize]="pageSize" [pageIndex]="pageIndex"
+      [pageSizeOptions]="pageSizeOptions" (page)="onPageChange($event)" showFirstLastButtons>
+    </mat-paginator>
+    }
+  </div>
+</div>
