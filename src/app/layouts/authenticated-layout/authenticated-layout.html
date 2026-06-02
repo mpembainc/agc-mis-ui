@@ -67,14 +67,16 @@
 
   <mat-sidenav-content>
     <mat-toolbar>
-      <button mat-icon-button class="menu-toggle-btn" (click)="snav.toggle()">
-        <mat-icon>menu</mat-icon>
-      </button>
+      <div class="flex items-center gap-2 md:gap-4">
+        <button mat-icon-button class="menu-toggle-btn" (click)="snav.toggle()">
+          <mat-icon>menu</mat-icon>
+        </button>
 
-      <!-- Search Bar -->
-      <div class="search-container">
-        <input type="text" placeholder="Search anything..." />
-        <mat-icon class="search-icon">search</mat-icon>
+        <!-- Search Bar -->
+        <div class="search-container h-10">
+          <input type="text" placeholder="Search anything..." class="placeholder:text-slate-600!" />
+          <mat-icon class="search-icon h-4! w-5! text-[20px]! text-slate-600!">search</mat-icon>
+        </div>
       </div>
 
       <!-- Badges and User Profile -->
@@ -94,7 +96,7 @@
         <!-- User profile block -->
         <button [matMenuTriggerFor]="userMenu" class="user-profile-btn" aria-label="User menu">
           <div class="avatar-container">
-            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" class="avatar-img" alt="avatar" />
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" class="avatar-img border-2 border-amber-600" alt="avatar" />
             <div class="online-indicator"></div>
           </div>
           <div class="user-info hidden sm:flex">
