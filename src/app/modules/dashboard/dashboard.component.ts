@@ -2,6 +2,9 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardHeaderComponent } from './components/dashboard-header/dashboard-header.component';
 import { DashboardCardComponent } from './components/dashboard-card/dashboard-card.component';
+import { ContractsLifecycleChartComponent } from './components/contracts-lifecycle-chart/contracts-lifecycle-chart.component';
+import { ContractsTypeChartComponent } from './components/contracts-type-chart/contracts-type-chart.component';
+import { ContractsDepartmentChartComponent } from './components/contracts-department-chart/contracts-department-chart.component';
 import {
   LucideFileText,
   LucideFileInput,
@@ -16,7 +19,10 @@ import {
   imports: [
     CommonModule,
     DashboardHeaderComponent,
-    DashboardCardComponent
+    DashboardCardComponent,
+    ContractsLifecycleChartComponent,
+    ContractsTypeChartComponent,
+    ContractsDepartmentChartComponent
   ],
   templateUrl: './dashboard.component.html',
 })
