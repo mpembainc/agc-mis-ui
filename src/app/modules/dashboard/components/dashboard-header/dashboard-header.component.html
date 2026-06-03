@@ -1,0 +1,28 @@
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+  <div>
+    <h1 class="text-[23px] font-bold font-figtree text-slate-900 tracking-tight">Welcome, DAG User</h1>
+    <p class="text-[13px] text-slate-500 font-figtree mt-0.5">Overview of Contract Advisory, Review & Lifecycle</p>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <!-- Date Filter Dropdown -->
+    <button [matMenuTriggerFor]="periodMenu" class="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 rounded-lg shadow-xs cursor-pointer transition-all duration-200 text-slate-700 font-medium text-sm font-figtree">
+      <svg lucideCalendarDays class="size-4 text-slate-500"></svg>
+      <span>{{ selectedPeriod }}</span>
+      <svg lucideChevronDown class="size-4 text-slate-400"></svg>
+    </button>
+    <mat-menu #periodMenu="matMenu" xPosition="after" panelClass="bg-white rounded-lg border border-slate-200">
+      @for (period of periods; track period) {
+        <button mat-menu-item (click)="selectPeriod(period)" class="font-figtree pl-4! text-sm text-slate-700 min-w-[120px]">
+          {{ period }}
+        </button>
+      }
+    </mat-menu>
+
+    <!-- Export Report Button -->
+    <button (click)="exportReport()" class="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 rounded-lg shadow-xs cursor-pointer transition-all duration-200 text-slate-700 font-medium text-sm font-figtree">
+      <svg lucideDownload class="size-4 text-slate-500"></svg>
+      <span>Export Report</span>
+    </button>
+  </div>
+</div>
