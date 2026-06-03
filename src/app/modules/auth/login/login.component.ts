@@ -32,19 +32,19 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   slides = [
     {
-      title: 'Fighting Financial Crime',
-      image: '/images/ML.jpg',
-      subtitle: 'Tanzania\'s primary authority for combating Money Laundering, Terrorist Financing, and Proliferation Financing.',
+      title: "Attorney-General's Chambers",
+      image: "images/slide-1.jpg",
+      subtitle: "Advocating for justice, legal integrity, and the rule of law in Zanzibar.",
     },
     {
-      title: 'Intelligence-Led Enforcement',
-      image: '/images/FIU-1.jpg',
-      subtitle: 'A centralized platform for collecting, analyzing, and reporting financial intelligence across Tanzania.',
+      title: "Legal Advisory & Drafting",
+      image: "images/slide-2.jpg",
+      subtitle: "Providing high-quality legislative drafting and legal counsel to government institutions.",
     },
     {
-      title: 'Securing the Financial System',
-      image: '/images/FIU-2.jpg',
-      subtitle: 'Protecting the integrity of Tanzania\'s financial sector through transparency, accountability, and data-driven action.',
+      title: "Securing Zanzibar's Legal Framework",
+      image: "images/slide-3.jpg",
+      subtitle: "Upholding constitutional values and protecting public interests through litigation and advocacy.",
     },
   ];
 
@@ -59,8 +59,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         Validators.minLength(6),
       ]),
     });
-
-    this.startSlideshow();
   }
 
   ngOnDestroy(): void {
@@ -68,9 +66,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   private startSlideshow(): void {
-    this.slideInterval = setInterval(() => {
-      this.currentSlideIndex = (this.currentSlideIndex + 1) % this.slides.length;
-    }, 5000);
+    // Auto slideshow disabled by request
   }
 
   onLogin(): void {
@@ -80,7 +76,22 @@ export class LoginComponent implements OnInit, OnDestroy {
       formData.append('username', this.form.value.username);
       formData.append('password', this.form.value.password);
 
-      this.authService.login();
+      this.authService.login(formData).subscribe({
+        next: () => {
+          this.loading = false;
+        },
+        error: (err: any) => {
+          this.loading = false;
+
+          if (err === 404) {
+            this.swalService.error('Incorrect Credentials ⚠️').then();
+          } else if (err === 423) {
+            this.swalService.error('🔒 Account is locked for security reasons, please contact admin').then();
+          } else {
+            this.swalService.error('Incorrect Credentials ⚠️').then();
+          }
+        },
+      });
     }
   }
 

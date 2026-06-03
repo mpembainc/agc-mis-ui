@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { of, delay, tap } from 'rxjs';
 import { User } from '../user.model';
 
 @Injectable({
@@ -11,13 +12,23 @@ export class AuthService {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  login() {
-    setTimeout(() => {
-      localStorage.setItem('_ta', 'mock-token');
-      this.router.navigate(['/'], { queryParams: { returnUrl: '/' } });
-    }, 1000);
+  login(credentials: any) {
+    return of(true).pipe(
+      delay(1000),
+      tap(() => {
+        localStorage.setItem('_ta', 'mock-token');
+        const mockUser = {
+          name: 'Nahla Masoud Abdul',
+          email: 'nahla.abdul@agc.go.tz',
+          role: 'System Administrator'
+        };
+        localStorage.setItem('_ud', btoa(JSON.stringify(mockUser)));
+        
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+        window.location.replace(returnUrl);
+      })
+    );
   }
-
 
   logout(returnUrl?: string): void {
     localStorage.clear();

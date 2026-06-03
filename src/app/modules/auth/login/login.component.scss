@@ -5,26 +5,33 @@
     (
       container-height: 50px,
       container-vertical-padding: 14px,
+      outlined-outline-color: rgba(255, 255, 255, 0.25),
+      outlined-hover-outline-color: rgba(255, 255, 255, 0.6),
+      outlined-focus-outline-color: #d99414,
+      outlined-label-text-color: rgba(255, 255, 255, 0.7),
+      outlined-focus-label-text-color: #d99414,
+      outlined-input-text-color: #ffffff,
+      outlined-input-text-placeholder-color: rgba(255, 255, 255, 0.5),
     )
   );
 }
 
-/* ── Slideshow ── */
+/* ── Immersive Full-Screen Slider ── */
 .slide {
   position: absolute;
   inset: 0;
   opacity: 0;
-  transition: opacity 1.2s ease-in-out;
+  transition: opacity 1.5s ease-in-out;
+  z-index: 0;
+  pointer-events: none;
 
   &.active {
     opacity: 1;
+    z-index: 1;
+    pointer-events: auto;
 
     .slide-img {
       animation: kenBurns 9s ease-in-out forwards;
-    }
-
-    .slide-content {
-      animation: slideUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
     }
   }
 }
@@ -41,11 +48,20 @@
 
 @keyframes kenBurns {
   0%   { transform: scale(1)    translate(0, 0); }
-  100% { transform: scale(1.12) translate(-2%, -1.5%); }
+  100% { transform: scale(1.08) translate(-1.5%, -1%); }
+}
+
+/* ── Slide Text Animation ── */
+.slide-text-block {
+  animation: slideUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  h3, p {
+    text-shadow: 0 2px 4px rgba(10, 30, 53, 0.8), 0 4px 12px rgba(10, 30, 53, 0.4) !important;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -54,14 +70,41 @@
   width: 6px;
   height: 6px;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.3);
   border: none;
   cursor: pointer;
   transition: width 0.3s ease, background 0.3s ease;
 
   &.dot-active {
-    width: 20px;
-    background: #fff;
+    width: 22px;
+    background: #d99414; /* Brand Gold */
   }
 }
 
+/* ── Glassmorphic card container ── */
+.glass-card {
+  background: rgba(10, 30, 53, 0.55); /* Translucent dark navy backdrop */
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Deep element overrides for white inputs inside card ── */
+::ng-deep {
+  .glass-card {
+    input.mat-mdc-input-element {
+      color: #ffffff !important;
+      caret-color: #d99414 !important;
+    }
+    
+    .mat-mdc-form-field-icon-prefix mat-icon,
+    .mat-mdc-form-field-icon-suffix mat-icon {
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+      color: rgba(255, 255, 255, 0.6) !important;
+    }
+  }
+}
