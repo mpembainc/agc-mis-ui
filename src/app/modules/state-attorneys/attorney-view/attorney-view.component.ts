@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,6 +7,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { StateAttorneysService } from '../services/state-attorneys.service';
 import { StateAttorney, Mda, Grade } from '../models/state-attorney.model';
 import { SwalService } from '@shared/services/swal.service';
+import { ActionButtonComponent } from '@shared/components/action-button/action-button.component';
+import { RemoveUnderscorePipe } from '@shared/pipes/remove-underscore.pipe';
 
 @Component({
   selector: 'app-attorney-view',
@@ -16,6 +18,8 @@ import { SwalService } from '@shared/services/swal.service';
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
+    ActionButtonComponent,
+    RemoveUnderscorePipe,
   ],
   templateUrl: './attorney-view.component.html',
   styleUrls: ['./attorney-view.component.scss'],
@@ -27,7 +31,7 @@ export class AttorneyViewComponent implements OnInit {
   private swalService = inject(SwalService);
 
   attorney: StateAttorney | null = null;
-  loading = false;
+  loading = signal(false);
   activeTab = 'profile';
 
   mdas: Mda[] = [];
@@ -54,14 +58,14 @@ export class AttorneyViewComponent implements OnInit {
   }
 
   loadAttorneyDetails(id: string): void {
-    this.loading = true;
+    this.loading.set(true);
     this.service.getAttorney(id).subscribe({
       next: (res) => {
         this.attorney = res.data;
-        this.loading = false;
+        this.loading.set(false);
       },
       error: () => {
-        this.loading = false;
+        this.loading.set(false);
         this.swalService.error('Failed to load State Attorney details.');
         this.router.navigate(['/state-attorneys']);
       },

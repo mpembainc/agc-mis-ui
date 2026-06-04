@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
@@ -54,7 +54,7 @@ export class AttorneyFormComponent implements OnInit {
   form!: FormGroup;
   isEditMode = false;
   attorneyId: string | null = null;
-  loading = false;
+  loading = signal(false);
   submitting = false;
 
   mdas: Mda[] = [];
@@ -146,36 +146,53 @@ export class AttorneyFormComponent implements OnInit {
   }
 
   loadAttorneyDetails(id: string): void {
-    this.loading = true;
+    this.loading.set(true);
     this.service.getAttorney(id).subscribe({
       next: (res) => {
-        const attorney = res.data;
-        // Format date for input if it exists (HTML date input expects YYYY-MM-DD)
-        let formattedDob = null;
-        if (attorney.date_of_birth) {
-          formattedDob = attorney.date_of_birth.substring(0, 10);
-        }
+        try {
+          const attorney = res?.data;
+          if (!attorney) {
+            this.swalService.error('State Attorney not found.');
+            this.router.navigate(['/state-attorneys']);
+            return;
+          }
 
-        this.form.patchValue({
-          full_name: attorney.full_name,
-          email: attorney.email,
-          phone: attorney.phone,
-          date_of_birth: formattedDob,
-          zanid: attorney.zanid,
-          gender: attorney.gender,
-          employment_type: attorney.employment_type,
-          mda_id: attorney.mda_id,
-          current_grade_id: attorney.current_grade_id,
-          current_grade: attorney.current_grade,
-          bio_summary: attorney.bio_summary,
-          status: attorney.status,
-          is_active: attorney.is_active,
-        });
-        this.loading = false;
+          // Parse date of birth safely as a Date object for MatDatepicker
+          let parsedDob: Date | null = null;
+          if (attorney.date_of_birth) {
+            const d = new Date(attorney.date_of_birth);
+            if (!isNaN(d.getTime())) {
+              parsedDob = d;
+            }
+          }
+
+          this.form.patchValue({
+            full_name: attorney.full_name || '',
+            email: attorney.email || '',
+            phone: attorney.phone || '',
+            date_of_birth: parsedDob,
+            zanid: attorney.zanid || '',
+            gender: attorney.gender || null,
+            employment_type: attorney.employment_type || null,
+            mda_id: attorney.mda_id || null,
+            current_grade_id: attorney.current_grade_id || null,
+            current_grade: attorney.current_grade || '',
+            bio_summary: attorney.bio_summary || '',
+            status: attorney.status || 'active',
+            is_active: attorney.is_active ?? true,
+          });
+
+          this.loading.set(false);
+        } catch (err) {
+          console.error('Error parsing attorney details:', err);
+          this.swalService.error('An error occurred while parsing State Attorney details.');
+          this.loading.set(false);
+        }
       },
-      error: () => {
-        this.loading = false;
-        this.swalService.error('Failed to load State Attorney details.');
+      error: (err) => {
+        this.loading.set(false);
+        const msg = err?.error?.message || err?.message || 'Failed to load State Attorney details.';
+        this.swalService.error(msg);
         this.router.navigate(['/state-attorneys']);
       },
     });
@@ -190,13 +207,17 @@ export class AttorneyFormComponent implements OnInit {
     this.submitting = true;
     const data = { ...this.form.value };
 
-    // Format date_of_birth Date object to YYYY-MM-DD string
-    if (data.date_of_birth instanceof Date) {
-      const d = data.date_of_birth;
-      const month = '' + (d.getMonth() + 1);
-      const day = '' + d.getDate();
-      const year = d.getFullYear();
-      data.date_of_birth = [year, month.padStart(2, '0'), day.padStart(2, '0')].join('-');
+    // Format date_of_birth safely to YYYY-MM-DD string
+    if (data.date_of_birth) {
+      const d = new Date(data.date_of_birth);
+      if (!isNaN(d.getTime())) {
+        const month = '' + (d.getMonth() + 1);
+        const day = '' + d.getDate();
+        const year = d.getFullYear();
+        data.date_of_birth = [year, month.padStart(2, '0'), day.padStart(2, '0')].join('-');
+      } else {
+        data.date_of_birth = null;
+      }
     }
 
     // Send null instead of empty string for optional fields

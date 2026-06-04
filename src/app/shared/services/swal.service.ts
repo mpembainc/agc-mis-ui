@@ -59,10 +59,7 @@ export class SwalService {
       title: title,
       text: message,
       icon: 'success',
-      showCancelButton: true,
       confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes!',
       customClass: {
         popup: 'small-swal',
       }
