@@ -72,23 +72,29 @@ export class LoginComponent implements OnInit, OnDestroy {
   onLogin(): void {
     if (this.form.valid) {
       this.loading = true;
-      const formData = new FormData();
-      formData.append('username', this.form.value.username);
-      formData.append('password', this.form.value.password);
+      const credentials = {
+        email: this.form.value.username,
+        password: this.form.value.password,
+      };
 
-      this.authService.login(formData).subscribe({
+      this.authService.login(credentials).subscribe({
         next: () => {
           this.loading = false;
         },
         error: (err: any) => {
           this.loading = false;
 
-          if (err === 404) {
+          const status = err?.status;
+          const message = err?.error?.message || err?.message || 'Incorrect Credentials ⚠️';
+
+          if (status === 423) {
+            this.swalService.error(`🔒 ${message}`).then();
+          } else if (status === 403) {
+            this.swalService.error(`🚫 ${message}`).then();
+          } else if (status === 401) {
             this.swalService.error('Incorrect Credentials ⚠️').then();
-          } else if (err === 423) {
-            this.swalService.error('🔒 Account is locked for security reasons, please contact admin').then();
           } else {
-            this.swalService.error('Incorrect Credentials ⚠️').then();
+            this.swalService.error(message).then();
           }
         },
       });

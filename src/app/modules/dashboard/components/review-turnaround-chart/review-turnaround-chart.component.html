@@ -1,0 +1,27 @@
+<div class="flex flex-col h-full bg-white border border-slate-100 rounded-xl p-5 shadow-xs hover:shadow-md transition-all duration-300">
+  <span class="text-xs font-bold text-slate-700 font-figtree tracking-wide uppercase mb-4">Review Turnaround Time (Average)</span>
+  
+  <div class="flex flex-row items-stretch gap-6 py-2 flex-1">
+    <!-- Left Panel (Big Indicator text) -->
+    <div class="flex flex-col justify-center items-start w-[28%] shrink-0">
+      <span class="text-5xl font-extrabold text-slate-800 tracking-tight font-figtree leading-none">3.6</span>
+      <span class="text-[15px] font-bold text-slate-500 font-figtree tracking-wider uppercase mt-2.5 leading-none">Days</span>
+    </div>
+    
+    <!-- Right Panel (Line Chart Canvas) -->
+    <div class="relative h-[130px] flex-1">
+      <canvas #canvas></canvas>
+    </div>
+  </div>
+  
+  <!-- Divider -->
+  <div class="my-4 h-px bg-slate-100"></div>
+
+  <!-- Footer Link -->
+  <div class="flex items-center justify-between">
+    <a href="#" class="text-xs font-bold font-figtree text-[#0063D6] hover:underline flex items-center gap-1">
+      View performance report
+    </a>
+    <svg lucideArrowRight class="size-4 text-[#0063D6]"></svg>
+  </div>
+</div>

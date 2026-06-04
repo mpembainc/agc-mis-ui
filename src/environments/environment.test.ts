@@ -4,5 +4,4 @@ export const environment = {
   production: false,
 
   apiUrl: `${BASE_ADDRESS}:9014/api/v1`,
-  authDomain: `${BASE_ADDRESS}:9013/auth/v1`,
 };

@@ -1,0 +1,39 @@
+<div class="flex flex-col h-full bg-white border border-slate-100 rounded-xl p-5 shadow-xs hover:shadow-md transition-all duration-300">
+  <span class="text-xs font-bold text-slate-700 font-figtree tracking-wide uppercase mb-4">Contract Value Summary</span>
+  
+  <div class="flex flex-row items-stretch gap-6 py-2 flex-1">
+    <!-- Left Panel (Total Contract Value) -->
+    <div class="flex flex-col justify-center items-start bg-[#FFF9E6]/60 border border-[#FDEFCB] rounded-xl p-4 w-[42%] shrink-0">
+      <span class="text-[10px] font-bold text-slate-400 font-figtree tracking-wide uppercase leading-none">Total Contract Value</span>
+      <span class="text-[22px] font-extrabold text-slate-800 tracking-tight font-figtree mt-2.5 leading-none">{{ totalValue }}</span>
+    </div>
+    
+    <!-- Right Panel (Breakdown items) -->
+    <div class="flex flex-col gap-4 flex-1 justify-center">
+      @for (item of breakdown; track item.label) {
+        <div class="flex flex-col font-figtree text-xs">
+          <div class="flex items-center gap-2">
+            <!-- small horizontal dash indicator -->
+            <span [class]="'w-3.5 h-1 rounded-full shrink-0 ' + item.dashClass"></span>
+            <span class="text-slate-500 font-semibold leading-none">{{ item.label }}</span>
+          </div>
+          <!-- value and percentage stacked -->
+          <span class="text-slate-800 font-bold mt-1.5 pl-5.5 leading-none">
+            {{ item.value }} <span class="text-slate-400 font-normal">({{ item.percentage }}%)</span>
+          </span>
+        </div>
+      }
+    </div>
+  </div>
+  
+  <!-- Divider -->
+  <div class="my-4 h-px bg-slate-100"></div>
+
+  <!-- Footer Link -->
+  <div class="flex items-center justify-between">
+    <a href="#" class="text-xs font-bold font-figtree text-[#0063D6] hover:underline flex items-center gap-1">
+      View financial summary
+    </a>
+    <svg lucideArrowRight class="size-4 text-[#0063D6]"></svg>
+  </div>
+</div>

@@ -5,6 +5,12 @@ import { DashboardCardComponent } from './components/dashboard-card/dashboard-ca
 import { ContractsLifecycleChartComponent } from './components/contracts-lifecycle-chart/contracts-lifecycle-chart.component';
 import { ContractsTypeChartComponent } from './components/contracts-type-chart/contracts-type-chart.component';
 import { ContractsDepartmentChartComponent } from './components/contracts-department-chart/contracts-department-chart.component';
+import { ContractsExpiryAlertComponent } from './components/contracts-expiry-alert/contracts-expiry-alert.component';
+import { ContractValueSummaryComponent } from './components/contract-value-summary/contract-value-summary.component';
+import { ObligationsMilestonesChartComponent } from './components/obligations-milestones-chart/obligations-milestones-chart.component';
+import { RecentActivitiesComponent } from './components/recent-activities/recent-activities.component';
+import { ReviewTurnaroundChartComponent } from './components/review-turnaround-chart/review-turnaround-chart.component';
+import { DocumentsCategoryChartComponent } from './components/documents-category-chart/documents-category-chart.component';
 import {
   LucideFileText,
   LucideFileInput,
@@ -22,7 +28,13 @@ import {
     DashboardCardComponent,
     ContractsLifecycleChartComponent,
     ContractsTypeChartComponent,
-    ContractsDepartmentChartComponent
+    ContractsDepartmentChartComponent,
+    ContractsExpiryAlertComponent,
+    ContractValueSummaryComponent,
+    ObligationsMilestonesChartComponent,
+    RecentActivitiesComponent,
+    ReviewTurnaroundChartComponent,
+    DocumentsCategoryChartComponent
   ],
   templateUrl: './dashboard.component.html',
 })

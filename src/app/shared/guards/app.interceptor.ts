@@ -13,41 +13,13 @@ export const appInterceptor: HttpInterceptorFn = (
 
   const addAuthToken = (req: HttpRequest<unknown>) => {
     const token = authService.getAuthToken();
-    const ant = authService.getAnToken();
 
     return req.clone({
       setHeaders: {
-        Authorization: `Bearer ${token}`,
-        ant: `${ant}`
-      },
+        Authorization: `Bearer ${token}`
+      }
     });
   };
-
-  if (request.url.includes('auth/v1/o/dr')) {
-    const token = authService.getAuthToken();
-    const ant = authService.getAnToken();
-    const rf = authService.getRefreshToken();
-
-    return next(request.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`,
-        ant: `${ant}`,
-        tr: `${rf}`,
-        "X-Frame-Options": "SAMEORIGIN"
-      },
-      reportProgress: true,
-    }));
-  }
-
-  if (['api.ipify.org', 'auth/v1/o/', 'auth/v1/login'].some(url => request.url.includes(url))) {
-    return next(request.clone({
-      setHeaders: {
-        'Accept': '*/*',
-        "X-Frame-Options": "SAMEORIGIN"
-      },
-      reportProgress: true,
-    }));
-  }
 
   return next(addAuthToken(request)).pipe(
     catchError((error) => {
@@ -64,16 +36,16 @@ export const appInterceptor: HttpInterceptorFn = (
             });
           }
 
-          return throwError(() => errorMessage);
+          return throwError(() => error);
         }
 
         case 500: {
-          return throwError(() => errorMessage);
+          return throwError(() => error);
         }
 
         default: {
           if (error != 'OK') {
-            return throwError(() => errorMessage);
+            return throwError(() => error);
           }
           return of(errorMessage);
         }

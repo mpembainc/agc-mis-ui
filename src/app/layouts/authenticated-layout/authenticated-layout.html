@@ -54,7 +54,7 @@
           <mat-icon class="role-icon">shield</mat-icon>
           <div class="role-details">
             <span class="role-label">Your Role</span>
-            <span class="role-value">System Administrator</span>
+            <span class="role-value">{{ currentUser.roles[0] || 'User' }}</span>
           </div>
         </div>
       </div>
@@ -96,8 +96,8 @@
             <div class="online-indicator"></div>
           </div>
           <div class="user-info hidden sm:flex">
-            <span class="user-name">Nahla Masoud Abdul</span>
-            <span class="user-role">System Administrator</span>
+            <span class="user-name">{{ currentUser.name }}</span>
+            <span class="user-role">{{ currentUser.roles[0] || 'User' }}</span>
           </div>
           <mat-icon class="dropdown-icon">keyboard_arrow_down</mat-icon>
         </button>

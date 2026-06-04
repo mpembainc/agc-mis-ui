@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of, delay, tap } from 'rxjs';
+import { tap } from 'rxjs';
+import { environment } from '@env/environment';
 import { User } from '../user.model';
 
 @Injectable({
@@ -12,31 +13,44 @@ export class AuthService {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  login(credentials: any) {
-    return of(true).pipe(
-      delay(1000),
-      tap(() => {
-        localStorage.setItem('_ta', 'mock-token');
-        const mockUser = {
-          name: 'Nahla Masoud Abdul',
-          email: 'nahla.abdul@agc.go.tz',
-          role: 'System Administrator'
-        };
-        localStorage.setItem('_ud', btoa(JSON.stringify(mockUser)));
-        
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-        window.location.replace(returnUrl);
+  login(credentials: { email: string; password: string }) {
+    return this.http.post<any>(`${environment.apiUrl}/auth/login`, credentials).pipe(
+      tap((res) => {
+        if (res.success && res.data) {
+          const token = res.data.token;
+          const user = res.data.user;
+
+          localStorage.setItem('_agc_ta', token);
+          localStorage.setItem('_agc_ud', btoa(JSON.stringify(user)));
+
+          const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
+          window.location.replace(returnUrl);
+        }
       })
     );
   }
 
   logout(returnUrl?: string): void {
-    localStorage.clear();
+    this.http.post(`${environment.apiUrl}/auth/logout`, {}).subscribe({
+      next: () => {
+        this.clearSession(returnUrl);
+      },
+      error: () => {
+        // Even if the backend call fails, proceed with logging out locally
+        this.clearSession(returnUrl);
+      }
+    });
+  }
+
+  private clearSession(returnUrl?: string): void {
+    localStorage.removeItem('_agc_ta');
+    localStorage.removeItem('_agc_ud');
     this.router.navigate(['/login'], { queryParams: { returnUrl } });
   }
 
   clearUsrData() {
-    localStorage.removeItem('_ta');
+    localStorage.removeItem('_agc_ta');
+    localStorage.removeItem('_agc_ud');
   }
 
   loggedIn(): boolean {
@@ -44,22 +58,22 @@ export class AuthService {
   }
 
   getAuthToken() {
-    const token = localStorage.getItem('_ta');
-    return token;
-  }
-
-  getAnToken() {
-    const token = localStorage.getItem('_nt');
-    return token;
-  }
-
-  getRefreshToken() {
-    const token = localStorage.getItem('_ur');
-    return token;
+    return localStorage.getItem('_agc_ta');
   }
 
   getUser(): User {
-    const data = atob(localStorage.getItem('_ud')!);
-    return JSON.parse(data);
+    const data = localStorage.getItem('_agc_ud');
+    if (!data) {
+      return { id: 0, name: '', email: '', mda_id: null, roles: [], permissions: [] } as User;
+    }
+    try {
+      const user = JSON.parse(atob(data));
+      if (user && user.roles) {
+        user.roles = user.roles.map((r: any) => typeof r === 'string' ? r : r.name || r.display_name || '');
+      }
+      return user;
+    } catch {
+      return { id: 0, name: '', email: '', mda_id: null, roles: [], permissions: [] } as User;
+    }
   }
 }

@@ -38,6 +38,8 @@ export class AuthenticatedLayout implements OnDestroy {
   private authService = inject(AuthService);
   private swalService = inject(SwalService);
 
+  currentUser = this.authService.getUser();
+
   expandedMenuIndex: number | null = null;
   menuItems = this.menuService.getMenuItems();
   protected readonly isMobile = signal(true);

@@ -46,6 +46,6 @@ export class DashboardCardComponent {
         link: 'text-[#0063D6] hover:text-[#0051B0]'
       }
     };
-    return maps[this.theme] || maps.blue;
+    return maps[this.theme] || maps['blue'];
   }
 }

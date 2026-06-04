@@ -1,18 +1,17 @@
 export interface User {
    id: number;
-   reference?: string;
-   user_ref: string;
    name: string;
-   username: string;
-   office_ref: string;
-   phone_number: string;
-   office_name: string;
-   category_name: string;
-   role: string;
-   role_name: string;
+   email: string;
+   mda_id: number | null;
+   mda?: {
+      id: number;
+      code: string;
+      name: string;
+   } | null;
+   roles: string[];
    permissions: string[];
-   isEnabled: boolean;
-   isLocked: boolean;
+   is_active?: boolean;
+   last_login_at?: string | null;
 }
 
 export interface UserDto {
