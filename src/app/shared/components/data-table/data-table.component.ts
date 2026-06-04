@@ -79,7 +79,7 @@ export interface TableFilter {
     SelectSearchComponent,
     NgxPermissionsModule,
     ActionMenuComponent
-],
+  ],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
 })
@@ -96,7 +96,7 @@ export class DataTableComponent<T> implements AfterViewInit, OnChanges {
   @Input() filterTemplate?: TemplateRef<any>;
   @Input() headerActions: HeaderAction[] = [];
   @Input() showHoverBg = false;
-  @Input() searchClass = 'w-2/5!';
+  @Input() searchClass = 'w-1/5!';
   @Input() showOuterCard = true;
   @Input() actionMenuItems: ActionMenuItem<T>[] = [];
 

@@ -1,0 +1,213 @@
+<div class="p-6 max-w-5xl mx-auto">
+  <!-- Back Button & Header -->
+  <div class="mb-6 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <button mat-icon-button routerLink="/state-attorneys" color="primary" aria-label="Back to listing">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <h1 class="text-2xl font-bold text-slate-800">State Attorney Profile</h1>
+        <p class="text-slate-500 text-sm">View registry logs, active case allocations, and leave balances.</p>
+      </div>
+    </div>
+    @if (attorney) {
+      <button mat-flat-button color="primary" [routerLink]="['/state-attorneys/edit', attorney.id]">
+        <mat-icon class="mr-1!">edit</mat-icon>
+        Edit Profile
+      </button>
+    }
+  </div>
+
+  <!-- Loading state -->
+  @if (loading) {
+    <div class="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm border border-slate-200">
+      <div class="animate-pulse flex flex-col items-center gap-4">
+        <div class="w-12 h-12 rounded-full border-4 border-slate-200 border-t-blue-500 animate-spin"></div>
+        <span class="text-slate-500 text-sm">Loading profile data...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Profile View Content -->
+  @if (!loading && attorney) {
+    <div class="space-y-6 animate-slide-up">
+      <!-- Profile Header Card -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex flex-col md:flex-row items-center gap-6">
+        <!-- Avatar Block -->
+        <div class="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 border border-slate-200">
+          <mat-icon class="text-[48px]! w-12! h-12!">person</mat-icon>
+        </div>
+
+        <!-- Bio Summary Name -->
+        <div class="flex-1 text-center md:text-left space-y-2">
+          <div class="flex flex-col md:flex-row md:items-center gap-2">
+            <h2 class="text-2xl font-bold text-slate-800">{{ attorney.full_name }}</h2>
+            <!-- Status Badge -->
+            <span class="inline-flex self-center md:self-auto px-2.5 py-0.5 rounded-full text-xs font-semibold"
+              [class.bg-emerald-100]="attorney.status === 'active'"
+              [class.text-emerald-800]="attorney.status === 'active'"
+              [class.bg-amber-100]="attorney.status === 'on_leave'"
+              [class.text-amber-800]="attorney.status === 'on_leave'"
+              [class.bg-rose-100]="attorney.status === 'suspended'"
+              [class.text-rose-800]="attorney.status === 'suspended'"
+              [class.bg-slate-100]="attorney.status !== 'active' && attorney.status !== 'on_leave' && attorney.status !== 'suspended'"
+              [class.text-slate-800]="attorney.status !== 'active' && attorney.status !== 'on_leave' && attorney.status !== 'suspended'"
+            >
+              {{ attorney.status | uppercase }}
+            </span>
+          </div>
+          <p class="text-slate-600 font-medium">{{ getGradeName(attorney.current_grade_id) || attorney.current_grade || 'State Attorney' }}</p>
+          <p class="text-slate-500 text-sm flex items-center justify-center md:justify-start gap-1">
+            <mat-icon class="text-sm! w-4! h-4!">business</mat-icon>
+            {{ getMdaName(attorney.mda_id) }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="border-b border-slate-200">
+        <nav class="flex space-x-6">
+          <button (click)="activeTab = 'profile'"
+            class="pb-4 text-sm font-semibold border-b-2 px-1 transition-all"
+            [class.border-blue-600]="activeTab === 'profile'"
+            [class.text-blue-600]="activeTab === 'profile'"
+            [class.border-transparent]="activeTab !== 'profile'"
+            [class.text-slate-500]="activeTab !== 'profile'"
+            [class.hover:text-slate-700]="activeTab !== 'profile'"
+          >
+            Personal & Career Info
+          </button>
+          <button (click)="activeTab = 'assignments'"
+            class="pb-4 text-sm font-semibold border-b-2 px-1 transition-all"
+            [class.border-blue-600]="activeTab === 'assignments'"
+            [class.text-blue-600]="activeTab === 'assignments'"
+            [class.border-transparent]="activeTab !== 'assignments'"
+            [class.text-slate-500]="activeTab !== 'assignments'"
+            [class.hover:text-slate-700]="activeTab !== 'assignments'"
+          >
+            Work Assignments ({{ attorney.assignments?.length || 0 }})
+          </button>
+        </nav>
+      </div>
+
+      <!-- Tab Content: Profile -->
+      @if (activeTab === 'profile') {
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Info Details Card (2/3 width) -->
+          <div class="md:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
+            <div>
+              <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Registry Dossier</h3>
+              <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-6">
+                <div>
+                  <dt class="text-xs text-slate-500">Zanzibar ID (ZanID)</dt>
+                  <dd class="text-sm font-medium text-slate-800 mt-1">{{ attorney.zanid || '-' }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs text-slate-500">Gender</dt>
+                  <dd class="text-sm font-medium text-slate-800 mt-1">
+                    {{ attorney.gender === 'M' ? 'Male' : attorney.gender === 'F' ? 'Female' : '-' }}
+                  </dd>
+                </div>
+                <div>
+                  <dt class="text-xs text-slate-500">Date of Birth</dt>
+                  <dd class="text-sm font-medium text-slate-800 mt-1">{{ getFormattedDob(attorney.date_of_birth) }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs text-slate-500">Employment Type</dt>
+                  <dd class="text-sm font-medium text-slate-800 mt-1 capitalize">{{ attorney.employment_type || '-' }}</dd>
+                </div>
+              </dl>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Bio & Specialisation Summary</h3>
+              <p class="text-slate-600 text-sm whitespace-pre-line leading-relaxed">
+                {{ attorney.bio_summary || 'No biography or specialisation summary notes provided.' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Contact Details Card (1/3 width) -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
+            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">Contact Details</h3>
+            <div class="space-y-4">
+              <div class="flex items-start gap-3">
+                <mat-icon class="text-slate-400 mt-0.5">email</mat-icon>
+                <div>
+                  <p class="text-xs text-slate-500">Email Address</p>
+                  <p class="text-sm font-medium text-slate-800 mt-1 break-all">{{ attorney.email || '-' }}</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <mat-icon class="text-slate-400 mt-0.5">phone</mat-icon>
+                <div>
+                  <p class="text-xs text-slate-500">Phone Number</p>
+                  <p class="text-sm font-medium text-slate-800 mt-1">{{ attorney.phone || '-' }}</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <mat-icon class="text-slate-400 mt-0.5">toggle_on</mat-icon>
+                <div>
+                  <p class="text-xs text-slate-500">System Account Status</p>
+                  <p class="text-sm font-semibold mt-1" [class.text-green-600]="attorney.is_active" [class.text-red-500]="!attorney.is_active">
+                    {{ attorney.is_active ? 'Enabled' : 'Disabled' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Tab Content: Assignments -->
+      @if (activeTab === 'assignments') {
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+          <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">Active Case Allocations</h3>
+          
+          @if (attorney.assignments && attorney.assignments.length > 0) {
+            <div class="overflow-x-auto border border-slate-200 rounded-lg">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-slate-200">
+                    <th class="p-3 text-xs font-semibold text-slate-600">Case Title</th>
+                    <th class="p-3 text-xs font-semibold text-slate-600">Role</th>
+                    <th class="p-3 text-xs font-semibold text-slate-600">Assigned Date</th>
+                    <th class="p-3 text-xs font-semibold text-slate-600">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (assign of attorney.assignments; track assign.id) {
+                    <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors">
+                      <td class="p-3 text-sm font-medium text-slate-800">{{ assign.title || '-' }}</td>
+                      <td class="p-3 text-sm text-slate-600">{{ assign.role || '-' }}</td>
+                      <td class="p-3 text-sm text-slate-600">{{ getFormattedDob(assign.assigned_at) }}</td>
+                      <td class="p-3 text-sm">
+                        <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium"
+                          [class.bg-emerald-50]="assign.status === 'completed'"
+                          [class.text-emerald-700]="assign.status === 'completed'"
+                          [class.bg-amber-50]="assign.status === 'in_progress'"
+                          [class.text-amber-700]="assign.status === 'in_progress'"
+                          [class.bg-slate-100]="assign.status !== 'completed' && assign.status !== 'in_progress'"
+                          [class.text-slate-700]="assign.status !== 'completed' && assign.status !== 'in_progress'"
+                        >
+                          {{ assign.status || 'Pending' }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="flex flex-col items-center justify-center p-8 bg-slate-50 border border-dashed border-slate-200 rounded-lg">
+              <mat-icon class="text-slate-300 text-[48px]! w-12! h-12! mb-2">assignment_late</mat-icon>
+              <p class="text-slate-500 text-sm">No work assignments or case allocations registered for this attorney.</p>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

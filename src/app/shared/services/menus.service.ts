@@ -19,11 +19,11 @@ export class MenusService {
         children: [
           {
             label: 'Attorneys Directory',
-            route: '/1', // Mock route pointing to dashboard
+            route: '/state-attorneys',
           },
           {
             label: 'Add New Attorney',
-            route: '/2', // Mock route pointing to dashboard
+            route: '/state-attorneys/create',
           },
           {
             label: 'Departments',

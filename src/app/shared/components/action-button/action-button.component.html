@@ -1,0 +1,23 @@
+@if (routerLink) {
+  <a mat-flat-button
+    [color]="color"
+    [routerLink]="routerLink"
+    [class]="buttonClass"
+  >
+    @if (icon) {
+      <mat-icon class="mr-1!">{{ icon }}</mat-icon>
+    }
+    {{ label }}
+  </a>
+} @else {
+  <button mat-flat-button
+    [color]="color"
+    (click)="handleClick($event)"
+    [class]="buttonClass"
+  >
+    @if (icon) {
+      <mat-icon class="mr-1!">{{ icon }}</mat-icon>
+    }
+    {{ label }}
+  </button>
+}

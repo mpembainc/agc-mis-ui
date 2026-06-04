@@ -50,6 +50,12 @@ body {
     )
   );
 
+   @include mat.select-overrides(
+    (
+      trigger-text-size: 15px,
+    )
+  );
+
   @include mat.tooltip-overrides(
     (
       container-shape: 16px,

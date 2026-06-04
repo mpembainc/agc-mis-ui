@@ -1,0 +1,67 @@
+<div>
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">State Attorneys</h1>
+      <p class="text-slate-500 text-sm">Manage Zanzibar State Attorneys registry, MDAs, and activity status.</p>
+    </div>
+    <div>
+      <app-action-button
+        label="Add New Attorney"
+        icon="add"
+        routerLink="/state-attorneys/create"
+      ></app-action-button>
+    </div>
+  </div>
+
+  <app-data-table
+    [data]="attorneys"
+    [columns]="columns"
+    [filters]="filters"
+    [loading]="loading"
+    [totalItems]="totalItems"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    [isBackendSearch]="true"
+    (pageChange)="onPageChange($event)"
+    (search)="onSearch($event)"
+    (filterChange)="onFilterChange($event)"
+    (view)="onView($event)"
+    (edit)="onEdit($event)"
+    (delete)="onDelete($event)"
+    [columnTemplates]="{
+      'status': statusTpl
+    }"
+  >
+  </app-data-table>
+
+  <!-- Status Column Template -->
+  <ng-template #statusTpl let-row>
+    @switch (row.status) {
+      @case ('active') {
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+          Active
+        </span>
+      }
+      @case ('on_leave') {
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+          On Leave
+        </span>
+      }
+      @case ('suspended') {
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800">
+          Suspended
+        </span>
+      }
+      @case ('seconded') {
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-800">
+          Seconded
+        </span>
+      }
+      @default {
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 capitalize">
+          {{ row.status }}
+        </span>
+      }
+    }
+  </ng-template>
+</div>

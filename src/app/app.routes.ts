@@ -26,6 +26,43 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./modules/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
+      {
+        path: 'state-attorneys',
+        loadComponent: () =>
+          import('./modules/state-attorneys/state-attorneys.component').then(
+            (m) => m.StateAttorneysComponent
+          ),
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./modules/state-attorneys/attorney-list/attorney-list.component').then(
+                (m) => m.AttorneyListComponent
+              ),
+          },
+          {
+            path: 'create',
+            loadComponent: () =>
+              import('./modules/state-attorneys/attorney-form/attorney-form.component').then(
+                (m) => m.AttorneyFormComponent
+              ),
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () =>
+              import('./modules/state-attorneys/attorney-form/attorney-form.component').then(
+                (m) => m.AttorneyFormComponent
+              ),
+          },
+          {
+            path: 'view/:id',
+            loadComponent: () =>
+              import('./modules/state-attorneys/attorney-view/attorney-view.component').then(
+                (m) => m.AttorneyViewComponent
+              ),
+          },
+        ],
+      },
     ],
   },
 ];

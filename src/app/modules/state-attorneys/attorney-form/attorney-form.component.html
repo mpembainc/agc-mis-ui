@@ -1,0 +1,177 @@
+<div>
+  <!-- Back Button & Header -->
+  <div class="mb-6 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <button mat-icon-button routerLink="/state-attorneys" color="primary" aria-label="Back to listing">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <h1 class="text-2xl font-bold text-slate-800">{{ isEditMode ? 'Edit' : 'Register' }} State Attorney</h1>
+        <p class="text-slate-500 text-sm">
+          {{ isEditMode ? 'Update existing credentials and registry history.' : 'Register a new state attorney with job status details.' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Indicator -->
+  @if (loading) {
+    <div class="flex justify-center items-center h-64 bg-white rounded-lg shadow-sm border border-slate-200">
+      <div class="animate-pulse flex flex-col items-center gap-4">
+        <div class="w-12 h-12 rounded-full bg-slate-200 border-4 border-slate-300 border-t-blue-500 animate-spin"></div>
+        <span class="text-slate-500 text-sm">Loading attorney data...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Form Card -->
+  @if (!loading) {
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden animate-slide-up">
+      <!-- Section Header -->
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-200">
+        <h2 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Registry & Bio Profile</h2>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <!-- Grid fields -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Full Name -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Full Name</mat-label>
+            <input matInput formControlName="full_name" placeholder="e.g. Ali Hassan Juma" />
+            @if (form.get('full_name')?.hasError('required') && form.get('full_name')?.touched) {
+              <mat-error>Full name is required</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Email -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Email Address</mat-label>
+            <input matInput type="email" formControlName="email" placeholder="e.g. ali.juma@agc.go.tz" />
+            @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
+              <mat-error>Enter a valid email address</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Phone -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Phone Number</mat-label>
+            <input matInput formControlName="phone" placeholder="e.g. +255 777 123 456" />
+          </mat-form-field>
+
+          <!-- ZanID -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Zanzibar ID (ZanID)</mat-label>
+            <input matInput formControlName="zanid" placeholder="e.g. ZNZ-12345" />
+          </mat-form-field>
+
+          <!-- Date of Birth -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Date of Birth</mat-label>
+            <input matInput [matDatepicker]="picker" [max]="maxDate" formControlName="date_of_birth" placeholder="Choose a date" />
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            @if ((form.get('date_of_birth')?.hasError('minAge') || form.get('date_of_birth')?.hasError('matDatepickerMax')) && form.get('date_of_birth')?.touched) {
+              <mat-error>Attorney must be at least 18 years old</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- Gender -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Gender</mat-label>
+            <mat-select formControlName="gender">
+              <mat-option hidden [value]="null">Select Gender</mat-option>
+              @for (g of genders; track g.value) {
+                <mat-option [value]="g.value">{{ g.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="border-t border-slate-100 my-4"></div>
+
+        <!-- Employment Information Header -->
+        <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-2">Employment Details</h3>
+
+        <!-- Grid fields -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- MDA Select Lookup -->
+          <div class="w-full">
+            <select-search
+              label="Ministry, Department or Agency (MDA)"
+              [items]="mdas"
+              displayMember="name"
+              valueMember="id"
+              formControlName="mda_id"
+            ></select-search>
+          </div>
+
+          <!-- Grade Select Lookup -->
+          <div class="w-full">
+            <select-search
+              label="Current Job Grade"
+              [items]="grades"
+              displayMember="grade_name"
+              valueMember="id"
+              formControlName="current_grade_id"
+            ></select-search>
+          </div>
+
+          <!-- Employment Type -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Employment Type</mat-label>
+            <mat-select formControlName="employment_type">
+              <mat-option [value]="null">Select Type</mat-option>
+              @for (et of employmentTypes; track et.value) {
+                <mat-option [value]="et.value">{{ et.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Status -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Activity Status</mat-label>
+            <mat-select formControlName="status">
+              @for (s of statuses; track s.value) {
+                <mat-option [value]="s.value">{{ s.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Bio Summary -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Bio Summary & Specialization Notes</mat-label>
+          <textarea matInput formControlName="bio_summary" rows="4" placeholder="Brief outline of the attorney's qualifications or experience..."></textarea>
+        </mat-form-field>
+
+        <!-- Active Checkbox -->
+        <div class="flex items-center">
+          <mat-checkbox formControlName="is_active" color="primary" class="font-medium text-slate-700">
+            Account Enabled (Access to system modules)
+          </mat-checkbox>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+        <button mat-stroked-button type="button" routerLink="/state-attorneys" [disabled]="submitting" class="font-medium!">
+          Cancel
+        </button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || submitting" class="font-medium!">
+          @if (submitting) {
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded-full border-2 border-slate-300 border-t-white animate-spin"></span>
+              Saving...
+            </span>
+          } @else {
+            <span class="inline-flex items-center gap-1">
+              <mat-icon class="mr-1!">save</mat-icon>
+              Save Registry
+            </span>
+          }
+        </button>
+      </div>
+    </form>
+  }
+</div>
