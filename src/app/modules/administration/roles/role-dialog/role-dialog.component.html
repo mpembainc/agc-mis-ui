@@ -1,0 +1,49 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="font-figtree">
+  <app-dialog-layout
+    [title]="isEditMode ? 'Edit Role Details' : 'Create New Role'"
+    [disablePrimaryButton]="form.invalid || submitting() || loading()"
+    [primaryButtonLabel]="isEditMode ? 'Update Role' : 'Save Role'"
+    (onConfirmed)="onSubmit()"
+  >
+    @if (loading()) {
+      <div class="py-8 flex flex-col items-center justify-center space-y-4">
+        <mat-progress-bar mode="indeterminate" class="w-2/3"></mat-progress-bar>
+        <span class="text-sm text-slate-500 font-figtree">Loading details and permissions...</span>
+      </div>
+    } @else {
+        <!-- Role Basic Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Display Name</mat-label>
+            <input matInput formControlName="display_name" placeholder="e.g. Contract Officer" />
+            <mat-hint>The user-friendly name of the role</mat-hint>
+            @if (form.get('display_name')?.hasError('required')) {
+              <mat-error>Display Name is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Role Code/Name (Slug)</mat-label>
+            <input matInput formControlName="name" placeholder="e.g. contract-officer" />
+            <mat-hint>Must be unique, lowercase, using hyphens/underscores</mat-hint>
+            @if (form.get('name')?.hasError('required')) {
+              <mat-error>Role Code/Name is required</mat-error>
+            }
+            @if (form.get('name')?.hasError('pattern')) {
+              <mat-error>Only lowercase letters, numbers, hyphens, and underscores are allowed</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Description</mat-label>
+          <textarea
+            matInput
+            formControlName="description"
+            rows="2"
+            placeholder="Enter a brief summary of what users in this role can do"
+          ></textarea>
+        </mat-form-field>
+      }
+    </app-dialog-layout>
+</form>

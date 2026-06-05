@@ -81,3 +81,8 @@
   border-bottom: 4px solid var(--color-slate-600) !important;
   border-radius: 10px !important;
 }
+
+.mat-mdc-form-field-hint-wrapper,
+.mat-mdc-form-field-error-wrapper {
+  padding: 0 !important;
+}

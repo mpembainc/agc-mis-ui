@@ -107,7 +107,7 @@ export class MenusService {
         children: [
           {
             label: 'User Roles',
-            route: '/15',
+            route: '/administration/roles',
           },
           {
             label: 'Global Configuration',

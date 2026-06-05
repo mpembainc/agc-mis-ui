@@ -27,6 +27,20 @@ export const routes: Routes = [
           import('./modules/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
       {
+        path: 'administration/roles',
+        loadComponent: () =>
+          import('./modules/administration/roles/roles.component').then(
+            (m) => m.RolesComponent
+          ),
+      },
+      {
+        path: 'administration/roles/:id/permissions',
+        loadComponent: () =>
+          import('./modules/administration/roles/role-permissions/role-permissions.component').then(
+            (m) => m.RolePermissionsComponent
+          ),
+      },
+      {
         path: 'state-attorneys',
         loadComponent: () =>
           import('./modules/state-attorneys/state-attorneys.component').then(

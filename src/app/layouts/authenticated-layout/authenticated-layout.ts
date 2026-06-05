@@ -13,6 +13,7 @@ import { MatLine } from '@angular/material/core';
 import { MenusService } from '@shared/services/menus.service';
 import { SwalService } from '@shared/services/swal.service';
 import { AuthService } from '@modules/auth/services/auth.service';
+import { NgxPermissionsService } from 'ngx-permissions';
 
 @Component({
   selector: 'authenticated-layout',
@@ -37,6 +38,7 @@ export class AuthenticatedLayout implements OnDestroy {
   private menuService = inject(MenusService);
   private authService = inject(AuthService);
   private swalService = inject(SwalService);
+  private permissionsService = inject(NgxPermissionsService);
 
   currentUser = this.authService.getUser();
 
@@ -55,6 +57,10 @@ export class AuthenticatedLayout implements OnDestroy {
     this.isMobile.set(this._mobileQuery.matches);
     this._mobileQueryListener = () => this.isMobile.set(this._mobileQuery.matches);
     this._mobileQuery.addEventListener('change', this._mobileQueryListener);
+
+    if (this.currentUser && this.currentUser.permissions) {
+      this.permissionsService.loadPermissions(this.currentUser.permissions);
+    }
   }
 
   ngOnDestroy(): void {
