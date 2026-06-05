@@ -1,0 +1,14 @@
+services:
+  agc-mis-ui:
+    image: agc-mis-ui:latest
+    container_name: agc-mis-ui
+    build: .
+    restart: always
+    ports:
+      - 8010:80
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true

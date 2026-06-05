@@ -1,7 +1,4 @@
-const BASE_ADDRESS = 'http://154.118.227.154';
-
 export const environment = {
   production: true,
-
-  apiUrl: `${BASE_ADDRESS}:9014/api/v1`,
+  apiUrl: 'http://102.214.44.29:9000/api/v1',
 };
