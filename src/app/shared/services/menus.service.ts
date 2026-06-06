@@ -106,6 +106,10 @@ export class MenusService {
         icon: 'admin_panel_settings',
         children: [
           {
+            label: 'Manage Users',
+            route: '/administration/users',
+          },
+          {
             label: 'User Roles',
             route: '/administration/roles',
           },

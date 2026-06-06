@@ -27,6 +27,13 @@ export const routes: Routes = [
           import('./modules/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
       {
+        path: 'administration/users',
+        loadComponent: () =>
+          import('./modules/administration/users/users.component').then(
+            (m) => m.UsersComponent
+          ),
+      },
+      {
         path: 'administration/roles',
         loadComponent: () =>
           import('./modules/administration/roles/roles.component').then(

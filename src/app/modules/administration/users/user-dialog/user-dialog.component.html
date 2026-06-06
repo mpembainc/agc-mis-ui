@@ -1,0 +1,81 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="font-figtree">
+  <app-dialog-layout
+    [title]="isEditMode ? 'Edit User Details' : 'Create New User'"
+    [disablePrimaryButton]="form.invalid || submitting() || loading()"
+    [primaryButtonLabel]="isEditMode ? 'Update User' : 'Save User'"
+    (onConfirmed)="onSubmit()"
+  >
+    @if (loading()) {
+      <div class="py-8 flex flex-col items-center justify-center space-y-4">
+        <mat-progress-bar mode="indeterminate" class="w-2/3"></mat-progress-bar>
+        <span class="text-sm text-slate-500">Loading user details...</span>
+      </div>
+    } @else {
+      <!-- User Info Row 1 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Full Name</mat-label>
+          <input matInput formControlName="name" placeholder="e.g. John Doe" />
+          <mat-hint>The user's first and last name</mat-hint>
+          @if (form.get('name')?.hasError('required')) {
+            <mat-error>Full Name is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Email Address</mat-label>
+          <input matInput formControlName="email" type="email" placeholder="e.g. john.doe@agc.go.tz" />
+          <mat-hint>Used for logging in and notifications</mat-hint>
+          @if (form.get('email')?.hasError('required')) {
+            <mat-error>Email address is required</mat-error>
+          }
+          @if (form.get('email')?.hasError('email')) {
+            <mat-error>Enter a valid email address</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- User Info Row 2 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Password</mat-label>
+          <input matInput formControlName="password" type="password" placeholder="••••••••" />
+          @if (isEditMode) {
+            <mat-hint>Leave blank to keep the current password</mat-hint>
+          } @else {
+            <mat-hint>Minimum 8 chars, must contain uppercase, lowercase & numbers</mat-hint>
+          }
+          @if (form.get('password')?.hasError('required')) {
+            <mat-error>Password is required</mat-error>
+          }
+          @if (form.get('password')?.hasError('minlength')) {
+            <mat-error>Password must be at least 8 characters long</mat-error>
+          }
+          @if (form.get('password')?.hasError('passwordComplexity')) {
+            <mat-error>Must include uppercase, lowercase, and numbers</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Roles</mat-label>
+          <mat-select formControlName="role_ids" multiple>
+            @for (role of roles; track role.id) {
+              <mat-option [value]="role.id">{{ role.display_name }}</mat-option>
+            }
+          </mat-select>
+          <mat-hint>Assign one or more permission groups</mat-hint>
+          @if (form.get('role_ids')?.hasError('required')) {
+            <mat-error>At least one role assignment is required</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Status Checkbox -->
+      <div class="mb-4 flex items-center h-10">
+        <mat-checkbox formControlName="is_active" color="primary">
+          <span class="text-slate-700 font-medium">User is Active</span>
+        </mat-checkbox>
+      </div>
+    }
+  </app-dialog-layout>
+</form>
