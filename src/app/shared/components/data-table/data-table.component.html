@@ -80,7 +80,7 @@
 
         <td mat-cell *matCellDef="let row; let i = index">
           @if (columnTemplates[col.key]) {
-          <ng-container [ngTemplateOutlet]="columnTemplates[col.key]" [ngTemplateOutletContext]="{ $implicit: row }">
+          <ng-container [ngTemplateOutlet]="columnTemplates[col.key]" [ngTemplateOutletContext]="{ $implicit: row, column: col }">
           </ng-container>
           } @else if (col.generated) {
           {{ col.generated(row, i + pageIndex * pageSize) }}

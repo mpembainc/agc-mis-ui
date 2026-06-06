@@ -1,0 +1,79 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="font-figtree">
+  <app-dialog-layout
+    bodyClass="pb-2"
+    [title]="isEditMode ? 'Edit ' + config.label : 'Add New ' + config.label"
+    [disablePrimaryButton]="form.invalid || submitting() || loading()"
+    [primaryButtonLabel]="isEditMode ? 'Update Entry' : 'Save Entry'"
+    (onConfirmed)="onSubmit()"
+  >
+    @if (loading()) {
+      <div class="py-8 flex flex-col items-center justify-center space-y-4">
+        <mat-progress-bar mode="indeterminate" class="w-2/3"></mat-progress-bar>
+        <span class="text-sm text-slate-500">Loading details...</span>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        @for (field of config.fields; track field.name) {
+          @if (field.type === 'text') {
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>{{ field.label }}</mat-label>
+              <input matInput [formControlName]="field.name" />
+              @if (form.get(field.name)?.hasError('required')) {
+                <mat-error>{{ field.label }} is required</mat-error>
+              }
+            </mat-form-field>
+          }
+
+          @if (field.type === 'number') {
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>{{ field.label }}</mat-label>
+              <input matInput type="number" [formControlName]="field.name" />
+              @if (form.get(field.name)?.hasError('required')) {
+                <mat-error>{{ field.label }} is required</mat-error>
+              }
+            </mat-form-field>
+          }
+
+          @if (field.type === 'textarea') {
+            <mat-form-field appearance="outline" class="w-full md:col-span-2">
+              <mat-label>{{ field.label }}</mat-label>
+              <textarea matInput rows="3" [formControlName]="field.name"></textarea>
+              @if (form.get(field.name)?.hasError('required')) {
+                <mat-error>{{ field.label }} is required</mat-error>
+              }
+            </mat-form-field>
+          }
+
+          @if (field.type === 'select') {
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>{{ field.label }}</mat-label>
+              <mat-select [formControlName]="field.name">
+                <mat-option [value]="null">-- Select Option --</mat-option>
+                @for (opt of selectOptions.get(field.name); track opt.id) {
+                  <mat-option [value]="opt.id">
+                    {{ opt[field.optionLabelKey || 'name'] }}
+                  </mat-option>
+                }
+              </mat-select>
+              @if (form.get(field.name)?.hasError('required')) {
+                <mat-error>{{ field.label }} is required</mat-error>
+              }
+            </mat-form-field>
+          }
+
+          @if (field.type === 'date') {
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>{{ field.label }}</mat-label>
+              <input matInput [matDatepicker]="picker" [formControlName]="field.name" />
+              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+              @if (form.get(field.name)?.hasError('required')) {
+                <mat-error>{{ field.label }} is required</mat-error>
+              }
+            </mat-form-field>
+          }
+        }
+      </div>
+    }
+  </app-dialog-layout>
+</form>

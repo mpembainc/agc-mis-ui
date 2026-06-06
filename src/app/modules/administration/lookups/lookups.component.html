@@ -1,0 +1,101 @@
+<div class="font-figtree">
+  <!-- Title -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-slate-800">Global Lookup Settings</h1>
+    <p class="text-slate-500 text-sm">Configure system metadata tables, regional locations, job grades, and contract rules.</p>
+  </div>
+
+  <!-- Horizontal Button Tabs (wrapped/flexible) -->
+  <div class="flex flex-wrap my-8 gap-3">
+    @for (config of lookupConfigs; track config.key) {
+      <button
+        (click)="selectLookup(config)"
+        class="flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-xs font-semibold border text-white cursor-pointer transition-all duration-300 ease-out hover:scale-[1.02] active:scale-[0.97]"
+        [class.bg-primary-900]="selectedConfig().key === config.key"
+        [class.border-primary-900]="selectedConfig().key === config.key"
+        [class.shadow-md]="selectedConfig().key === config.key"
+        [class.bg-accent-500]="selectedConfig().key !== config.key"
+        [class.border-accent-500]="selectedConfig().key !== config.key"
+        [class.hover:bg-accent-600]="selectedConfig().key !== config.key"
+        [class.hover:border-accent-600]="selectedConfig().key !== config.key"
+      >
+        <svg [lucideIcon]="config.icon" class="size-3.5"></svg>
+        {{ config.label }}
+      </button>
+    }
+  </div>
+
+  <!-- Selected Lookup Title and Action -->
+  <div class="flex justify-between items-center mb-4 px-1">
+    <div class="flex items-center gap-2.5">
+      <div class="p-1.5 bg-primary-900/10 rounded-lg text-primary-900">
+        <svg [lucideIcon]="selectedConfig().icon" class="size-5"></svg>
+      </div>
+      <div>
+        <h2 class="text-base font-bold text-slate-800 leading-tight">{{ selectedConfig().label }}</h2>
+        <p class="text-xs text-slate-500 mt-0.5">{{ selectedConfig().description }}</p>
+      </div>
+    </div>
+    <div>
+      <app-action-button
+        [label]="'Add ' + selectedConfig().label"
+        icon="add"
+        [dialogComponent]="LookupDialog"
+        [dialogConfig]="matDialogConfig"
+        [dialogData]="{ config: selectedConfig() }"
+        (dialogClosed)="onDialogClosed($event)"
+      ></app-action-button>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <app-data-table
+    [data]="items()"
+    [columns]="selectedConfig().columns"
+    [loading]="loading()"
+    [isBackendSearch]="true"
+    [hidePagination]="true"
+    [actionMenuItems]="actionMenuItems"
+    (search)="onSearch($event)"
+    [columnTemplates]="getColumnTemplates()"
+  >
+  </app-data-table>
+
+  <!-- Status Badge Template -->
+  <ng-template #statusTpl let-row>
+    @if (row.is_active) {
+      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+        Active
+      </span>
+    } @else {
+      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-800 border border-gray-200">
+        Inactive
+      </span>
+    }
+  </ng-template>
+
+  <!-- Generic Boolean Yes/No Template -->
+  <ng-template #booleanTpl let-row let-column="column">
+    @if (row[column.key]) {
+      <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+        Yes
+      </span>
+    } @else {
+      <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+        No
+      </span>
+    }
+  </ng-template>
+
+  <!-- Color Code Preview Template -->
+  <ng-template #colorTpl let-row>
+    <div class="flex items-center gap-1.5">
+      @if (row.color_code) {
+        <span class="w-4 h-4 rounded-full border border-slate-300 shadow-xs" [style.background-color]="row.color_code"></span>
+        <span class="font-mono text-xs text-slate-600">{{ row.color_code }}</span>
+      } @else {
+        <span class="text-slate-400 text-xs italic">-</span>
+      }
+    </div>
+  </ng-template>
+</div>

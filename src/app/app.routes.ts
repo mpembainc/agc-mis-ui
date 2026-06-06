@@ -53,6 +53,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'administration/lookups',
+        loadComponent: () =>
+          import('./modules/administration/lookups/lookups.component').then(
+            (m) => m.LookupsComponent
+          ),
+      },
+      {
         path: 'state-attorneys',
         loadComponent: () =>
           import('./modules/state-attorneys/state-attorneys.component').then(

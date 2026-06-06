@@ -114,6 +114,10 @@ export class MenusService {
             route: '/administration/roles',
           },
           {
+            label: 'Lookup Settings',
+            route: '/administration/lookups',
+          },
+          {
             label: 'Global Configuration',
             route: '/16',
           }

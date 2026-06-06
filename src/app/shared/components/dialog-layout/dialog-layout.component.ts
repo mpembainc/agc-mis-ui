@@ -3,6 +3,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { CommonModule } from '@angular/common';
 import { MatAnchor, MatButton } from "@angular/material/button";
 import { ConfirmTooltipComponent } from '../confirm-tooltip/confirm-tooltip.component';
+import { twMerge } from 'tailwind-merge';
 
 @Component({
   selector: 'app-dialog-layout',
@@ -21,6 +22,11 @@ export class DialogLayoutComponent {
   @Input() confirmTooltipCancelLabel = 'No';
   @Input() disableCancelButton = false;
   @Input() disablePrimaryButton = false;
+  @Input() bodyClass = '';
 
   @Output() onConfirmed = new EventEmitter<void>();
+
+  get mergedBodyClass(): string {
+    return twMerge('p-6', this.bodyClass);
+  }
 }
