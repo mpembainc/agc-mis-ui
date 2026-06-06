@@ -29,6 +29,9 @@ import { NgxPermissionsModule } from 'ngx-permissions';
 import { ActionMenuComponent } from "../action-menu/action-menu.component";
 import { ActionMenuItem } from '../action-menu/action-menu';
 
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
+
 export interface TableColumn {
   key: string;
   label: string;
@@ -49,7 +52,7 @@ export interface HeaderAction {
 export interface TableFilter {
   key: string;
   label: string;
-  type: 'select' | 'input';
+  type: 'select' | 'input' | 'datepicker';
   options?: { label: string; value: any }[];
   placeholder?: string;
   defaultValue?: any;
@@ -78,8 +81,10 @@ export interface TableFilter {
     MatOptionModule,
     SelectSearchComponent,
     NgxPermissionsModule,
-    ActionMenuComponent
+    ActionMenuComponent,
+    MatDatepickerModule,
   ],
+  providers: [provideNativeDateAdapter()],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',
 })

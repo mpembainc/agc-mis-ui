@@ -1,0 +1,113 @@
+<app-dialog-layout
+  [title]="'Audit Log Entry Details'"
+  [showPrimaryButton]="false"
+  cancelButtonLabel="Close"
+  bodyClass="max-h-[65vh] overflow-y-auto"
+>
+  <div class="space-y-6 font-figtree">
+    <!-- Metadata Info Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-orange-50 border border-orange-200/60 rounded-xl text-sm">
+      <div>
+        <span class="block text-xs text-orange-400 font-semibold uppercase tracking-wider mb-0.5">Performed By</span>
+        <span class="font-bold text-orange-800">{{ log.user?.name || 'System / Guest' }}</span>
+      </div>
+      <div>
+        <span class="block text-xs text-orange-400 font-semibold uppercase tracking-wider mb-0.5">Action Type</span>
+        <span class="inline-flex px-2 py-0.5 text-xs font-bold border rounded-full" [ngClass]="getActionColor(log.action)">
+          {{ log.action }}
+        </span>
+      </div>
+      <div>
+        <span class="block text-xs text-orange-400 font-semibold uppercase tracking-wider mb-0.5">Date & Time</span>
+        <span class="font-medium text-orange-800">{{ log.created_at | date:'medium' }}</span>
+      </div>
+      <div>
+        <span class="block text-xs text-orange-400 font-semibold uppercase tracking-wider mb-0.5">IP Address</span>
+        <span class="font-medium text-orange-700">{{ log.ip_address || 'N/A' }}</span>
+      </div>
+    </div>
+
+    <!-- Target Resource Info -->
+    <div class="flex flex-wrap gap-x-8 gap-y-2 text-xs text-slate-500 border-b border-slate-100 pb-3 px-1">
+      <div>
+        <span class="font-semibold text-slate-600">Resource Type:</span> {{ log.entity_type }}
+      </div>
+      <div>
+        <span class="font-semibold text-slate-600">Resource UUID:</span> <span class=" text-slate-700">{{ log.entity_id || 'N/A' }}</span>
+      </div>
+      <div class="w-full mt-1.5" *ngIf="log.user_agent">
+        <span class="font-semibold text-slate-600">User Agent:</span> <span class="text-slate-500  text-[11px] leading-relaxed wrap-break-word">{{ log.user_agent }}</span>
+      </div>
+    </div>
+
+    <!-- Changes Header & Toggle -->
+    <div class="flex justify-between items-center px-1">
+      <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+        <mat-icon class="text-slate-500 text-[18px]! h-[18px]! w-[18px]!">difference</mat-icon>
+        Detailed Value Comparison
+      </h3>
+      <mat-checkbox 
+        [checked]="showAllFields()" 
+        (change)="showAllFields.set($event.checked)"
+        color="primary"
+        class="text-xs font-medium text-slate-600"
+      >
+        Show Unchanged Fields
+      </mat-checkbox>
+    </div>
+
+    <!-- Comparative Table -->
+    <div class="border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse text-left text-xs">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+              <th class="py-2.5 px-4 w-1/4">Field</th>
+              <th class="py-2.5 px-4 w-5/12">Previous Value</th>
+              <th class="py-2.5 px-4 w-5/12">New Value</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr *ngFor="let change of filteredChanges" 
+              [ngClass]="{
+                'bg-emerald-50/20 text-emerald-950': change.status === 'added',
+                'bg-rose-50/10 text-rose-950': change.status === 'removed',
+                'bg-amber-50/20 text-amber-950': change.status === 'modified',
+                'text-slate-500': change.status === 'unchanged'
+              }"
+              class="hover:bg-slate-50/50 transition-colors"
+            >
+              <!-- Field -->
+              <td class="py-3 px-4 font-semibold  text-[11px] truncate" [ngClass]="{
+                'text-slate-800': change.status !== 'unchanged'
+              }">
+                {{ change.field }}
+              </td>
+
+              <!-- Before -->
+              <td class="py-3 px-4 break-all  text-[11px]">
+                <span *ngIf="change.status === 'added'" class="text-slate-400 italic">none</span>
+                <span *ngIf="change.status !== 'added'">
+                  {{ formatValue(change.oldVal) }}
+                </span>
+              </td>
+
+              <!-- After -->
+              <td class="py-3 px-4 break-all  text-[11px]">
+                <span *ngIf="change.status === 'removed'" class="text-slate-400 italic">removed</span>
+                <span *ngIf="change.status !== 'removed'">
+                  {{ formatValue(change.newVal) }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="filteredChanges.length === 0">
+              <td colspan="3" class="py-6 text-center text-slate-400 italic">
+                No field changes detected in this log.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</app-dialog-layout>

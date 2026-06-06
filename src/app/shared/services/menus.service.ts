@@ -94,7 +94,7 @@ export class MenusService {
       {
         label: 'Audit Trail',
         icon: 'policy',
-        route: '/13'
+        route: '/administration/audit-logs'
       },
       {
         label: 'Notices & Alerts',

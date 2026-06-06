@@ -1,0 +1,43 @@
+<div class="font-figtree">
+  <!-- Title Block -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-slate-800">Audit Trail</h1>
+    <p class="text-slate-500 text-sm">
+      Track system modifications, user activity logs, and historical data snapshots.
+    </p>
+  </div>
+
+  <!-- Data Table -->
+  <app-data-table
+    [data]="logs"
+    [columns]="columns"
+    [filters]="filters"
+    [loading]="loading()"
+    [isBackendSearch]="false"
+    [totalItems]="totalItems"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    [actionMenuItems]="actionMenuItems"
+    (pageChange)="onPageChange($event)"
+    (filterChange)="onFilterChange($event)"
+    [columnTemplates]="getColumnTemplates()"
+  >
+  </app-data-table>
+
+  <!-- User Column Template -->
+  <ng-template #userTpl let-row>
+    <div class="flex flex-col py-0.5">
+      <span class="font-semibold text-slate-800 text-xs">{{ row.user?.name || 'System / Guest' }}</span>
+      <span class="text-[10px] text-slate-400 font-mono">{{ row.user?.email || 'system@internal' }}</span>
+    </div>
+  </ng-template>
+
+  <!-- Action Column Template -->
+  <ng-template #actionTpl let-row>
+    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border" 
+      [ngClass]="getActionColorClass(row.action)"
+    >
+      {{ row.action }}
+    </span>
+  </ng-template>
+</div>

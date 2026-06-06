@@ -32,6 +32,14 @@
               <input matInput [formControlName]="filter.key" [placeholder]="filter.placeholder || ''" />
             </mat-form-field>
           }
+          @if (filter.type === 'datepicker') {
+            <mat-form-field subscriptSizing="dynamic" appearance="outline" class="w-50">
+              <mat-label>{{ filter.label }}</mat-label>
+              <input matInput [matDatepicker]="picker" [formControlName]="filter.key" [placeholder]="filter.placeholder || ''" />
+              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+          }
         }
       </form>
       }

@@ -60,6 +60,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'administration/audit-logs',
+        loadComponent: () =>
+          import('./modules/administration/audit-logs/audit-logs.component').then(
+            (m) => m.AuditLogsComponent
+          ),
+      },
+      {
         path: 'state-attorneys',
         loadComponent: () =>
           import('./modules/state-attorneys/state-attorneys.component').then(
