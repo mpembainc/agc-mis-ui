@@ -40,7 +40,9 @@ export class AuthenticatedLayout implements OnDestroy {
   private swalService = inject(SwalService);
   private permissionsService = inject(NgxPermissionsService);
 
-  currentUser = this.authService.getUser();
+  get currentUser() {
+    return this.authService.currentUserSignal();
+  }
 
   expandedMenuIndex: number | null = null;
   menuItems = this.menuService.getMenuItems();

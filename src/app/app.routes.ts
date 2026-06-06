@@ -27,6 +27,11 @@ export const routes: Routes = [
           import('./modules/dashboard/dashboard.component').then((m) => m.DashboardComponent),
       },
       {
+        path: 'profile',
+        loadComponent: () =>
+          import('./modules/profile/profile.component').then((m) => m.ProfileComponent),
+      },
+      {
         path: 'administration/users',
         loadComponent: () =>
           import('./modules/administration/users/users.component').then(

@@ -1,9 +1,15 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { environment } from '@env/environment';
 import { User } from '../user.model';
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +18,8 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+
+  currentUserSignal = signal<User>(this.getUser());
 
   login(credentials: { email: string; password: string }) {
     return this.http.post<any>(`${environment.apiUrl}/auth/login`, credentials).pipe(
@@ -22,6 +30,7 @@ export class AuthService {
 
           localStorage.setItem('_agc_ta', token);
           localStorage.setItem('_agc_ud', btoa(JSON.stringify(user)));
+          this.currentUserSignal.set(user);
 
           const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
           window.location.replace(returnUrl);
@@ -45,12 +54,14 @@ export class AuthService {
   private clearSession(returnUrl?: string): void {
     localStorage.removeItem('_agc_ta');
     localStorage.removeItem('_agc_ud');
+    this.currentUserSignal.set(this.getDefaultUser());
     this.router.navigate(['/login'], { queryParams: { returnUrl } });
   }
 
   clearUsrData() {
     localStorage.removeItem('_agc_ta');
     localStorage.removeItem('_agc_ud');
+    this.currentUserSignal.set(this.getDefaultUser());
   }
 
   loggedIn(): boolean {
@@ -61,10 +72,25 @@ export class AuthService {
     return localStorage.getItem('_agc_ta');
   }
 
+  getProfile(): Observable<ApiResponse<any>> {
+    return this.http.get<ApiResponse<any>>(`${environment.apiUrl}/auth/me`);
+  }
+
+  updateCurrentUserLocal(userData: Partial<User>) {
+    const cachedUser = this.getUser();
+    const updatedUser = { ...cachedUser, ...userData };
+    localStorage.setItem('_agc_ud', btoa(JSON.stringify(updatedUser)));
+    this.currentUserSignal.set(updatedUser);
+  }
+
+  private getDefaultUser(): User {
+    return { id: 0, name: '', email: '', mda_id: null, roles: [], permissions: [] } as User;
+  }
+
   getUser(): User {
     const data = localStorage.getItem('_agc_ud');
     if (!data) {
-      return { id: 0, name: '', email: '', mda_id: null, roles: [], permissions: [] } as User;
+      return this.getDefaultUser();
     }
     try {
       const user = JSON.parse(atob(data));
@@ -73,7 +99,7 @@ export class AuthService {
       }
       return user;
     } catch {
-      return { id: 0, name: '', email: '', mda_id: null, roles: [], permissions: [] } as User;
+      return this.getDefaultUser();
     }
   }
 }
