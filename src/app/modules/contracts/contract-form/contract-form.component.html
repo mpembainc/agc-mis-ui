@@ -1,0 +1,114 @@
+<div class="font-figtree space-y-6">
+  <!-- Header Title -->
+  <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">
+        {{ isEditMode ? 'Edit Contract details' : 'Register New Contract Intake' }}
+      </h1>
+      <p class="text-slate-500 text-sm">
+        {{ isEditMode ? 'Modify vetting metadata and contract status parameters.' : 'Initiate legal review or register active supply/service agreements.' }}
+      </p>
+    </div>
+    <a mat-stroked-button routerLink="/contracts" class="h-9 px-4 rounded-lg border-slate-200">
+      <mat-icon class="mr-1!">arrow_back</mat-icon> Back to Directory
+    </a>
+  </div>
+
+  <mat-progress-bar *ngIf="loading() || submitting()" mode="indeterminate" class="rounded-full"></mat-progress-bar>
+
+  <!-- Form Card -->
+  <div class="bg-white rounded-xl border border-slate-200 p-6 md:p-8 shadow-xs">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+      <!-- Grid Layout for core details -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+        <!-- Contract Number -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Contract Reference Number</mat-label>
+          <input matInput formControlName="contract_number" placeholder="e.g. AGC/CON/2026/001" />
+          <mat-error *ngIf="form.get('contract_number')?.hasError('required')">Contract reference is required.</mat-error>
+          <mat-error *ngIf="form.get('contract_number')?.hasError('maxlength')">Cannot exceed 50 characters.</mat-error>
+        </mat-form-field>
+
+        <!-- Originating MDA -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Originating MDA</mat-label>
+          <mat-select formControlName="mda_id">
+            <mat-option *ngFor="let mda of mdas()" [value]="mda.id">{{ mda.name }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('mda_id')?.hasError('required')">MDA selection is required.</mat-error>
+        </mat-form-field>
+
+        <!-- Contract Type -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Contract Type</mat-label>
+          <mat-select formControlName="type_id">
+            <mat-option [value]="null">-- Not Specified --</mat-option>
+            <mat-option *ngFor="let type of contractTypes()" [value]="type.id">{{ type.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Priority Vetting Level -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Priority Vetting Level</mat-label>
+          <mat-select formControlName="priority_id">
+            <mat-option [value]="null">-- Not Specified --</mat-option>
+            <mat-option *ngFor="let pr of priorities()" [value]="pr.id">{{ pr.priority_name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Contract Value -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Contract Value (TSh)</mat-label>
+          <input type="number" matInput formControlName="value" placeholder="e.g. 500000000" />
+          <mat-error *ngIf="form.get('value')?.hasError('min')">Value cannot be negative.</mat-error>
+        </mat-form-field>
+
+        <!-- Duration (Months) -->
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Duration (Months)</mat-label>
+          <input type="number" matInput formControlName="duration_months" placeholder="e.g. 12" />
+          <mat-error *ngIf="form.get('duration_months')?.hasError('min')">Duration must be at least 1 month.</mat-error>
+        </mat-form-field>
+
+        <!-- Vetting / Lifecycle Status -->
+        <mat-form-field appearance="outline" class="w-full md:col-span-2">
+          <mat-label>Review & Lifecycle Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option *ngFor="let st of statuses" [value]="st.value">{{ st.label }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('status')?.hasError('required')">Status is required.</mat-error>
+        </mat-form-field>
+      </div>
+
+      <!-- Contract Parties -->
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Contracting Parties / Partners</mat-label>
+        <textarea matInput formControlName="partners" rows="2" placeholder="e.g. Attorney General Chambers on behalf of Ministry of Health AND Medical Equipments Ltd."></textarea>
+        <mat-error *ngIf="form.get('partners')?.hasError('maxlength')">Cannot exceed 1000 characters.</mat-error>
+      </mat-form-field>
+
+      <!-- Subject Matter -->
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>Subject Matter / Description</mat-label>
+        <textarea matInput formControlName="subject_matter" rows="4" placeholder="Briefly describe the key objectives, deliverables, and purpose of the agreement..."></textarea>
+        <mat-error *ngIf="form.get('subject_matter')?.hasError('maxlength')">Cannot exceed 2000 characters.</mat-error>
+      </mat-form-field>
+
+      <!-- Strategic Interest Checkbox -->
+      <div class="py-2 px-1">
+        <mat-checkbox formControlName="strategic_interest_flag" color="primary" class="font-medium text-slate-700">
+          Mark as Strategic Interest Contract
+        </mat-checkbox>
+        <p class="text-xs text-slate-400 pl-7 mt-0.5">Strategic contracts are flagged for prioritized vetting cycles and senior executive oversight.</p>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+        <a mat-button routerLink="/contracts" class="px-6 h-10 rounded-lg">Cancel</a>
+        <button mat-flat-button type="submit" [disabled]="form.invalid || submitting() || loading()" class="px-6 h-10 rounded-lg bg-[#d99414] text-white">
+          <mat-icon class="mr-1!">save</mat-icon> Save Contract
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

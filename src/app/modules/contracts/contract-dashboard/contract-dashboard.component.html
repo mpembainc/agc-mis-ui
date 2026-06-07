@@ -1,0 +1,254 @@
+<div class="font-figtree space-y-6">
+  <!-- Loading Indicator -->
+  <mat-progress-bar *ngIf="loading()" mode="indeterminate" class="rounded-full"></mat-progress-bar>
+
+  <!-- Dashboard Header -->
+  <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Contract Advisory & Review</h1>
+      <p class="text-slate-500 text-sm">Monitor review turnaround, value distributions, compliance checkpoints, and expiry alerts.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <a mat-stroked-button routerLink="/contracts" class="font-medium h-9 px-4 rounded-lg border-slate-200">
+        <mat-icon class="mr-1!">list</mat-icon> Directory
+      </a>
+      <a mat-flat-button color="primary" routerLink="/contracts/create" class="font-medium h-9 px-4 rounded-lg bg-[#d99414] text-white">
+        <mat-icon class="mr-1!">add</mat-icon> Add Contract
+      </a>
+    </div>
+  </div>
+
+  <ng-container *ngIf="metrics() as data">
+    <!-- Summary Metrics Row -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <app-stats-card
+        label="Total Active"
+        [value]="data.summary.total_contracts"
+        icon="assignment"
+        iconClass="bg-slate-100 text-slate-600"
+        valueClass="text-slate-900"
+      ></app-stats-card>
+
+      <app-stats-card
+        label="New Intakes"
+        [value]="data.summary.new_intakes"
+        icon="inbox"
+        iconClass="bg-blue-50 text-blue-600"
+        valueClass="text-blue-900"
+      ></app-stats-card>
+
+      <app-stats-card
+        label="Under Review"
+        [value]="data.summary.under_review"
+        icon="rate_review"
+        iconClass="bg-amber-50 text-amber-600"
+        valueClass="text-amber-600"
+      ></app-stats-card>
+
+      <app-stats-card
+        label="Pending Appr."
+        [value]="data.summary.pending_approval"
+        icon="gavel"
+        iconClass="bg-indigo-50 text-indigo-700"
+        valueClass="text-indigo-700"
+      ></app-stats-card>
+
+      <app-stats-card
+        label="Signed / Active"
+        [value]="data.summary.active_contracts"
+        icon="task_alt"
+        iconClass="bg-emerald-50 text-emerald-600"
+        valueClass="text-emerald-600"
+      ></app-stats-card>
+
+      <app-stats-card
+        label="Expiring (90d)"
+        [value]="data.summary.expiring_soon"
+        icon="notification_important"
+        iconClass="bg-rose-50 text-rose-600"
+        valueClass="text-rose-600"
+      ></app-stats-card>
+    </div>
+
+    <!-- Contract Value Analysis Panel -->
+    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div>
+          <h2 class="text-base font-bold text-slate-800">Financial Value Breakdown</h2>
+          <p class="text-slate-500 text-xs">Lifecycle stage monetary valuation split (Expressed in Billions TSh).</p>
+        </div>
+        <span class="text-lg font-bold text-slate-800">{{ formatCurrency(data.contract_value_summary.total_value) }}</span>
+      </div>
+
+      <!-- Stacked Distribution Bar -->
+      <div class="w-full h-4 bg-slate-100 rounded-full overflow-hidden flex my-5">
+        <div class="h-full bg-emerald-500 transition-all duration-500" 
+          [style.width.%]="data.contract_value_summary.active_percentage" 
+          [title]="'Active: ' + data.contract_value_summary.active_percentage + '%'"></div>
+        <div class="h-full bg-amber-500 transition-all duration-500" 
+          [style.width.%]="data.contract_value_summary.under_review_percentage" 
+          [title]="'Under Review: ' + data.contract_value_summary.under_review_percentage + '%'"></div>
+        <div class="h-full bg-indigo-500 transition-all duration-500" 
+          [style.width.%]="data.contract_value_summary.pending_approval_percentage" 
+          [title]="'Pending Approval: ' + data.contract_value_summary.pending_approval_percentage + '%'"></div>
+      </div>
+
+      <!-- Legend & Info Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 text-xs">
+        <div class="flex items-center gap-3 p-3 rounded-lg bg-emerald-50/30 border border-emerald-100">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 block shrink-0"></span>
+          <div>
+            <span class="text-slate-500 block">Active & Signed</span>
+            <span class="font-bold text-emerald-950 text-sm">{{ formatCurrency(data.contract_value_summary.active_value) }} ({{ data.contract_value_summary.active_percentage }}%)</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 p-3 rounded-lg bg-amber-50/30 border border-amber-100">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-500 block shrink-0"></span>
+          <div>
+            <span class="text-slate-500 block">Under Review</span>
+            <span class="font-bold text-amber-950 text-sm">{{ formatCurrency(data.contract_value_summary.under_review_value) }} ({{ data.contract_value_summary.under_review_percentage }}%)</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 p-3 rounded-lg bg-indigo-50/30 border border-indigo-100">
+          <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 block shrink-0"></span>
+          <div>
+            <span class="text-slate-500 block">Approved (Pending Signature)</span>
+            <span class="font-bold text-indigo-950 text-sm">{{ formatCurrency(data.contract_value_summary.pending_approval_value) }} ({{ data.contract_value_summary.pending_approval_percentage }}%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Double Column breakdown: Type & Department -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Contracts by Type -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div>
+          <h2 class="text-base font-bold text-slate-800 mb-1">Contracts by Type</h2>
+          <p class="text-slate-500 text-xs mb-4">Distribution of advisory categories across the registry.</p>
+        </div>
+        <div class="space-y-4">
+          <div *ngFor="let item of data.contracts_by_type" class="text-xs">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-semibold text-slate-700">{{ item.type }}</span>
+              <span class="font-bold text-slate-900">{{ item.count }} ({{ item.percentage }}%)</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full bg-primary-900/80 rounded-full" [style.width.%]="item.percentage"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contracts by Department / MDA -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div>
+          <h2 class="text-base font-bold text-slate-800 mb-1">Contracts by Department (Top 6)</h2>
+          <p class="text-slate-500 text-xs mb-4">Originating Ministries, Departments, and Agencies (MDAs).</p>
+        </div>
+        <div class="space-y-4">
+          <div *ngFor="let item of data.contracts_by_department" class="text-xs">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-semibold text-slate-700 truncate max-w-[70%]">{{ item.department }}</span>
+              <span class="font-bold text-slate-900 shrink-0">{{ item.count }} ({{ item.percentage }}%)</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div class="h-full bg-accent-500/80 rounded-full" [style.width.%]="item.percentage"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expiry Alerts & Recent Activity Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Expiry Alerts -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs">
+        <h2 class="text-base font-bold text-slate-800 mb-1">Critical Expiry Alerts</h2>
+        <p class="text-slate-500 text-xs mb-4">Active agreements nearing their termination or renewal deadlines.</p>
+        <div class="divide-y divide-slate-100">
+          <div *ngFor="let alert of data.contracts_expiry_alerts" class="py-3 flex justify-between items-center text-xs">
+            <div class="space-y-0.5">
+              <span class="font-bold text-slate-800 block">{{ alert.title }}</span>
+              <span class="font-mono text-slate-400 text-[10px] block">{{ alert.ref }}</span>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg text-xs font-bold" 
+              [ngClass]="{
+                'bg-rose-50 text-rose-700 border border-rose-100': alert.days_to_expire <= 15,
+                'bg-amber-50 text-amber-700 border border-amber-100': alert.days_to_expire > 15
+              }"
+            >
+              Expires in {{ alert.days_to_expire }} days
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Advisory Activity -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs">
+        <h2 class="text-base font-bold text-slate-800 mb-1">Advisory Activity Timeline</h2>
+        <p class="text-slate-500 text-xs mb-4">Chronological log of recent contract edits, uploads, and decisions.</p>
+        <div class="relative pl-6 border-l border-slate-100 space-y-5">
+          <div *ngFor="let act of data.recent_activities" class="relative text-xs">
+            <!-- Timeline dot -->
+            <span class="absolute -left-[30px] top-0.5 w-2.5 h-2.5 rounded-full bg-primary-900 border-2 border-white ring-4 ring-slate-100/50 block"></span>
+            <div class="space-y-0.5">
+              <p class="font-semibold text-slate-800">{{ act.description }}</p>
+              <div class="flex justify-between text-[10px] text-slate-400 font-medium">
+                <span>{{ act.meta }}</span>
+                <span>{{ act.time }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Turnaround Time & Compliance Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Turnaround months -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs lg:col-span-2 flex flex-col justify-between">
+        <div>
+          <h2 class="text-base font-bold text-slate-800 mb-1">Advisory Review Turnaround Time</h2>
+          <p class="text-slate-500 text-xs mb-4">Average response time (in days) to conclude contract vetting reviews.</p>
+        </div>
+        <!-- Simple Horizontal Bar Chart comparing months -->
+        <div class="flex justify-between items-end gap-3 h-32 pt-2 px-2">
+          <div *ngFor="let item of data.review_turnaround_time" class="flex flex-col items-center flex-1 group">
+            <span class="text-[10px] font-bold text-slate-800 mb-1.5 opacity-0 group-hover:opacity-100 transition-opacity">{{ item.days }}d</span>
+            <div class="w-full bg-slate-100 rounded-t-md overflow-hidden relative" style="height: 80px;">
+              <div class="absolute bottom-0 left-0 right-0 bg-primary-900 hover:bg-[#d99414] transition-all duration-300 rounded-t-md" 
+                [style.height.%]="(item.days / 5) * 100"></div>
+            </div>
+            <span class="text-[10px] text-slate-400 font-semibold mt-2">{{ item.month }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compliance Metrics Card -->
+      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
+        <div>
+          <h2 class="text-base font-bold text-slate-800 mb-1">Contract Compliance</h2>
+          <p class="text-slate-500 text-xs mb-4">Summary of obligations, contract parties, and active disputes.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+            <span class="text-slate-400 block text-[10px] font-semibold uppercase tracking-wider mb-0.5">Contract Parties</span>
+            <span class="text-xl font-bold text-slate-800">{{ data.bottom_metrics.total_parties }}</span>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+            <span class="text-slate-400 block text-[10px] font-semibold uppercase tracking-wider mb-0.5">Active Oblig.</span>
+            <span class="text-xl font-bold text-slate-800">{{ data.bottom_metrics.active_obligations }}</span>
+          </div>
+          <div class="p-3 bg-slate-50 rounded-lg border border-slate-100 col-span-2 flex justify-between items-center">
+            <div>
+              <span class="text-slate-400 block text-[10px] font-semibold uppercase tracking-wider mb-0.5">Disputes Tracker</span>
+              <span class="text-sm font-bold text-rose-700">{{ data.bottom_metrics.disputes_raised }} Raised / {{ data.bottom_metrics.disputes_resolved }} Resolved</span>
+            </div>
+            <mat-icon class="text-rose-500 text-[24px]! h-6! w-6!">gavel</mat-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

@@ -67,6 +67,34 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'contracts/dashboard',
+        loadComponent: () =>
+          import('./modules/contracts/contract-dashboard/contract-dashboard.component').then(
+            (m) => m.ContractDashboardComponent
+          ),
+      },
+      {
+        path: 'contracts',
+        loadComponent: () =>
+          import('./modules/contracts/contract-list/contract-list.component').then(
+            (m) => m.ContractListComponent
+          ),
+      },
+      {
+        path: 'contracts/create',
+        loadComponent: () =>
+          import('./modules/contracts/contract-form/contract-form.component').then(
+            (m) => m.ContractFormComponent
+          ),
+      },
+      {
+        path: 'contracts/edit/:id',
+        loadComponent: () =>
+          import('./modules/contracts/contract-form/contract-form.component').then(
+            (m) => m.ContractFormComponent
+          ),
+      },
+      {
         path: 'state-attorneys',
         loadComponent: () =>
           import('./modules/state-attorneys/state-attorneys.component').then(

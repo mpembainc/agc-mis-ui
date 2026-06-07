@@ -40,12 +40,16 @@ export class MenusService {
         icon: 'assignment',
         children: [
           {
+            label: 'Contracts Dashboard',
+            route: '/contracts/dashboard',
+          },
+          {
             label: 'Contracts Directory',
-            route: '/5',
+            route: '/contracts',
           },
           {
             label: 'Add New Contract',
-            route: '/6',
+            route: '/contracts/create',
           }
         ]
       },

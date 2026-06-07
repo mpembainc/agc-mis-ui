@@ -1,0 +1,61 @@
+<div class="font-figtree">
+  <!-- Title and Actions -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Contracts Directory</h1>
+      <p class="text-slate-500 text-sm">Search, filter, and manage AGC contracts, legal vetting cycles, and agreements.</p>
+    </div>
+    <div>
+      <a mat-flat-button color="primary" routerLink="/contracts/create" class="font-medium h-9 px-4 rounded-lg bg-[#d99414] text-white">
+        <mat-icon class="mr-1!">add</mat-icon> Add Contract
+      </a>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <app-data-table
+    [data]="contracts"
+    [columns]="columns"
+    [filters]="filters"
+    [loading]="loading()"
+    [isBackendSearch]="true"
+    [totalItems]="totalItems"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    [actionMenuItems]="actionMenuItems"
+    (search)="onSearch($event)"
+    (pageChange)="onPageChange($event)"
+    (filterChange)="onFilterChange($event)"
+    [columnTemplates]="getColumnTemplates()"
+  >
+  </app-data-table>
+
+  <!-- Status Template -->
+  <ng-template #statusTpl let-row>
+    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border"
+      [ngClass]="getStatusColorClass(row.status)"
+    >
+      {{ formatStatusLabel(row.status) }}
+    </span>
+  </ng-template>
+
+  <!-- Value Template -->
+  <ng-template #valueTpl let-row>
+    <span class="font-mono text-xs font-semibold text-slate-800">
+      {{ formatCurrency(row.value) }}
+    </span>
+  </ng-template>
+
+  <!-- Strategic Template -->
+  <ng-template #strategicTpl let-row>
+    @if (row.strategic_interest_flag) {
+      <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+        Yes
+      </span>
+    } @else {
+      <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-50 text-slate-400 border border-slate-200/50">
+        No
+      </span>
+    }
+  </ng-template>
+</div>
