@@ -32,6 +32,13 @@ export const routes: Routes = [
           import('./modules/profile/profile.component').then((m) => m.ProfileComponent),
       },
       {
+        path: 'notifications',
+        loadComponent: () =>
+          import('./modules/notifications/notifications.component').then(
+            (m) => m.NotificationsComponent
+          ),
+      },
+      {
         path: 'administration/users',
         loadComponent: () =>
           import('./modules/administration/users/users.component').then(

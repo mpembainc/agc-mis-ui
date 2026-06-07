@@ -77,17 +77,131 @@
 
       <!-- Badges and User Profile -->
       <div class="flex items-center gap-2 md:gap-4">
-        <!-- Notification Icon with count 8 -->
-        <div class="icon-badge-container">
-          <mat-icon>notifications</mat-icon>
-          <span class="badge">8</span>
+        <!-- Notification Icon with Dynamic Count -->
+        <div class="icon-badge-container" [matMenuTriggerFor]="notificationsMenu" aria-label="Open notifications">
+          <svg lucideBell class="size-[22px] text-white"></svg>
+          @if (notificationsService.unreadCount() > 0) {
+            <span class="badge">{{ notificationsService.unreadCount() }}</span>
+          }
         </div>
-        
-        <!-- Mail Icon with count 3 -->
-        <div class="icon-badge-container">
-          <mat-icon>mail</mat-icon>
-          <span class="badge">3</span>
-        </div>
+
+        <mat-menu #notificationsMenu="matMenu" xPosition="before" class="action-menu-panel" panelClass="notifications-menu-panel">
+          <!-- Notification Header -->
+          <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/50">
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-slate-800 font-figtree text-[14px]">Notifications</span>
+              @if (notificationsService.unreadCount() > 0) {
+                <span class="px-2 py-px text-[10px] font-bold text-white bg-red-500 rounded-full font-figtree whitespace-nowrap">
+                  {{ notificationsService.unreadCount() }} new
+                </span>
+              }
+            </div>
+            <div class="flex items-center gap-1">
+              @if (notificationsService.unreadCount() > 0) {
+                <button class="text-xs text-amber-600 hover:text-amber-700 font-medium px-1.5 py-0.5 min-w-0 h-auto" (click)="markAllAsRead($event)">
+                  Mark all read
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Scrollable Notification List -->
+          <div class="notification-list-scroll divide-y divide-slate-100" (click)="$event.stopPropagation()">
+            @if (notificationsService.loading()) {
+              <div class="flex flex-col items-center justify-center py-8 text-slate-500">
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-600"></div>
+                <span class="text-xs mt-2 font-figtree">Loading...</span>
+              </div>
+            } @else if (notificationsService.notifications().length === 0) {
+              <div class="flex flex-col items-center justify-center py-8 px-4 text-center">
+                <svg lucideInbox class="size-8 text-slate-300 mb-1.5"></svg>
+                <p class="text-xs font-semibold text-slate-600 font-figtree">All caught up!</p>
+                <p class="text-[11px] text-slate-400 mt-0.5 font-figtree">No notifications at the moment.</p>
+              </div>
+            } @else {
+              @for (notification of notificationsService.notifications().slice(0, 5); track notification.id) {
+                <div class="flex gap-2.5 p-3 hover:bg-slate-50 transition-colors relative cursor-pointer group"
+                     [class.bg-amber-50/10]="!notification.is_read"
+                     [routerLink]="notification.link"
+                     (click)="!notification.is_read ? notificationsService.markAsRead(notification.id).subscribe() : null">
+                  
+                  <!-- Icon based on type -->
+                  <div class="shrink-0 mt-0.5">
+                    @switch (notification.notification_type) {
+                      @case ('success') {
+                        <div class="p-1 bg-green-50 text-green-600 rounded">
+                          <svg lucideCheckCircle2 class="size-3.5"></svg>
+                        </div>
+                      }
+                      @case ('warning') {
+                        <div class="p-1 bg-amber-50 text-amber-600 rounded">
+                          <svg lucideAlertTriangle class="size-3.5"></svg>
+                        </div>
+                      }
+                      @case ('error') {
+                        <div class="p-1 bg-red-50 text-red-600 rounded">
+                          <svg lucideXCircle class="size-3.5"></svg>
+                        </div>
+                      }
+                      @case ('workflow') {
+                        <div class="p-1 bg-blue-50 text-blue-600 rounded">
+                          <svg lucideBell class="size-3.5"></svg>
+                        </div>
+                      }
+                      @default {
+                        <div class="p-1 bg-slate-100 text-slate-600 rounded">
+                          <svg lucideInfo class="size-3.5"></svg>
+                        </div>
+                      }
+                    }
+                  </div>
+
+                  <!-- Text content -->
+                  <div class="grow min-w-0 pr-6">
+                    <div class="flex items-center gap-1.5">
+                      <p class="text-[12px] text-slate-800 truncate font-figtree" [class.font-bold]="!notification.is_read" [class.font-semibold]="notification.is_read">
+                        {{ notification.title }}
+                      </p>
+                      @if (!notification.is_read) {
+                        <span class="size-1.5 bg-blue-500 rounded-full shrink-0"></span>
+                      }
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed font-figtree wrap-break-word">
+                      {{ notification.body }}
+                    </p>
+                    <p class="text-[9px] text-slate-400 mt-1 font-figtree">
+                      {{ notification.created_at | date:'shortDate' }} • {{ notification.created_at | date:'shortTime' }}
+                    </p>
+                  </div>
+
+                  <!-- Action buttons (hover state) -->
+                  <div class="absolute right-2 top-2.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 p-0.5 rounded shadow-sm border border-slate-150">
+                    @if (!notification.is_read) {
+                      <button class="p-0.5 hover:bg-slate-100 text-slate-500 hover:text-green-600 rounded"
+                              title="Mark as read"
+                              (click)="markAsRead(notification.id, $event)">
+                        <svg lucideCheck class="size-3"></svg>
+                      </button>
+                    }
+                    <button class="p-0.5 hover:bg-slate-100 text-slate-500 hover:text-red-600 rounded"
+                            title="Delete"
+                            (click)="deleteNotification(notification.id, $event)">
+                      <svg lucideTrash2 class="size-3"></svg>
+                    </button>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+
+          <!-- Footer -->
+          <div class="border-t border-slate-100 bg-slate-50/50 flex">
+            <button class="text-xs text-slate-500 hover:text-slate-700 w-full text-center flex items-center justify-center gap-1 font-figtree py-2 rounded-none" routerLink="/notifications">
+              <span>View all notifications</span>
+              <svg lucideArrowRight class="size-3"></svg>
+            </button>
+          </div>
+        </mat-menu>
 
         <!-- User profile block -->
         <button [matMenuTriggerFor]="userMenu" class="user-profile-btn" aria-label="User menu">

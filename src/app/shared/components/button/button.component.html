@@ -1,0 +1,13 @@
+<button
+  [type]="type"
+  [disabled]="disabled"
+  [class]="buttonClasses"
+  (click)="onClick($event)"
+>
+  @if (icon) {
+    <svg [lucideIcon]="icon" class="size-4"></svg>
+  }
+  <span>
+    <ng-content></ng-content>
+  </span>
+</button>

@@ -1,0 +1,250 @@
+<div class="notifications-page-container space-y-6">
+  <!-- Top Header Bar -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-lg border border-slate-100 shadow-sm transition-all duration-300">
+    <div class="space-y-1">
+      <div class="flex items-center gap-2.5">
+        <div class="p-2 bg-amber-50 text-amber-600 rounded-lg">
+          <svg lucideBell class="size-6"></svg>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-800 font-figtree tracking-tight">Notifications</h1>
+      </div>
+      <p class="text-sm text-slate-500 font-figtree">
+        Manage your system notifications, workflow assignments, and alerts.
+      </p>
+    </div>
+
+    <!-- Quick Operations -->
+    <div class="flex flex-wrap items-center gap-2">
+      <app-button
+        [icon]="plusIcon"
+        variant="outline"
+        (btnClick)="createMockNotification()"
+        title="Generate a random mock notification for testing"
+      >
+        Generate Mock
+      </app-button>
+
+      <app-button
+        [icon]="checkSquareIcon"
+        variant="amber"
+        [disabled]="notificationsService.unreadCount() === 0 || loading()"
+        (btnClick)="markAllAsRead()"
+      >
+        Mark All Read
+      </app-button>
+
+      <app-button
+        [icon]="trashIcon"
+        variant="red"
+        [disabled]="notificationsService.notifications().length === 0 || loading()"
+        (btnClick)="deleteAllNotifications()"
+      >
+        Clear All
+      </app-button>
+    </div>
+  </div>
+
+  <!-- Search and Filters Section -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-lg border border-slate-100 shadow-sm">
+    <!-- Filter Tabs -->
+    <div class="flex border-b border-slate-100 md:border-b-0 gap-1.5">
+      <button
+        (click)="activeFilter.set('all')"
+        class="px-4 py-2 text-sm font-semibold rounded-lg font-figtree transition-all cursor-pointer"
+        [class.bg-slate-900]="activeFilter() === 'all'"
+        [class.text-white]="activeFilter() === 'all'"
+        [class.text-slate-600]="activeFilter() !== 'all'"
+        [class.hover:bg-slate-50]="activeFilter() !== 'all'"
+      >
+        All Notifications
+        <span 
+          class="ml-1.5 px-1.5 py-0.5 text-[11px] rounded-full"
+          [class.bg-slate-800]="activeFilter() === 'all'"
+          [class.bg-slate-100]="activeFilter() !== 'all'"
+          [class.text-white]="activeFilter() === 'all'"
+          [class.text-slate-600]="activeFilter() !== 'all'"
+        >
+          {{ notificationsService.notifications().length }}
+        </span>
+      </button>
+
+      <button
+        (click)="activeFilter.set('unread')"
+        class="px-4 py-2 text-sm font-semibold rounded-lg font-figtree transition-all cursor-pointer"
+        [class.bg-slate-900]="activeFilter() === 'unread'"
+        [class.text-white]="activeFilter() === 'unread'"
+        [class.text-slate-600]="activeFilter() !== 'unread'"
+        [class.hover:bg-slate-50]="activeFilter() !== 'unread'"
+      >
+        Unread
+        <span 
+          class="ml-1.5 px-1.5 py-0.5 text-[11px] rounded-full"
+          [class.bg-red-500]="notificationsService.unreadCount() > 0"
+          [class.bg-slate-100]="notificationsService.unreadCount() === 0"
+          [class.text-white]="notificationsService.unreadCount() > 0"
+          [class.text-slate-600]="notificationsService.unreadCount() === 0"
+        >
+          {{ notificationsService.unreadCount() }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Search Input -->
+    <div class="relative w-full md:w-80">
+      <input
+        type="text"
+        placeholder="Filter by keyword..."
+        [(ngModel)]="searchQuery"
+        class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-figtree focus:outline-none focus:border-amber-500 transition-all text-slate-800 placeholder:text-slate-400"
+      />
+      <svg 
+        lucideSearch 
+        class="absolute left-3 top-2.5 size-4 text-slate-400"
+      ></svg>
+    </div>
+  </div>
+
+  <!-- Loading State Indicator (as a progress bar or spinner) -->
+  @if (loading() && filteredNotifications().length === 0) {
+    <div class="bg-white rounded-lg border border-slate-100 shadow-sm p-12 text-center flex flex-col items-center justify-center">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
+      <p class="text-sm font-semibold text-slate-600 font-figtree mt-4">Loading notifications...</p>
+      <p class="text-xs text-slate-400 mt-1 font-figtree">Fetching latest events from server</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && filteredNotifications().length === 0) {
+    <div class="bg-white rounded-lg border border-slate-100 shadow-sm p-16 text-center flex flex-col items-center justify-center">
+      <div class="p-4 bg-slate-50 text-slate-400 rounded-full mb-4">
+        <svg lucideInbox class="size-10"></svg>
+      </div>
+      <h3 class="text-lg font-bold text-slate-700 font-figtree">No Notifications Found</h3>
+      <p class="text-sm text-slate-400 mt-1 max-w-sm mx-auto font-figtree">
+        @if (searchQuery()) {
+          No results match your search "{{ searchQuery() }}". Try adjusting your keywords.
+        } @else if (activeFilter() === 'unread') {
+          You are all caught up! There are no unread notifications.
+        } @else {
+          Your notification list is empty. Any new system events will appear here.
+        }
+      </p>
+      @if (searchQuery()) {
+        <button 
+          mat-button 
+          (click)="searchQuery.set('')"
+          class="mt-4 px-4 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600 font-figtree hover:bg-slate-50"
+        >
+          Clear Search
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Notifications List -->
+  @if (filteredNotifications().length > 0) {
+    <div class="bg-white rounded-lg border border-slate-100 shadow-sm overflow-hidden divide-y divide-gray-200">
+      @for (notification of filteredNotifications(); track notification.id) {
+        <div 
+          class="flex flex-col sm:flex-row sm:items-center justify-between p-5 gap-4 transition-all duration-200 relative group"
+          [class.bg-amber-50/5]="!notification.is_read"
+          [class.hover:bg-slate-50]="notification.is_read"
+          [class.hover:bg-amber-50/10]="!notification.is_read"
+        >
+          <!-- Left: Icon and Text Details -->
+          <div class="flex gap-4 min-w-0 items-start">
+            <!-- Dynamic Colored Icon -->
+            <div class="shrink-0 mt-0.5">
+              @switch (notification.notification_type) {
+                @case ('success') {
+                  <div class="p-2 bg-green-50 text-green-600 rounded-lg">
+                    <svg lucideCheckCircle2 class="size-5"></svg>
+                  </div>
+                }
+                @case ('warning') {
+                  <div class="p-2 bg-amber-50 text-amber-600 rounded-lg">
+                    <svg lucideAlertTriangle class="size-5"></svg>
+                  </div>
+                }
+                @case ('error') {
+                  <div class="p-2 bg-red-50 text-red-600 rounded-lg">
+                    <svg lucideXCircle class="size-5"></svg>
+                  </div>
+                }
+                @case ('workflow') {
+                  <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                    <svg lucideBell class="size-5"></svg>
+                  </div>
+                }
+                @default {
+                  <div class="p-2 bg-slate-100 text-slate-600 rounded-lg">
+                    <svg lucideInfo class="size-5"></svg>
+                  </div>
+                }
+              }
+            </div>
+
+            <!-- Title & Body Description -->
+            <div class="space-y-1 min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 
+                  class="text-[14px] text-slate-800 font-figtree"
+                  [class.font-bold]="!notification.is_read"
+                  [class.font-semibold]="notification.is_read"
+                >
+                  {{ notification.title }}
+                </h3>
+                @if (!notification.is_read) {
+                  <span class="flex h-2 w-2 rounded-full bg-blue-500"></span>
+                  <span class="px-1.5 py-0.5 text-[9px] font-bold text-blue-600 bg-blue-50 rounded font-figtree uppercase tracking-wider">Unread</span>
+                }
+              </div>
+              <p class="text-sm text-slate-600 font-figtree leading-relaxed wrap-break-word">
+                {{ notification.body }}
+              </p>
+              
+              <!-- Meta Row (Date, Time, Link button) -->
+              <div class="flex flex-wrap items-center gap-3 pt-1 text-[11px] text-slate-400 font-figtree">
+                <span>{{ notification.created_at | date:'mediumDate' }}</span>
+                <span>•</span>
+                <span>{{ notification.created_at | date:'shortTime' }}</span>
+                
+                @if (notification.link) {
+                  <span>•</span>
+                  <a 
+                    [routerLink]="notification.link" 
+                    (click)="!notification.is_read ? markAsRead(notification.id) : null"
+                    class="inline-flex items-center gap-1 text-amber-600 hover:text-amber-700 font-semibold cursor-pointer underline hover:no-underline"
+                  >
+                    View details
+                    <svg lucideCheck class="size-3 hidden"></svg>
+                  </a>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Individual Actions -->
+          <div class="flex items-center gap-1.5 self-end sm:self-center">
+            @if (!notification.is_read) {
+              <button
+                (click)="markAsRead(notification.id)"
+                class="flex items-center justify-center p-2 text-slate-400 hover:text-green-600 hover:bg-slate-100 rounded-lg transition-all"
+                title="Mark as read"
+              >
+                <svg lucideCheck class="size-4"></svg>
+              </button>
+            }
+            <button
+              (click)="deleteNotification(notification.id)"
+              class="flex items-center justify-center p-2 text-slate-400 hover:text-red-600 hover:bg-slate-100 rounded-lg transition-all"
+              title="Delete notification"
+            >
+              <svg lucideTrash2 class="size-4"></svg>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
