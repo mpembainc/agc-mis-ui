@@ -39,6 +39,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'documents',
+        loadComponent: () =>
+          import('./modules/documents/documents.component').then(
+            (m) => m.DocumentsComponent
+          ),
+      },
+      {
         path: 'administration/users',
         loadComponent: () =>
           import('./modules/administration/users/users.component').then(

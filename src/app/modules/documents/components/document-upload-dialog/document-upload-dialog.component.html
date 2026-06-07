@@ -1,0 +1,122 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="font-figtree">
+  <app-dialog-layout
+    [title]="existingDocument ? 'Upload New Version' : 'Upload Document'"
+    [disablePrimaryButton]="form.invalid || submitting() || loading() || !selectedFile"
+    [primaryButtonLabel]="submitting() ? 'Uploading...' : (existingDocument ? 'Upload Version' : 'Upload Document')"
+    (onConfirmed)="onSubmit()"
+  >
+    @if (loading()) {
+      <div class="py-8 flex flex-col items-center justify-center space-y-4">
+        <mat-progress-bar mode="indeterminate" class="w-2/3"></mat-progress-bar>
+        <span class="text-sm text-slate-500">Loading configurations...</span>
+      </div>
+    } @else {
+      <!-- Info banner for new version upload -->
+      @if (existingDocument) {
+        <div class="mb-5 p-4 bg-amber-50 border border-amber-100 rounded-lg text-xs text-amber-800 flex items-start gap-2.5">
+          <svg lucideInfo class="size-4 mt-0.5 shrink-0 text-amber-600"></svg>
+          <div class="space-y-1">
+            <span class="font-bold">Version Control Active</span>
+            <p class="leading-relaxed">
+              You are uploading a new version of <span class="font-semibold">{{ existingDocument.original_name }}</span>. 
+              The current version is <span class="font-bold">v{{ existingDocument.version_number }}</span>. 
+              All metadata will be preserved, and a new file version will be created in the registry.
+            </p>
+          </div>
+        </div>
+      }
+
+      <div class="space-y-4">
+        <!-- File Dropzone Area -->
+        <div class="flex flex-col items-center justify-center w-full mb-8">
+          <label 
+            class="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100/70 border-slate-300 hover:border-slate-400 transition-all"
+            [class.bg-green-50/20]="selectedFile"
+            [class.border-green-300]="selectedFile"
+          >
+            <div class="flex flex-col items-center justify-center pt-5 pb-6 px-4 text-center">
+              @if (selectedFile) {
+                <div class="p-3 bg-green-50 text-green-600 rounded-full mb-3 animate-bounce">
+                  <svg lucideFile class="size-8"></svg>
+                </div>
+                <p class="mb-1 text-sm text-slate-700 font-semibold truncate max-w-xs">
+                  {{ selectedFile.name }}
+                </p>
+                <p class="text-xs text-slate-500">
+                  {{ (selectedFile.size / 1024 / 1024) | number:'1.1-2' }} MB
+                </p>
+              } @else {
+                <div class="p-3 bg-slate-100 text-slate-600 rounded-full mb-3">
+                  <svg lucideUpload class="size-8"></svg>
+                </div>
+                <p class="mb-1.5 text-sm text-slate-700 font-semibold">
+                  Click to choose a file or drag and drop
+                </p>
+                <p class="text-xs text-slate-400">
+                  Supports PDF, Word, Excel, Images, etc. (Max 50MB)
+                </p>
+              }
+            </div>
+            <input 
+              type="file" 
+              class="hidden" 
+              (change)="onFileSelected($event)" 
+              required 
+            />
+          </label>
+        </div>
+
+        <!-- Metadata fields (Only for new documents) -->
+        @if (!existingDocument) {
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Document Type / Category</mat-label>
+              <mat-select formControlName="document_type_id" required>
+                @for (type of documentTypes(); track type.id) {
+                  <mat-option [value]="type.id">{{ type.type_name }}</mat-option>
+                }
+              </mat-select>
+              @if (form.get('document_type_id')?.hasError('required')) {
+                <mat-error>Document Type is required</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Context / Module Link</mat-label>
+              <mat-select formControlName="entity_type">
+                <mat-option value="General">General / Shared</mat-option>
+                <mat-option value="Contract">Contracts Module</mat-option>
+                <mat-option value="LeaveRequest">Leave Requests Module</mat-option>
+                <mat-option value="Attorney">Attorney Directory</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Entity ID if linked to a specific item -->
+          @if (form.get('entity_type')?.value !== 'General') {
+            <div class="transition-all duration-200">
+              <mat-form-field appearance="outline" class="w-full">
+                <mat-label>Linked Record ID (UUID)</mat-label>
+                <input matInput formControlName="entity_id" placeholder="e.g. e89312c0-a88f-4ad1..." />
+                @if (form.get('entity_id')?.value && form.get('entity_id')?.invalid) {
+                  <mat-error>Enter a valid UUID</mat-error>
+                }
+              </mat-form-field>
+            </div>
+          }
+        }
+
+        <!-- Upload progress indicator -->
+        @if (submitting()) {
+          <div class="space-y-2 pt-2">
+            <mat-progress-bar mode="query" color="primary"></mat-progress-bar>
+            <div class="flex justify-between text-xs text-slate-500 font-semibold">
+              <span>Uploading file to storage disk...</span>
+              <span>Please wait</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </app-dialog-layout>
+</form>

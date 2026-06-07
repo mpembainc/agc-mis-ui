@@ -63,7 +63,7 @@ export class MenusService {
         children: [
           {
             label: 'All Documents',
-            route: '/7',
+            route: '/documents',
           },
           {
             label: 'My Folders',

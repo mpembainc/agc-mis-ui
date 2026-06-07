@@ -28,7 +28,6 @@ interface TaskRow {
   selector: 'app-team-tasks',
   imports: [
     CommonModule,
-    RouterLink,
     MatButtonModule,
     MatIconModule,
     DataTableComponent,

@@ -1,0 +1,74 @@
+<app-dialog-layout
+  [title]="'Document Audit History'"
+  [showPrimaryButton]="false"
+  cancelButtonLabel="Close"
+>
+  <div class="font-figtree space-y-4 min-w-[500px] max-w-full">
+    <!-- Document Summary Card -->
+    <div class="p-4 bg-slate-50 border border-slate-150 rounded-lg flex items-start gap-3">
+      <div class="p-2 bg-amber-100 text-amber-800 rounded-lg">
+        <svg lucideHistory class="size-5"></svg>
+      </div>
+      <div class="space-y-0.5">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Document</span>
+        <h4 class="text-sm font-bold text-slate-800 break-all">{{ document.original_name }}</h4>
+        <p class="text-xs text-slate-500">
+          Current Version: <span class="font-semibold text-slate-700">v{{ document.version_number }}</span> • 
+          Uploaded: <span class="font-medium">{{ document.created_at | date:'mediumDate' }}</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="py-8 flex flex-col items-center justify-center space-y-4">
+        <mat-progress-bar mode="indeterminate" class="w-2/3"></mat-progress-bar>
+        <span class="text-xs text-slate-500">Retrieving audit trail...</span>
+      </div>
+    } @else {
+      <!-- Audit Table -->
+      @if (logs().length === 0) {
+        <div class="py-10 text-center flex flex-col items-center justify-center space-y-2 bg-slate-50 rounded-lg border border-slate-100">
+          <svg lucideInfo class="size-8 text-slate-300"></svg>
+          <span class="text-xs text-slate-500">No activity logged for this document yet.</span>
+        </div>
+      } @else {
+        <div class="border border-slate-150 rounded-lg overflow-hidden max-h-80 overflow-y-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-50/75 border-b border-slate-150 text-[10px] font-bold text-slate-400 uppercase font-figtree tracking-wider">
+                <th class="px-4 py-3">User</th>
+                <th class="px-4 py-3">Action</th>
+                <th class="px-4 py-3">IP Address</th>
+                <th class="px-4 py-3">Date & Time</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-150 text-slate-600 font-figtree">
+              @for (log of logs(); track log.id) {
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                  <td class="px-4 py-3">
+                    <div class="font-semibold text-slate-800">{{ log.user?.name || 'System User' }}</div>
+                    <div class="text-[10px] text-slate-400 mt-0.5">{{ log.user?.email || 'N/A' }}</div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span 
+                      class="px-2 py-0.5 rounded-full text-[10px] font-semibold border"
+                      [class]="getActionColorClass(log.action)"
+                    >
+                      {{ getActionLabel(log.action) }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 font-mono text-slate-500">{{ log.ip_address || '127.0.0.1' }}</td>
+                  <td class="px-4 py-3 text-slate-500">
+                    <div>{{ log.accessed_at | date:'mediumDate' }}</div>
+                    <div class="text-[10px] text-slate-400 mt-0.5">{{ log.accessed_at | date:'shortTime' }}</div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </div>
+</app-dialog-layout>

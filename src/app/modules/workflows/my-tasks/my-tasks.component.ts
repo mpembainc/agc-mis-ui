@@ -27,7 +27,6 @@ interface TaskRow {
   selector: 'app-my-tasks',
   imports: [
     CommonModule,
-    RouterLink,
     MatButtonModule,
     MatIconModule,
     DataTableComponent,

@@ -16,7 +16,6 @@ import { WorkflowInstance } from '../models/workflow.model';
   selector: 'app-workflow-list',
   imports: [
     CommonModule,
-    RouterLink,
     MatButtonModule,
     MatIconModule,
     DataTableComponent,
