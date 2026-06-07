@@ -1,0 +1,94 @@
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="font-figtree">
+  <app-dialog-layout 
+    [title]="'Apply for Leave'" 
+    [disablePrimaryButton]="form.invalid || submitting() || loading()"
+    (onConfirmed)="onSubmit()"
+  >
+    @if (loading()) {
+      <div class="flex justify-center p-8">
+        <mat-icon class="animate-spin text-primary-600 size-8 text-[32px]">refresh</mat-icon>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 p-1">
+        
+        <!-- Attorney Resolution / Selection -->
+        <div class="col-span-1 md:col-span-2">
+          @if (isAdmin) {
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-label>Select State Attorney</mat-label>
+              <mat-select formControlName="attorney_id">
+                @for (attorney of attorneys; track attorney.id) {
+                  <mat-option [value]="attorney.id">{{ attorney.full_name }} ({{ attorney.email }})</mat-option>
+                }
+              </mat-select>
+              @if (form.get('attorney_id')?.hasError('required')) {
+                <mat-error>Attorney selection is required.</mat-error>
+              }
+            </mat-form-field>
+          } @else {
+            <div class="mb-4 p-3 bg-slate-50 border border-slate-200 rounded flex flex-col">
+              <span class="text-[10px] uppercase font-bold text-slate-400">Requesting State Attorney</span>
+              <span class="text-sm font-semibold text-slate-800">{{ resolvedAttorneyName }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Leave Type -->
+        <div class="col-span-1 md:col-span-2">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Leave Type</mat-label>
+            <mat-select formControlName="leave_type">
+              @for (type of leaveTypes; track type.value) {
+                <mat-option [value]="type.value">{{ type.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Start Date -->
+        <div>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Start Date</mat-label>
+            <input matInput [matDatepicker]="startPicker" formControlName="start_date" placeholder="Choose start date">
+            <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+            @if (form.get('start_date')?.hasError('required')) {
+              <mat-error>Start date is required.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- End Date -->
+        <div>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>End Date</mat-label>
+            <input matInput [matDatepicker]="endPicker" formControlName="end_date" placeholder="Choose end date">
+            <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+            @if (form.get('end_date')?.hasError('required')) {
+              <mat-error>End date is required.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Calculated Duration Display -->
+        <div class="col-span-1 md:col-span-2 mb-4">
+          <div class="p-3 bg-indigo-50 border border-indigo-150 rounded flex justify-between items-center">
+            <span class="text-xs font-semibold text-indigo-900 uppercase">Calculated Leave Duration:</span>
+            <span class="text-lg font-bold text-indigo-950">{{ form.get('total_days')?.value || 0 }} Working Days</span>
+          </div>
+        </div>
+
+        <!-- Reason -->
+        <div class="col-span-1 md:col-span-2">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Reason / Process Remarks</mat-label>
+            <textarea matInput formControlName="reason" rows="3" placeholder="State your reasons for this leave request..."></textarea>
+            <mat-hint align="end">{{ form.get('reason')?.value?.length || 0 }}/500</mat-hint>
+          </mat-form-field>
+        </div>
+
+      </div>
+    }
+  </app-dialog-layout>
+</form>

@@ -95,6 +95,41 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'workflows/my-tasks',
+        loadComponent: () =>
+          import('./modules/workflows/my-tasks/my-tasks.component').then(
+            (m) => m.MyTasksComponent
+          ),
+      },
+      {
+        path: 'workflows/team-tasks',
+        loadComponent: () =>
+          import('./modules/workflows/team-tasks/team-tasks.component').then(
+            (m) => m.TeamTasksComponent
+          ),
+      },
+      {
+        path: 'workflows/manage',
+        loadComponent: () =>
+          import('./modules/workflows/workflow-list/workflow-list.component').then(
+            (m) => m.WorkflowListComponent
+          ),
+      },
+      {
+        path: 'workflows/details/:id',
+        loadComponent: () =>
+          import('./modules/workflows/workflow-details/workflow-details.component').then(
+            (m) => m.WorkflowDetailsComponent
+          ),
+      },
+      {
+        path: 'leave-requests',
+        loadComponent: () =>
+          import('./modules/leave-requests/leave-request-list/leave-request-list.component').then(
+            (m) => m.LeaveRequestListComponent
+          ),
+      },
+      {
         path: 'state-attorneys',
         loadComponent: () =>
           import('./modules/state-attorneys/state-attorneys.component').then(

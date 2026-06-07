@@ -1,0 +1,54 @@
+<div>
+  <div class="flex justify-between items-center mb-6 font-figtree animate-fade-in">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Leave Requests</h1>
+      <p class="text-slate-500 text-sm">
+        @if (isAdmin) {
+          Manage state attorneys' leave applications, view workflow progress, and audit logs.
+        } @else {
+          Apply for leave, track application states, and view your approval progress.
+        }
+      </p>
+    </div>
+    <div>
+      <app-action-button
+        label="Request Leave"
+        icon="add"
+        [dialogComponent]="LeaveDialog"
+        [dialogConfig]="matDialogConfig"
+        (dialogClosed)="onDialogClosed($event)"
+      ></app-action-button>
+    </div>
+  </div>
+
+  <app-data-table
+    [data]="leaveRequests"
+    [columns]="columns"
+    [filters]="filters"
+    [loading]="loading()"
+    [isBackendSearch]="true"
+    [totalItems]="totalItems"
+    [pageSize]="pageSize"
+    [pageIndex]="pageIndex"
+    [actionMenuItems]="actionMenuItems"
+    [showHoverBg]="true"
+    (pageChange)="onPageChange($event)"
+    (filterChange)="onFilterChange($event)"
+    [columnTemplates]="getColumnTemplates()"
+  >
+  </app-data-table>
+
+  <!-- Leave Type Column Template -->
+  <ng-template #typeTpl let-row>
+    <span class="text-slate-800 font-medium capitalize">
+      {{ row.leave_type }} Leave
+    </span>
+  </ng-template>
+
+  <!-- Status Column Template -->
+  <ng-template #statusTpl let-row>
+    <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ' + getStatusColorClass(row.status)">
+      {{ capitalize(row.status) }}
+    </span>
+  </ng-template>
+</div>

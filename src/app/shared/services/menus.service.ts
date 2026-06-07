@@ -26,6 +26,10 @@ export class MenusService {
             route: '/state-attorneys/create',
           },
           {
+            label: 'Leave Requests',
+            route: '/leave-requests',
+          },
+          {
             label: 'Departments',
             route: '/3', // Mock route pointing to dashboard
           },
@@ -73,11 +77,15 @@ export class MenusService {
         children: [
           {
             label: 'My Tasks',
-            route: '/9',
+            route: '/workflows/my-tasks',
           },
           {
             label: 'Team Tasks',
-            route: '/10',
+            route: '/workflows/team-tasks',
+          },
+          {
+            label: 'Manage Workflows',
+            route: '/workflows/manage',
           }
         ]
       },

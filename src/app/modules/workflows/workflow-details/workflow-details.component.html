@@ -1,0 +1,258 @@
+<div class="font-figtree animate-fade-in">
+  <!-- Top Navigation Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <div class="flex items-center gap-2 text-slate-500 text-xs mb-1">
+        <a routerLink="/workflows/my-tasks" class="hover:text-primary-600 transition-colors">Workflows</a>
+        <span>&gt;</span>
+        <span class="text-slate-700">Details</span>
+      </div>
+      <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+        Workflow Details
+        @if (workflow) {
+          <span [class]="'px-2.5 py-0.5 rounded-full text-xs font-semibold border ' + getStatusColorClass(workflow.current_state)">
+            {{ capitalize(workflow.current_state) }}
+          </span>
+        }
+      </h1>
+    </div>
+    <button mat-stroked-button color="primary" routerLink="/workflows/my-tasks" class="flex items-center gap-1">
+      <mat-icon class="text-[18px] w-[18px] h-[18px] leading-[18px]">arrow_back</mat-icon>
+      Back to Tasks
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="flex flex-col items-center justify-center p-12 bg-white rounded-lg shadow-sm border border-slate-200">
+      <mat-icon class="animate-spin text-primary-600 size-10 text-[40px] mb-4">refresh</mat-icon>
+      <p class="text-slate-500 text-sm">Loading workflow details and history...</p>
+    </div>
+  } @else if (workflow) {
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Left Column: Details & Actions (Span 2) -->
+      <div class="lg:col-span-2 flex flex-col gap-6">
+        
+        <!-- Entity Details Card -->
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+            <h2 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
+              <mat-icon class="text-[20px] text-slate-600 leading-[20px]">info</mat-icon>
+              Associated {{ capitalize(workflow.entity_type) }} Information
+            </h2>
+            <span class="text-xs text-slate-500 font-mono">ID: {{ workflow.entity_id }}</span>
+          </div>
+          
+          <div class="p-6">
+            @if (workflow.entity_type === 'contract' && entity) {
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Contract Number</label>
+                  <span class="text-sm font-semibold text-slate-800">{{ entity.contract_number }}</span>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Parties</label>
+                  <span class="text-sm text-slate-800">{{ entity.partners || 'N/A' }}</span>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Subject Matter</label>
+                  <p class="text-sm text-slate-800 whitespace-pre-line mt-0.5">{{ entity.subject_matter || 'N/A' }}</p>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Contract Value</label>
+                  <span class="text-sm font-semibold text-slate-800">{{ formatCurrency(entity.value) }}</span>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Interest Flag</label>
+                  <span class="inline-flex items-center mt-1 px-2.5 py-0.5 rounded text-xs font-semibold"
+                        [class.bg-red-50]="entity.strategic_interest_flag"
+                        [class.text-red-700]="entity.strategic_interest_flag"
+                        [class.bg-slate-100]="!entity.strategic_interest_flag"
+                        [class.text-slate-600]="!entity.strategic_interest_flag">
+                    {{ entity.strategic_interest_flag ? 'Strategic Interest' : 'Normal Priority' }}
+                  </span>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Duration</label>
+                  <span class="text-sm text-slate-800">{{ entity.duration_months }} Months</span>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Submission Date</label>
+                  <span class="text-sm text-slate-800">{{ formatDate(entity.submission_date) }}</span>
+                </div>
+              </div>
+            } @else if (workflow.entity_type === 'leave_request' && entity) {
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Requesting Attorney</label>
+                  <span class="text-sm font-semibold text-slate-800">{{ entity.attorney?.full_name || 'N/A' }}</span>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Leave Type</label>
+                  <span class="text-sm text-slate-800 capitalize">{{ entity.leave_type }}</span>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Duration Period</label>
+                  <span class="text-sm text-slate-800">
+                    {{ formatDate(entity.start_date) }} to {{ formatDate(entity.end_date) }}
+                  </span>
+                </div>
+                <div>
+                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Working Days</label>
+                  <span class="text-sm font-semibold text-slate-800">{{ entity.total_days || 'N/A' }} Days</span>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Reason / Description</label>
+                  <p class="text-sm text-slate-800 whitespace-pre-line mt-0.5">{{ entity.reason || 'No reason specified' }}</p>
+                </div>
+                @if (entity.approver_remarks) {
+                  <div class="md:col-span-2 p-3 bg-amber-50 rounded border border-amber-100">
+                    <label class="text-[11px] font-bold text-amber-800 uppercase tracking-wider block">Approver's Remarks</label>
+                    <p class="text-sm text-amber-900 mt-0.5">{{ entity.approver_remarks }}</p>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="flex justify-center py-6 text-slate-400 text-sm italic">
+                No detailed metadata loaded for this entity.
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Action Panel (Transition Steps) -->
+        @if (canAction && possibleTransitions.length > 0) {
+          <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+              <mat-icon class="text-[20px] text-primary-600 leading-[20px]">assignment_turned_in</mat-icon>
+              <h2 class="text-sm font-semibold text-slate-800">Action Required: Transition Workflow</h2>
+            </div>
+            
+            <div class="p-6">
+              <p class="text-xs text-slate-500 mb-4">
+                You are authorized to execute transitions for the current state. You can optionaly add comments or remarks.
+              </p>
+              
+              <form [formGroup]="transitionForm" class="flex flex-col gap-4">
+                <mat-form-field appearance="outline" class="w-full">
+                  <mat-label>Approver / Process Comments</mat-label>
+                  <textarea matInput formControlName="remarks" rows="3" placeholder="Enter comments or remarks regarding this action..."></textarea>
+                  <mat-hint align="end">{{ transitionForm.get('remarks')?.value?.length || 0 }}/500</mat-hint>
+                </mat-form-field>
+
+                <div class="flex flex-wrap gap-2 mt-2">
+                  @for (nextState of possibleTransitions; track nextState) {
+                    <button mat-raised-button 
+                            [color]="nextState === 'approved' || nextState === 'active' || nextState === 'completed' ? 'primary' : 
+                                     nextState === 'rejected' || nextState === 'cancelled' || nextState === 'terminated' ? 'warn' : 'accent'"
+                            [disabled]="submitting()"
+                            (click)="onTransition(nextState)">
+                      @if (submitting()) {
+                        <mat-icon class="animate-spin text-[18px] w-[18px] h-[18px] leading-[18px] mr-1">refresh</mat-icon>
+                      } @else {
+                        <mat-icon class="text-[18px] w-[18px] h-[18px] leading-[18px] mr-1">check_circle</mat-icon>
+                      }
+                      {{ capitalize(nextState) }}
+                    </button>
+                  }
+                </div>
+              </form>
+            </div>
+          </div>
+        } @else if (possibleTransitions.length === 0) {
+          <div class="p-4 bg-emerald-50 rounded-lg border border-emerald-100 text-emerald-950 flex items-center gap-3">
+            <mat-icon class="text-emerald-700">check_circle_outline</mat-icon>
+            <div class="text-xs">
+              This workflow has completed and reached a terminal state. No further actions are required.
+            </div>
+          </div>
+        } @else {
+          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 text-slate-700 flex items-center gap-3">
+            <mat-icon class="text-slate-500">lock</mat-icon>
+            <div class="text-xs">
+              You are not authorized to perform actions in the current state of this workflow.
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Right Column: Vertical Timeline History (Span 1) -->
+      <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
+          <mat-icon class="text-[20px] text-slate-600 leading-[20px]">history</mat-icon>
+          <h2 class="text-sm font-semibold text-slate-800">Workflow Timeline & Log</h2>
+        </div>
+
+        <div class="p-6 relative">
+          @if (tasks.length > 0) {
+            <!-- Timeline connector line -->
+            <div class="absolute left-9 top-8 bottom-8 w-0.5 bg-slate-200"></div>
+
+            <div class="flex flex-col gap-6 relative">
+              @for (task of tasks; track task.id; let isLast = $last) {
+                <div class="flex gap-4">
+                  <!-- Timeline indicator node -->
+                  <div class="flex flex-col items-center z-10">
+                    <div class="w-6 h-6 rounded-full flex items-center justify-center border-2 border-white ring-2 ring-slate-100"
+                         [class.bg-emerald-500]="task.end_time"
+                         [class.bg-primary-500]="!task.end_time">
+                      <mat-icon class="text-white text-[12px] w-[12px] h-[12px] leading-[12px]">
+                        {{ task.end_time ? 'check' : 'pending' }}
+                      </mat-icon>
+                    </div>
+                  </div>
+
+                  <!-- Task details card -->
+                  <div class="flex-1 min-w-0 bg-slate-50 rounded border border-slate-200/60 p-3 relative">
+                    <!-- Ribbon for active task -->
+                    @if (!task.end_time) {
+                      <div class="absolute right-0 top-0 bg-primary-600 text-white text-[9px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-bl">
+                        Active
+                      </div>
+                    }
+
+                    <div class="flex justify-between items-start">
+                      <h3 class="text-xs font-bold text-slate-800 truncate capitalize">{{ capitalize(task.node_name) }} State</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-1 mt-2 text-[11px] text-slate-500">
+                      <div class="flex items-center gap-1.5">
+                        <mat-icon class="text-[12px] w-[12px] h-[12px] leading-[12px]">person</mat-icon>
+                        <span class="font-medium">Assignee:</span> {{ task.resolved_assignee_name }}
+                      </div>
+                      <div class="flex items-center gap-1.5">
+                        <mat-icon class="text-[12px] w-[12px] h-[12px] leading-[12px]">security</mat-icon>
+                        <span class="font-medium">Assigned Role:</span> {{ task.resolved_role_name }}
+                      </div>
+                      <div class="flex items-center gap-1.5">
+                        <mat-icon class="text-[12px] w-[12px] h-[12px] leading-[12px]">schedule</mat-icon>
+                        <span class="font-medium">Started:</span> {{ formatDate(task.start_time) }}
+                      </div>
+                      @if (task.end_time) {
+                        <div class="flex items-center gap-1.5">
+                          <mat-icon class="text-[12px] w-[12px] h-[12px] leading-[12px]">check_circle_outline</mat-icon>
+                          <span class="font-medium">Completed:</span> {{ formatDate(task.end_time) }}
+                        </div>
+                      }
+                    </div>
+
+                    @if (task.comments) {
+                      <div class="mt-2 pt-2 border-t border-slate-200/50 text-[11px] text-slate-700 italic">
+                        "{{ task.comments }}"
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="text-center py-6 text-slate-400 text-xs italic">
+              No tasks found in workflow.
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+</div>

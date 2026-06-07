@@ -1,0 +1,54 @@
+<div>
+  <div class="flex justify-between items-center mb-6 font-figtree animate-fade-in">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">Team Tasks</h1>
+      <p class="text-slate-500 text-sm">
+        Tasks assigned to your role group. Any eligible member of your group can action these tasks.
+      </p>
+    </div>
+  </div>
+
+  <app-data-table
+    [data]="tasks"
+    [columns]="columns"
+    [loading]="loading()"
+    [actionMenuItems]="actionMenuItems"
+    [showHoverBg]="true"
+    [columnTemplates]="getColumnTemplates()"
+  >
+  </app-data-table>
+
+  <!-- Module/Entity Type Column Template -->
+  <ng-template #typeTpl let-row>
+    @if (row.entity_type === 'contract') {
+      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+        <mat-icon class="text-[14px] w-[14px] h-[14px] leading-[14px] mr-1">assignment</mat-icon>
+        Contract
+      </span>
+    } @else if (row.entity_type === 'leave_request') {
+      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-pink-50 text-pink-700 border border-pink-100">
+        <mat-icon class="text-[14px] w-[14px] h-[14px] leading-[14px] mr-1">date_range</mat-icon>
+        Leave
+      </span>
+    } @else {
+      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-100">
+        <mat-icon class="text-[14px] w-[14px] h-[14px] leading-[14px] mr-1">settings</mat-icon>
+        {{ capitalize(row.entity_type) }}
+      </span>
+    }
+  </ng-template>
+
+  <!-- Details Template -->
+  <ng-template #detailsTpl let-row>
+    <div class="max-w-md truncate text-xs text-slate-600">
+      {{ row.entity_detail }}
+    </div>
+  </ng-template>
+
+  <!-- Status Column Template -->
+  <ng-template #statusTpl let-row>
+    <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ' + getStatusColorClass(row.node_name)">
+      {{ capitalize(row.node_name) }}
+    </span>
+  </ng-template>
+</div>
