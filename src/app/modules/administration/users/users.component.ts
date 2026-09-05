@@ -6,6 +6,7 @@ import { MatDialog, MatDialogConfig, MatDialogModule } from '@angular/material/d
 import { PageEvent } from '@angular/material/paginator';
 import { DataTableComponent, TableColumn, TableFilter } from '@shared/components/data-table/data-table.component';
 import { ActionButtonComponent } from '@shared/components/action-button/action-button.component';
+import { HeaderComponent } from '@shared/components/header/header.component';
 import { ActionMenuItem } from '@shared/components/action-menu/action-menu';
 import { UsersService } from '../services/users.service';
 import { User } from '../models/user.model';
@@ -23,6 +24,7 @@ import { AuthService } from '@modules/auth/services/auth.service';
     MatDialogModule,
     DataTableComponent,
     ActionButtonComponent,
+    HeaderComponent,
   ],
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.scss'],

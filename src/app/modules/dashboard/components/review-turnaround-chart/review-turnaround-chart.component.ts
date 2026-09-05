@@ -68,7 +68,7 @@ export class ReviewTurnaroundChartComponent implements AfterViewInit, OnDestroy 
               color: '#94A3B8',
               font: {
                 size: 10,
-                family: 'Figtree',
+                family: 'Outfit',
               },
             },
           },
@@ -80,7 +80,7 @@ export class ReviewTurnaroundChartComponent implements AfterViewInit, OnDestroy 
               color: '#94A3B8',
               font: {
                 size: 10,
-                family: 'Figtree',
+                family: 'Outfit',
               },
             },
           },

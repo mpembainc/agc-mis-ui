@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, ViewChild, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogConfig, MatDialogModule } from '@angular/material/dialog';
@@ -16,17 +16,20 @@ import { LeaveRequest } from '../models/leave-request.model';
 import { LeaveRequestDialogComponent } from '../leave-request-dialog/leave-request-dialog.component';
 import { matDialogConfig } from '@shared/config';
 import { ActionButtonComponent } from "@shared/components/action-button/action-button.component";
+import { HeaderComponent } from "@shared/components/header/header.component";
 
 @Component({
-  selector: 'app-leave-request-list',
   imports: [
     CommonModule,
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
     DataTableComponent,
-    ActionButtonComponent
-],
+    ActionButtonComponent,
+    HeaderComponent,
+    ActionButtonComponent,
+    HeaderComponent
+  ],
   templateUrl: './leave-request-list.component.html',
   styleUrls: ['./leave-request-list.component.scss'],
 })

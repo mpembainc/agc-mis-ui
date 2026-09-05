@@ -8,6 +8,7 @@ import { ContractsService } from '../services/contracts.service';
 import { ContractDashboardData } from '../models/contract.model';
 import { SwalService } from '@shared/services/swal.service';
 import { StatsCardComponent } from '@shared/components/stats-card/stats-card.component';
+import { HeaderComponent } from '@shared/components/header/header.component';
 
 @Component({
   selector: 'app-contract-dashboard',
@@ -18,6 +19,7 @@ import { StatsCardComponent } from '@shared/components/stats-card/stats-card.com
     MatIconModule,
     MatProgressBarModule,
     StatsCardComponent,
+    HeaderComponent,
   ],
   templateUrl: './contract-dashboard.component.html',
   styleUrls: ['./contract-dashboard.component.scss'],

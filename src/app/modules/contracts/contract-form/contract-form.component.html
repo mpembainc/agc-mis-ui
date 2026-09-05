@@ -1,18 +1,12 @@
 <div class="font-figtree space-y-6">
-  <!-- Header Title -->
-  <div class="flex justify-between items-center border-b border-slate-100 pb-4">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-800">
-        {{ isEditMode ? 'Edit Contract details' : 'Register New Contract Intake' }}
-      </h1>
-      <p class="text-slate-500 text-sm">
-        {{ isEditMode ? 'Modify vetting metadata and contract status parameters.' : 'Initiate legal review or register active supply/service agreements.' }}
-      </p>
-    </div>
+  <app-header
+    [title]="isEditMode ? 'Edit Contract details' : 'Register New Contract Intake'"
+    [subTitle]="isEditMode ? 'Modify vetting metadata and contract status parameters.' : 'Initiate legal review or register active supply/service agreements.'"
+    [canGoBack]="true">
     <a mat-stroked-button routerLink="/contracts" class="h-9 px-4 rounded-lg border-slate-200">
-      <mat-icon class="mr-1!">arrow_back</mat-icon> Back to Directory
+      <mat-icon class="mr-1!">list</mat-icon> Back to Directory
     </a>
-  </div>
+  </app-header>
 
   <mat-progress-bar *ngIf="loading() || submitting()" mode="indeterminate" class="rounded-full"></mat-progress-bar>
 

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { LucideCalendarDays, LucideDownload, LucideChevronDown } from '@lucide/angular';
+import { HeaderComponent } from '@shared/components/header/header.component';
 
 @Component({
   selector: 'app-dashboard-header',
@@ -13,7 +14,8 @@ import { LucideCalendarDays, LucideDownload, LucideChevronDown } from '@lucide/a
     MatButtonModule,
     LucideCalendarDays,
     LucideDownload,
-    LucideChevronDown
+    LucideChevronDown,
+    HeaderComponent,
   ],
   templateUrl: './dashboard-header.component.html',
 })

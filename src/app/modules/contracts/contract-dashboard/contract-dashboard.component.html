@@ -2,12 +2,9 @@
   <!-- Loading Indicator -->
   <mat-progress-bar *ngIf="loading()" mode="indeterminate" class="rounded-full"></mat-progress-bar>
 
-  <!-- Dashboard Header -->
-  <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-800">Contract Advisory & Review</h1>
-      <p class="text-slate-500 text-sm">Monitor review turnaround, value distributions, compliance checkpoints, and expiry alerts.</p>
-    </div>
+  <app-header
+    title="Contract Advisory & Review"
+    subTitle="Monitor review turnaround, value distributions, compliance checkpoints, and expiry alerts.">
     <div class="flex items-center gap-3">
       <a mat-stroked-button routerLink="/contracts" class="font-medium h-9 px-4 rounded-lg border-slate-200">
         <mat-icon class="mr-1!">list</mat-icon> Directory
@@ -16,7 +13,7 @@
         <mat-icon class="mr-1!">add</mat-icon> Add Contract
       </a>
     </div>
-  </div>
+  </app-header>
 
   <ng-container *ngIf="metrics() as data">
     <!-- Summary Metrics Row -->

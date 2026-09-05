@@ -1,18 +1,9 @@
 <div>
-  <!-- Back Button & Header -->
-  <div class="mb-6 flex items-center justify-between">
-    <div class="flex items-center gap-2">
-      <button mat-icon-button routerLink="/state-attorneys" color="primary" aria-label="Back to listing">
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <div>
-        <h1 class="text-2xl font-bold text-slate-800">{{ isEditMode ? 'Edit' : 'Register' }} State Attorney</h1>
-        <p class="text-slate-500 text-sm">
-          {{ isEditMode ? 'Update existing credentials and registry history.' : 'Register a new state attorney with job status details.' }}
-        </p>
-      </div>
-    </div>
-  </div>
+  <app-header
+    [title]="(isEditMode ? 'Edit' : 'Register') + ' State Attorney'"
+    [subTitle]="isEditMode ? 'Update existing credentials and registry history.' : 'Register a new state attorney with job status details.'"
+    [canGoBack]="true"
+  />
 
   <!-- Loading Indicator -->
   @if (loading()) {

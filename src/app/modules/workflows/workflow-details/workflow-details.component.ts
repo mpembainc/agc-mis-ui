@@ -13,6 +13,7 @@ import { RolesService } from '@modules/administration/services/roles.service';
 import { UsersService } from '@modules/administration/services/users.service';
 import { SwalService } from '@shared/services/swal.service';
 import { catchError, forkJoin, of } from 'rxjs';
+import { HeaderComponent } from '@shared/components/header/header.component';
 
 interface ExtendedTask {
   id: string;
@@ -59,6 +60,7 @@ const LEAVE_TRANSITIONS: Record<string, string[]> = {
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
+    HeaderComponent,
   ],
   templateUrl: './workflow-details.component.html',
   styleUrls: ['./workflow-details.component.scss'],
@@ -348,5 +350,112 @@ export class WorkflowDetailsComponent implements OnInit {
     } else {
       return 'bg-primary-100 text-primary-900 ring-primary-300 animate-pulse';
     }
+  }
+
+  getInitials(name?: string): string {
+    if (!name || name === 'Unassigned') return 'U';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  getDuration(startStr: string | null, endStr: string | null): string {
+    if (!startStr || !endStr) return '';
+    const start = new Date(startStr).getTime();
+    const end = new Date(endStr).getTime();
+    if (isNaN(start) || isNaN(end) || end < start) return '';
+
+    const diffSeconds = Math.floor((end - start) / 1000);
+    if (diffSeconds < 60) return '< 1 min';
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    if (diffMinutes < 60) return `${diffMinutes} min${diffMinutes > 1 ? 's' : ''}`;
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) return `${diffHours} hr${diffHours > 1 ? 's' : ''}`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays} day${diffDays > 1 ? 's' : ''}`;
+  }
+
+  formatTime(dateStr: string | null): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  formatDateOnly(dateStr: string | null): string {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  getNodeSubtitle(task: ExtendedTask): string {
+    const node = (task.node_name || '').toLowerCase();
+    if (!task.end_time) {
+      if (node.includes('approve')) return 'Waiting for approval';
+      if (node.includes('review')) return 'Waiting for assignment & review';
+      return 'Waiting for assignment & review';
+    }
+    if (node.includes('pending')) return 'Waiting for assignment';
+    if (node.includes('approve')) return 'Request has been approved';
+    if (node.includes('reject')) return 'Request has been rejected';
+    if (node.includes('submit')) return 'Request submitted';
+    if (node.includes('sign')) return 'Document signed';
+    if (node.includes('active')) return 'Workflow active';
+    if (node.includes('complete')) return 'Workflow completed';
+    return 'Transition completed';
+  }
+
+  getNodeIcon(task: ExtendedTask): string {
+    const node = (task.node_name || '').toLowerCase();
+    if (node.includes('pending')) return 'schedule';
+    if (node.includes('approve')) return 'check_circle';
+    if (node.includes('reject')) return 'cancel';
+    if (node.includes('review')) return 'rate_review';
+    if (node.includes('submit')) return 'send';
+    if (!task.end_time) return 'schedule';
+    return 'task_alt';
+  }
+
+  getCardBgClass(task: ExtendedTask): string {
+    const node = (task.node_name || '').toLowerCase();
+    if (node.includes('approve')) return 'bg-emerald-50/20';
+    if (node.includes('reject')) return 'bg-rose-50/20';
+    if (!task.end_time) return 'bg-blue-50/20';
+    return 'bg-white';
+  }
+
+  getCardBorderClass(task: ExtendedTask): string {
+    const node = (task.node_name || '').toLowerCase();
+    if (node.includes('approve')) return 'border-emerald-200';
+    if (node.includes('reject')) return 'border-rose-200';
+    if (!task.end_time) return 'border-blue-300';
+    return 'border-slate-200';
+  }
+
+  getHeaderIconBoxClass(task: ExtendedTask): string {
+    const node = (task.node_name || '').toLowerCase();
+    if (node.includes('approve')) return 'bg-emerald-100 text-emerald-600';
+    if (node.includes('reject')) return 'bg-rose-100 text-rose-600';
+    if (node.includes('pending')) return 'bg-slate-100 text-slate-600';
+    if (!task.end_time) return 'bg-blue-100 text-blue-600';
+    return 'bg-slate-100 text-slate-600';
+  }
+
+  getBadgeClass(task: ExtendedTask): string {
+    const node = (task.node_name || '').toLowerCase();
+    if (node.includes('approve')) return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
+    if (node.includes('reject')) return 'bg-rose-100 text-rose-700 border border-rose-200';
+    if (node.includes('pending')) return 'bg-slate-100 text-slate-600 border border-slate-200/80';
+    if (!task.end_time) return 'bg-blue-100 text-blue-700 border border-blue-200';
+    return 'bg-slate-100 text-slate-700 border border-slate-200';
+  }
+
+  getBadgeText(task: ExtendedTask): string {
+    const node = (task.node_name || '').toLowerCase();
+    if (!task.end_time && !node.includes('approve') && !node.includes('reject')) {
+      return 'ACTIVE';
+    }
+    return this.capitalize(task.node_name);
   }
 }

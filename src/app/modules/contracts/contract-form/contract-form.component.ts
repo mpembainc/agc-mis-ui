@@ -14,6 +14,7 @@ import { ContractsService } from '../services/contracts.service';
 import { LookupsService } from '@modules/administration/services/lookups.service';
 import { Contract } from '../models/contract.model';
 import { SwalService } from '@shared/services/swal.service';
+import { HeaderComponent } from '@shared/components/header/header.component';
 
 @Component({
   selector: 'app-contract-form',
@@ -29,6 +30,7 @@ import { SwalService } from '@shared/services/swal.service';
     MatOptionModule,
     MatCheckboxModule,
     MatProgressBarModule,
+    HeaderComponent,
   ],
   templateUrl: './contract-form.component.html',
   styleUrls: ['./contract-form.component.scss'],

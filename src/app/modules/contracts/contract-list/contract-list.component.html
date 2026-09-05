@@ -1,16 +1,11 @@
 <div class="font-figtree">
-  <!-- Title and Actions -->
-  <div class="flex justify-between items-center mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-800">Contracts Directory</h1>
-      <p class="text-slate-500 text-sm">Search, filter, and manage AGC contracts, legal vetting cycles, and agreements.</p>
-    </div>
-    <div>
-      <a mat-flat-button color="primary" routerLink="/contracts/create" class="font-medium h-9 px-4 rounded-lg bg-[#d99414] text-white">
-        <mat-icon class="mr-1!">add</mat-icon> Add Contract
-      </a>
-    </div>
-  </div>
+  <app-header
+    title="Contracts Directory"
+    subTitle="Search, filter, and manage AGC contracts, legal vetting cycles, and agreements.">
+    <a mat-flat-button color="primary" routerLink="/contracts/create" class="font-medium h-9 px-4 rounded-lg bg-[#d99414] text-white">
+      <mat-icon class="mr-1!">add</mat-icon> Add Contract
+    </a>
+  </app-header>
 
   <!-- Data Table -->
   <app-data-table

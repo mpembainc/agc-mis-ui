@@ -11,6 +11,7 @@ import { RolesService } from '@modules/administration/services/roles.service';
 import { SwalService } from '@shared/services/swal.service';
 import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { HeaderComponent } from '@shared/components/header/header.component';
 
 interface TaskRow {
   id: string; // instance id
@@ -31,6 +32,7 @@ interface TaskRow {
     MatButtonModule,
     MatIconModule,
     DataTableComponent,
+    HeaderComponent,
   ],
   templateUrl: './team-tasks.component.html',
   styleUrls: ['./team-tasks.component.scss'],

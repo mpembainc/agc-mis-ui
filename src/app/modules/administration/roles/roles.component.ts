@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogConfig, MatDialogModule } from '@angular/material/dialog';
 import { DataTableComponent, TableColumn } from '@shared/components/data-table/data-table.component';
 import { ActionButtonComponent } from '@shared/components/action-button/action-button.component';
+import { HeaderComponent } from '@shared/components/header/header.component';
 import { ActionMenuItem } from '@shared/components/action-menu/action-menu';
 import { RolesService } from '../services/roles.service';
 import { Role } from '../models/role.model';
@@ -22,6 +23,7 @@ import { matDialogConfig } from '@shared/config';
     MatDialogModule,
     DataTableComponent,
     ActionButtonComponent,
+    HeaderComponent,
   ],
   templateUrl: './roles.component.html',
   styleUrls: ['./roles.component.scss'],

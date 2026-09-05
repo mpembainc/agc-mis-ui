@@ -10,6 +10,7 @@ import { ContractsService } from '../services/contracts.service';
 import { LookupsService } from '@modules/administration/services/lookups.service';
 import { Contract } from '../models/contract.model';
 import { SwalService } from '@shared/services/swal.service';
+import { HeaderComponent } from '@shared/components/header/header.component';
 
 @Component({
   selector: 'app-contract-list',
@@ -19,6 +20,7 @@ import { SwalService } from '@shared/services/swal.service';
     MatButtonModule,
     MatIconModule,
     DataTableComponent,
+    HeaderComponent,
   ],
   templateUrl: './contract-list.component.html',
   styleUrls: ['./contract-list.component.scss'],

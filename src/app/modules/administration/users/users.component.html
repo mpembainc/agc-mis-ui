@@ -1,21 +1,15 @@
 <div>
-  <div class="flex justify-between items-center mb-6 font-figtree">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-800">User Accounts</h1>
-      <p class="text-slate-500 text-sm">
-        Manage system users, assign access roles, and control active credentials.
-      </p>
-    </div>
-    <div>
-      <app-action-button
-        label="Add New User"
-        icon="add"
-        [dialogComponent]="UserDialog"
-        [dialogConfig]="matDialogConfig"
-        (dialogClosed)="onDialogClosed($event)"
-      ></app-action-button>
-    </div>
-  </div>
+  <app-header
+    title="User Accounts"
+    subTitle="Manage system users, assign access roles, and control active credentials.">
+    <app-action-button
+      label="Add New User"
+      icon="add"
+      [dialogComponent]="UserDialog"
+      [dialogConfig]="matDialogConfig"
+      (dialogClosed)="onDialogClosed($event)"
+    ></app-action-button>
+  </app-header>
 
   <app-data-table
     [data]="users"

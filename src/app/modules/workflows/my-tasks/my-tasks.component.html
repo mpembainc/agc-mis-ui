@@ -1,12 +1,8 @@
 <div>
-  <div class="flex justify-between items-center mb-6 font-figtree animate-fade-in">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-800">My Tasks</h1>
-      <p class="text-slate-500 text-sm">
-        Tasks directly assigned to you that require your review, input, or approval.
-      </p>
-    </div>
-  </div>
+  <app-header
+    title="My Tasks"
+    subTitle="Tasks directly assigned to you that require your review, input, or approval."
+  />
 
   <app-data-table
     [data]="tasks"

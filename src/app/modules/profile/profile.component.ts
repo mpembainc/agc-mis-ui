@@ -10,6 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SwalService } from '@shared/services/swal.service';
 import { AuthService } from '@modules/auth/services/auth.service';
 import { UsersService } from '../administration/services/users.service';
+import { HeaderComponent } from '@shared/components/header/header.component';
 
 @Component({
   selector: 'app-profile',
@@ -22,6 +23,7 @@ import { UsersService } from '../administration/services/users.service';
     MatInputModule,
     MatProgressBarModule,
     MatTooltipModule,
+    HeaderComponent,
   ],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.scss'],

@@ -1,17 +1,13 @@
 <div>
-  <div class="flex justify-between items-center mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-800">State Attorneys</h1>
-      <p class="text-slate-500 text-sm">Manage Zanzibar State Attorneys registry, MDAs, and activity status.</p>
-    </div>
-    <div>
-      <app-action-button
-        label="Add New Attorney"
-        icon="add"
-        routerLink="/state-attorneys/create"
-      ></app-action-button>
-    </div>
-  </div>
+  <app-header
+    title="State Attorneys"
+    subTitle="Manage Zanzibar State Attorneys registry, MDAs, and activity status.">
+    <app-action-button
+      label="Add New Attorney"
+      icon="add"
+      routerLink="/state-attorneys/create"
+    ></app-action-button>
+  </app-header>
 
   <app-data-table
     [data]="attorneys"

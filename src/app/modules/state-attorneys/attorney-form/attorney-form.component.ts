@@ -23,6 +23,7 @@ import { StateAttorneysService } from '../services/state-attorneys.service';
 import { Mda, Grade } from '../models/state-attorney.model';
 import { SwalService } from '@shared/services/swal.service';
 import { SelectSearchComponent } from '@shared/components/select-search/select-search.component';
+import { HeaderComponent } from '@shared/components/header/header.component';
 
 @Component({
   selector: 'app-attorney-form',
@@ -39,6 +40,7 @@ import { SelectSearchComponent } from '@shared/components/select-search/select-s
     MatCheckboxModule,
     MatDatepickerModule,
     SelectSearchComponent,
+    HeaderComponent,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './attorney-form.component.html',

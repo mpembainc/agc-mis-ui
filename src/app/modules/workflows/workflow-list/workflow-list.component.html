@@ -1,12 +1,8 @@
 <div>
-  <div class="flex justify-between items-center mb-6 font-figtree animate-fade-in">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-800">Workflow Directory</h1>
-      <p class="text-slate-500 text-sm">
-        Monitor all workflow executions, task completions, and transition pathways in the system.
-      </p>
-    </div>
-  </div>
+  <app-header
+    title="Workflow Directory"
+    subTitle="Monitor all workflow executions, task completions, and transition pathways in the system."
+  />
 
   <app-data-table
     [data]="workflows"

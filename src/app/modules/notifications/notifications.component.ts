@@ -7,6 +7,7 @@ import { SwalService } from '@shared/services/swal.service';
 import { NotificationsService } from '@shared/services/notifications.service';
 import { AuthService } from '@modules/auth/services/auth.service';
 import { ButtonComponent } from '@shared/components/button/button.component';
+import { HeaderComponent } from '@shared/components/header/header.component';
 import {
   LucideBell,
   LucideCheck,
@@ -40,6 +41,7 @@ import { RouterLink } from '@angular/router';
     LucideSearch,
     RouterLink,
     ButtonComponent,
+    HeaderComponent,
   ],
   templateUrl: './notifications.component.html',
   styleUrls: ['./notifications.component.scss'],

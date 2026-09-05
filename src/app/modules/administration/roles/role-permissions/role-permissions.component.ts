@@ -9,6 +9,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RolesService } from '../../services/roles.service';
 import { Role, Permission } from '../../models/role.model';
 import { SwalService } from '@shared/services/swal.service';
+import { HeaderComponent } from '@shared/components/header/header.component';
 
 @Component({
   selector: 'app-role-permissions',
@@ -20,6 +21,7 @@ import { SwalService } from '@shared/services/swal.service';
     MatCheckboxModule,
     MatTooltipModule,
     MatProgressBarModule,
+    HeaderComponent,
   ],
   templateUrl: './role-permissions.component.html',
   styleUrls: ['./role-permissions.component.scss'],

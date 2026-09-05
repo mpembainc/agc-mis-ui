@@ -2,8 +2,9 @@
 
 @theme {
   /* Fonts */
-  --font-figtree: 'Figtree', sans-serif;
-  --font-poppins: 'Poppins', sans-serif;
+  --font-outfit: 'Outfit', sans-serif;
+  --font-figtree: var(--font-outfit);
+  --font-poppins: var(--font-outfit);
 
   /* Primary color palette (Dark Navy Blue) */
   --color-primary-50: oklch(0.97 0.01 250);

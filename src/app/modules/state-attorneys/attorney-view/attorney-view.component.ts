@@ -9,6 +9,7 @@ import { StateAttorney, Mda, Grade } from '../models/state-attorney.model';
 import { SwalService } from '@shared/services/swal.service';
 import { ActionButtonComponent } from '@shared/components/action-button/action-button.component';
 import { RemoveUnderscorePipe } from '@shared/pipes/remove-underscore.pipe';
+import { HeaderComponent } from '@shared/components/header/header.component';
 
 @Component({
   selector: 'app-attorney-view',
@@ -20,6 +21,7 @@ import { RemoveUnderscorePipe } from '@shared/pipes/remove-underscore.pipe';
     MatTooltipModule,
     ActionButtonComponent,
     RemoveUnderscorePipe,
+    HeaderComponent,
   ],
   templateUrl: './attorney-view.component.html',
   styleUrls: ['./attorney-view.component.scss'],

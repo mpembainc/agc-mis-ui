@@ -6,6 +6,7 @@ import { DocumentsService } from './services/documents.service';
 import { Document } from './models/document.model';
 import { SwalService } from '@shared/services/swal.service';
 import { ButtonComponent } from '@shared/components/button/button.component';
+import { HeaderComponent } from '@shared/components/header/header.component';
 import { DocumentUploadDialogComponent } from './components/document-upload-dialog/document-upload-dialog.component';
 import { DocumentLogsDialogComponent } from './components/document-logs-dialog/document-logs-dialog.component';
 import { DataTableComponent, TableColumn } from '@shared/components/data-table/data-table.component';
@@ -15,7 +16,6 @@ import {
   LucideFolder,
   LucideUpload,
   LucideFile,
-  LucideSearch,
   LucidePlus,
   LucideArrowLeft,
   LucideArrowRight,
@@ -30,10 +30,9 @@ import {
     MatDialogModule,
     ButtonComponent,
     LucideFolder,
-    LucideUpload,
     LucideFile,
-    LucideSearch,
     DataTableComponent,
+    HeaderComponent,
   ],
   templateUrl: './documents.component.html',
   styleUrls: ['./documents.component.scss'],

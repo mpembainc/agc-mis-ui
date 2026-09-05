@@ -11,6 +11,7 @@ import { AuditLog } from '../models/audit-log.model';
 import { SwalService } from '@shared/services/swal.service';
 import { AuditLogDetailsDialogComponent } from './audit-log-details-dialog/audit-log-details-dialog.component';
 import { matDialogConfig } from '@shared/config';
+import { HeaderComponent } from '@shared/components/header/header.component';
 
 @Component({
   selector: 'app-audit-logs',
@@ -20,6 +21,7 @@ import { matDialogConfig } from '@shared/config';
     MatIconModule,
     MatDialogModule,
     DataTableComponent,
+    HeaderComponent,
   ],
   templateUrl: './audit-logs.component.html',
   styleUrls: ['./audit-logs.component.scss'],

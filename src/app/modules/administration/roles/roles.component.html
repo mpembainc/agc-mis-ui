@@ -1,21 +1,15 @@
 <div>
-  <div class="flex justify-between items-center mb-6 font-figtree">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-800">User Roles & Permissions</h1>
-      <p class="text-slate-500 text-sm">
-        Manage role access levels, assign permissions to groups, and govern user capabilities.
-      </p>
-    </div>
-    <div>
-      <app-action-button
-        label="Add New Role"
-        icon="add"
-        [dialogComponent]="RoleDialog"
-        [dialogConfig]="matDialogConfig"
-        (dialogClosed)="onDialogClosed($event)"
-      ></app-action-button>
-    </div>
-  </div>
+  <app-header
+    title="User Roles & Permissions"
+    subTitle="Manage role access levels, assign permissions to groups, and govern user capabilities.">
+    <app-action-button
+      label="Add New Role"
+      icon="add"
+      [dialogComponent]="RoleDialog"
+      [dialogConfig]="matDialogConfig"
+      (dialogClosed)="onDialogClosed($event)"
+    ></app-action-button>
+  </app-header>
 
   <app-data-table
     [data]="roles"

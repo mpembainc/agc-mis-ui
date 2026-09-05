@@ -13,6 +13,7 @@ import { SwalService } from '@shared/services/swal.service';
 import { LookupDialogComponent } from './lookup-dialog/lookup-dialog.component';
 import { matDialogConfig } from '@shared/config';
 import { LucideDynamicIcon } from '@lucide/angular';
+import { HeaderComponent } from '@shared/components/header/header.component';
 
 @Component({
   selector: 'app-lookups',
@@ -25,6 +26,7 @@ import { LucideDynamicIcon } from '@lucide/angular';
     DataTableComponent,
     ActionButtonComponent,
     LucideDynamicIcon,
+    HeaderComponent,
   ],
   templateUrl: './lookups.component.html',
   styleUrls: ['./lookups.component.scss'],

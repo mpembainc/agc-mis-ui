@@ -8,7 +8,7 @@ html {
         primary: mat.$azure-palette,
         tertiary: mat.$blue-palette,
       ),
-      typography: Figtree,
+      typography: Outfit,
       density: 0,
     )
   );
@@ -46,7 +46,7 @@ body {
       outlined-hover-outline-color: #b1b5c3,
       outlined-label-text-size: 15px,
       container-text-size: 15px,
-      container-text-font: 'Figtree',
+      container-text-font: 'Outfit',
     )
   );
 
@@ -65,7 +65,7 @@ body {
 
   @include mat.menu-overrides((
     container-shape: 10px,
-    item-label-text-font: 'Figtree',
+    item-label-text-font: 'Outfit',
     item-leading-spacing: 2px,
     item-label-text-size: 15px
   ));

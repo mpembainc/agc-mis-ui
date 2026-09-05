@@ -11,6 +11,7 @@ import { SwalService } from '@shared/services/swal.service';
 import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { WorkflowInstance } from '../models/workflow.model';
+import { HeaderComponent } from '@shared/components/header/header.component';
 
 @Component({
   selector: 'app-workflow-list',
@@ -19,6 +20,7 @@ import { WorkflowInstance } from '../models/workflow.model';
     MatButtonModule,
     MatIconModule,
     DataTableComponent,
+    HeaderComponent,
   ],
   templateUrl: './workflow-list.component.html',
   styleUrls: ['./workflow-list.component.scss'],

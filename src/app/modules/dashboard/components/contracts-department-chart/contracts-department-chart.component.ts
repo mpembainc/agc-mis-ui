@@ -61,7 +61,7 @@ export class ContractsDepartmentChartComponent implements AfterViewInit, OnDestr
               color: '#475569',
               font: {
                 size: 11,
-                family: 'Figtree',
+                family: 'Outfit',
                 weight: 'normal',
               },
             },
@@ -77,7 +77,7 @@ export class ContractsDepartmentChartComponent implements AfterViewInit, OnDestr
               color: '#0f172a',
               font: {
                 size: 11,
-                family: 'Figtree',
+                family: 'Outfit',
                 weight: 'bold',
               },
             },
@@ -95,7 +95,7 @@ export class ContractsDepartmentChartComponent implements AfterViewInit, OnDestr
               color: '#94A3B8',
               font: {
                 size: 10,
-                family: 'Figtree',
+                family: 'Outfit',
               },
             },
           },

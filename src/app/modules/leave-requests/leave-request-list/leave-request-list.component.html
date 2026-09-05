@@ -1,25 +1,15 @@
 <div>
-  <div class="flex justify-between items-center mb-6 font-figtree animate-fade-in">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-800">Leave Requests</h1>
-      <p class="text-slate-500 text-sm">
-        @if (isAdmin) {
-          Manage state attorneys' leave applications, view workflow progress, and audit logs.
-        } @else {
-          Apply for leave, track application states, and view your approval progress.
-        }
-      </p>
-    </div>
-    <div>
-      <app-action-button
-        label="Request Leave"
-        icon="add"
-        [dialogComponent]="LeaveDialog"
-        [dialogConfig]="matDialogConfig"
-        (dialogClosed)="onDialogClosed($event)"
-      ></app-action-button>
-    </div>
-  </div>
+  <app-header
+    title="Leave Requests"
+    [subTitle]="isAdmin ? 'Manage state attorneys\' leave applications, view workflow progress, and audit logs.' : 'Apply for leave, track application states, and view your approval progress.'">
+    <app-action-button
+      label="Request Leave"
+      icon="add"
+      [dialogComponent]="LeaveDialog"
+      [dialogConfig]="matDialogConfig"
+      (dialogClosed)="onDialogClosed($event)"
+    ></app-action-button>
+  </app-header>
 
   <app-data-table
     [data]="leaveRequests"

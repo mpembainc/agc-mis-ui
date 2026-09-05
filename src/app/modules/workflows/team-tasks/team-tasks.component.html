@@ -1,12 +1,8 @@
 <div>
-  <div class="flex justify-between items-center mb-6 font-figtree animate-fade-in">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-800">Team Tasks</h1>
-      <p class="text-slate-500 text-sm">
-        Tasks assigned to your role group. Any eligible member of your group can action these tasks.
-      </p>
-    </div>
-  </div>
+  <app-header
+    title="Team Tasks"
+    subTitle="Tasks assigned to your role group. Any eligible member of your group can action these tasks."
+  />
 
   <app-data-table
     [data]="tasks"

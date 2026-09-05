@@ -1,9 +1,8 @@
 <div class="font-figtree">
-  <!-- Header -->
-  <div class="mb-6">
-    <h1 class="text-2xl font-bold text-slate-800">My Profile</h1>
-    <p class="text-slate-500 text-sm">Manage your personal credentials, view your system permissions, and update your security settings.</p>
-  </div>
+  <app-header
+    title="My Profile"
+    subTitle="Manage your personal credentials, view your system permissions, and update your security settings."
+  />
 
   <!-- Loading State -->
   @if (loading()) {
