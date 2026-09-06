@@ -28,36 +28,109 @@
     <div class="space-y-6 animate-slide-up">
       <!-- Profile Header Card -->
       <div class="bg-white rounded-xl border border-slate-200 shadow-xs p-6 flex flex-col md:flex-row items-center gap-6">
-        <!-- Avatar Block: Initials with High Contrast -->
-        <div class="w-18 h-18 rounded-2xl bg-amber-500/10 text-amber-900 border border-amber-300 shadow-2xs flex items-center justify-center text-2xl md:text-3xl font-bold font-figtree select-none shrink-0">
-          {{ getInitials(attorney.full_name) }}
+        <!-- Avatar Block with High-Contrast Framing & Hover Controls (Preview + Upload) -->
+        <div
+          (click)="onAvatarContainerClick($event)"
+          class="relative group w-18 h-18 rounded-2xl shadow-xs flex items-center justify-center text-2xl md:text-3xl font-bold font-figtree select-none shrink-0 overflow-hidden transition-all duration-200"
+          [class.cursor-pointer]="attorney.avatar_url && !avatarError()"
+          [class.border-2]="true"
+          [class.border-slate-200]="attorney.avatar_url && !avatarError()"
+          [class.ring-2]="attorney.avatar_url && !avatarError()"
+          [class.ring-slate-100]="attorney.avatar_url && !avatarError()"
+          [class.bg-slate-100]="attorney.avatar_url && !avatarError()"
+          [class.border-amber-300]="!attorney.avatar_url || avatarError()"
+          [class.bg-amber-500/10]="!attorney.avatar_url || avatarError()"
+          [class.text-amber-900]="!attorney.avatar_url || avatarError()">
+          @if (attorney.avatar_url && !avatarError()) {
+            <img
+              [src]="attorney.avatar_url"
+              [alt]="attorney.full_name"
+              class="w-full h-full object-cover block"
+              (error)="onAvatarError()"
+            />
+          } @else {
+            {{ getInitials(attorney.full_name) }}
+          }
+
+          <!-- Hover Overlay Controls -->
+          @if (!uploadingAvatar()) {
+            @if (attorney.avatar_url && !avatarError()) {
+              <!-- Dual Action Overlay: Preview & Change -->
+              <div
+                class="absolute inset-0 bg-slate-900/60 text-white flex items-center justify-center gap-1.5 transition-all duration-200 opacity-0 group-hover:opacity-100 backdrop-blur-[1px]">
+                <!-- Preview Button -->
+                <button
+                  type="button"
+                  (click)="openPreview($event)"
+                  title="Preview image"
+                  aria-label="Preview image"
+                  class="size-7.5 rounded-lg bg-white/20 hover:bg-white text-white hover:text-slate-900 flex items-center justify-center transition-all duration-150 cursor-pointer shadow-xs focus:outline-none">
+                  <svg lucideEye class="size-4"></svg>
+                </button>
+                <!-- Change Photo Button -->
+                <button
+                  type="button"
+                  (click)="triggerFileInput($event)"
+                  title="Change image"
+                  aria-label="Change image"
+                  class="size-7.5 rounded-lg bg-white/20 hover:bg-white text-white hover:text-slate-900 flex items-center justify-center transition-all duration-150 cursor-pointer shadow-xs focus:outline-none">
+                  <svg lucideCamera class="size-4"></svg>
+                </button>
+              </div>
+            } @else {
+              <!-- Single Upload Trigger for Initials Placeholder -->
+              <button
+                type="button"
+                (click)="triggerFileInput($event)"
+                title="Upload profile photo"
+                aria-label="Upload profile photo"
+                class="absolute inset-0 bg-slate-900/65 text-white flex flex-col items-center justify-center gap-1 transition-all duration-200 opacity-0 group-hover:opacity-100 cursor-pointer focus:outline-none">
+                <svg lucideCamera class="size-5 text-white drop-shadow-xs"></svg>
+                <span class="text-[10px] font-semibold leading-none tracking-tight drop-shadow-xs">Upload</span>
+              </button>
+            }
+          } @else {
+            <!-- Uploading Spinner -->
+            <div class="absolute inset-0 bg-slate-900/75 text-white flex flex-col items-center justify-center gap-1 opacity-100">
+              <svg lucideLoader2 class="size-5 text-white animate-spin"></svg>
+              <span class="text-[10px] font-medium leading-none tracking-tight">Uploading...</span>
+            </div>
+          }
+
+          <!-- Hidden File Input -->
+          <input
+            #fileInput
+            type="file"
+            accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+            class="hidden"
+            (change)="onAvatarSelected($event)"
+          />
         </div>
 
         <!-- Bio Summary Name -->
         <div class="flex-1 text-center md:text-left space-y-2">
           <div class="flex flex-col md:flex-row md:items-center gap-2.5">
-            <h2 class="text-xl font-semibold text-slate-900 uppercase tracking-tight">{{ attorney.full_name }}</h2>
+            <h2 class="text-xl font-semibold text-slate-900 tracking-tight">{{ formatName(attorney.full_name) }}</h2>
             <!-- Status Badge using shared BadgeComponent -->
             <app-badge
+              class="capitalize"
               [variant]="getStatusVariant(attorney.status)"
-              [pill]="true"
-              [text]="attorney.status | uppercase | removeUnderscore">
+              [text]="attorney.status | removeUnderscore">
             </app-badge>
             <!-- Account Status indicator badge -->
             <app-badge
               [variant]="attorney.is_active ? 'success' : 'danger'"
-              [pill]="true"
               [text]="attorney.is_active ? 'Account Active' : 'Account Disabled'">
             </app-badge>
           </div>
           <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-0.5">
-            <p class="text-slate-700 font-semibold text-sm flex items-center gap-1.5">
+            <p class="text-slate-700 font-semibold  uppercase text-sm flex items-center gap-1.5">
               <svg lucideShieldCheck class="size-4.5 text-amber-600 shrink-0"></svg>
               {{ getGradeName(attorney.current_grade_id) || attorney.current_grade || 'State Attorney' }}
             </p>
-            <span class="text-slate-300 hidden md:inline">•</span>
+            <span class="text-slate-400 hidden md:inline">•</span>
             <p class="text-slate-600 text-sm font-medium flex items-center gap-1.5">
-              <svg lucideLandmark class="size-4.5 text-slate-500 shrink-0"></svg>
+              <svg lucideLandmark class="size-4.5 text-slate-600 shrink-0"></svg>
               {{ getMdaName(attorney.mda_id) }}
             </p>
           </div>
@@ -166,7 +239,6 @@
               <detail-item label="System Account Status">
                 <app-badge
                   [variant]="attorney.is_active ? 'success' : 'danger'"
-                  [pill]="true"
                   [text]="attorney.is_active ? 'Enabled' : 'Disabled'">
                 </app-badge>
               </detail-item>
@@ -183,53 +255,79 @@
       <!-- Tab Content: Assignments -->
       @if (activeTab === 'assignments') {
         <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
-          <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex items-center justify-between">
-            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+          <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-2">
               <svg lucideFolderKanban class="size-4.5 text-slate-500 shrink-0"></svg>
-              Active Case Allocations & Assignments
-            </h3>
-            <app-badge
-              [variant]="attorney.assignments && attorney.assignments.length > 0 ? 'primary' : 'secondary'"
-              [pill]="true"
-              [text]="(attorney.assignments?.length || 0) + ' Total Cases'">
-            </app-badge>
+              <h3 class="text-sm font-semibold text-slate-800 tracking-wider">
+                Active Case Allocations & Assignments
+              </h3>
+            </div>
+            <div class="flex items-center gap-3">
+              <app-button
+                variant="primary"
+                [icon]="plusIcon"
+                (btnClick)="openAssignWorkDialog()">
+                Assign Work
+              </app-button>
+            </div>
           </div>
           
           <div class="p-6">
             @if (attorney.assignments && attorney.assignments.length > 0) {
-              <div class="overflow-x-auto border border-slate-200 rounded-lg">
-                <table class="w-full text-left border-collapse">
-                  <thead>
-                    <tr class="bg-slate-50 border-b border-slate-200">
-                      <th class="p-3 text-xs font-bold text-slate-700 uppercase tracking-wider">Case Title</th>
-                      <th class="p-3 text-xs font-bold text-slate-700 uppercase tracking-wider">Role</th>
-                      <th class="p-3 text-xs font-bold text-slate-700 uppercase tracking-wider">Assigned Date</th>
-                      <th class="p-3 text-xs font-bold text-slate-700 uppercase tracking-wider">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (assign of attorney.assignments; track assign.id) {
-                      <tr class="border-b border-slate-200 last:border-0 hover:bg-slate-50/80 transition-colors">
-                        <td class="p-3 text-sm font-semibold text-slate-900">{{ assign.title || '-' }}</td>
-                        <td class="p-3 text-sm text-slate-700">{{ assign.role || '-' }}</td>
-                        <td class="p-3 text-sm text-slate-600">{{ getFormattedDob(assign.assigned_at) }}</td>
-                        <td class="p-3 text-sm">
-                          <app-badge
-                            [variant]="getAssignmentStatusVariant(assign.status)"
-                            [pill]="true"
-                            [text]="assign.status || 'Pending'">
-                          </app-badge>
-                        </td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
+              <app-data-table
+                [data]="attorney.assignments || []"
+                [columns]="assignmentColumns"
+                [columnTemplates]="{
+                  role: roleColTpl,
+                  timeline: timelineColTpl,
+                  status: statusColTpl
+                }"
+                [showOuterCard]="false"
+                [hidePagination]="true"
+                (view)="onViewAssignment($event)"
+                (delete)="onDeleteAssignment($event)">
+              </app-data-table>
+
+              <!-- Column Templates for Assignments DataTable -->
+              <ng-template #roleColTpl let-row>
+                <span class="text-sm font-medium text-slate-700">
+                  {{ row.role || '-' }}
+                </span>
+              </ng-template>
+
+              <ng-template #timelineColTpl let-row>
+                <div class="text-xs text-slate-600">
+                  <div class="font-medium text-slate-700">
+                    Start: {{ getFormattedDob(row.start_date || row.created_at) }}
+                  </div>
+                  @if (row.end_date) {
+                    <div class="text-slate-500 mt-0.5">
+                      Due: {{ getFormattedDob(row.end_date) }}
+                    </div>
+                  }
+                </div>
+              </ng-template>
+
+              <ng-template #statusColTpl let-row>
+                <app-badge
+                  [variant]="getAssignmentStatusVariant(row.status)"
+                  [pill]="false"
+                  [text]="row.status ? (row.status | uppercase | removeUnderscore) : 'ACTIVE'">
+                </app-badge>
+              </ng-template>
             } @else {
-              <div class="flex flex-col items-center justify-center p-12 bg-slate-50/60 border border-dashed border-slate-300 rounded-xl">
+              <div class="flex flex-col items-center justify-center p-12 bg-slate-50/60 border border-dashed border-slate-300 rounded-xl text-center">
                 <svg lucideBriefcase class="size-12 text-slate-400 mb-3 stroke-[1.5]"></svg>
                 <h4 class="text-sm font-bold text-slate-800 mb-1">No Active Assignments</h4>
-                <p class="text-slate-600 text-sm text-center max-w-md">No work assignments or active case allocations are currently registered for this state attorney.</p>
+                <p class="text-slate-600 text-sm text-center max-w-md mb-4">
+                  No work assignments or active case allocations are currently registered for this state attorney.
+                </p>
+                <app-button
+                  variant="primary"
+                  [icon]="plusIcon"
+                  (btnClick)="openAssignWorkDialog()">
+                  Assign First Work
+                </app-button>
               </div>
             }
           </div>
@@ -237,4 +335,174 @@
       }
     </div>
   }
+
+  <!-- Assign Work Dialog Template (rendered via MatDialog with app-dialog-layout and mat-form-field) -->
+  <ng-template #assignWorkDialog>
+    <form (ngSubmit)="saveAssignment()" class="w-full">
+      <app-dialog-layout
+        title="Assign Work / Allocate Matter"
+        primaryButtonLabel="Confirm Assignment"
+        cancelButtonLabel="Cancel"
+        [disablePrimaryButton]="assignLoading()"
+        (onConfirmed)="saveAssignment()">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 py-1">
+          <!-- Matter Type -->
+          <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+            <mat-label>Matter / Task Type</mat-label>
+            <mat-select [(ngModel)]="assignForm.entity_type" name="entity_type" required>
+              @for (t of entityTypes; track t.value) {
+                <mat-option [value]="t.value">{{ t.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Select Contract or Title -->
+          @if (assignForm.entity_type === 'contract') {
+            <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+              <mat-label>Select Contract</mat-label>
+              <mat-select [(ngModel)]="assignForm.entity_id" name="entity_id" required>
+                @for (c of availableContracts(); track c.id) {
+                  <mat-option [value]="c.id">
+                    {{ c.contract_number }} - {{ c.subject_matter || 'No description' }}
+                  </mat-option>
+                }
+              </mat-select>
+              @if (contractsLoading()) {
+                <mat-hint>Loading active contracts...</mat-hint>
+              }
+            </mat-form-field>
+          } @else {
+            <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+              <mat-label>Matter Title / Reference</mat-label>
+              <input matInput [(ngModel)]="assignForm.custom_title" name="custom_title" placeholder="e.g. Civil Appeal No. 12/2026 or Advisory Review" required />
+            </mat-form-field>
+          }
+
+          <!-- Role -->
+          <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+            <mat-label>Assigned Attorney Role</mat-label>
+            <mat-select [(ngModel)]="assignForm.role" name="role" required>
+              @for (r of rolesList; track r) {
+                <mat-option [value]="r">{{ r }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Dates -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Start Date</mat-label>
+            <input matInput [matDatepicker]="startPicker" [(ngModel)]="assignForm.start_date" name="start_date" placeholder="Choose start date">
+            <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Due / Target Date</mat-label>
+            <input matInput [matDatepicker]="duePicker" [(ngModel)]="assignForm.end_date" name="end_date" placeholder="Choose target date">
+            <mat-datepicker-toggle matIconSuffix [for]="duePicker"></mat-datepicker-toggle>
+            <mat-datepicker #duePicker></mat-datepicker>
+          </mat-form-field>
+
+          <!-- Instructions & Notes -->
+          <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+            <mat-label>Assignment Instructions & Notes</mat-label>
+            <textarea matInput rows="3" [(ngModel)]="assignForm.notes" name="notes" placeholder="Provide any specific instructions, deliverables, or background context..."></textarea>
+          </mat-form-field>
+        </div>
+      </app-dialog-layout>
+    </form>
+  </ng-template>
+
+  <!-- View Assignment Details Dialog Template (rendered via MatDialog with app-dialog-layout) -->
+  <ng-template #viewAssignmentDialog>
+    <div class="w-full">
+      <app-dialog-layout
+        title="Assignment Details"
+        [showPrimaryButton]="false"
+        cancelButtonLabel="Close">
+        @if (selectedAssignment) {
+          <div class="space-y-4 py-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="col-span-1 sm:col-span-2">
+                <detail-item label="Matter / Case Title" [value]="selectedAssignment.title || 'Untitled Matter'" [fullWidth]="true"></detail-item>
+              </div>
+              <detail-item label="Matter Type">
+                <app-badge [variant]="getEntityTypeVariant(selectedAssignment.entity_type)" [pill]="false" [text]="formatEntityType(selectedAssignment.entity_type)"></app-badge>
+              </detail-item>
+              <detail-item label="Reference Number" [value]="selectedAssignment.reference_number || '-'"></detail-item>
+              <detail-item label="Assigned Role" [value]="selectedAssignment.role || '-'"></detail-item>
+              <detail-item label="Status">
+                <app-badge [variant]="getAssignmentStatusVariant(selectedAssignment.status)" [pill]="false" [text]="selectedAssignment.status ? (selectedAssignment.status | uppercase | removeUnderscore) : 'ACTIVE'"></app-badge>
+              </detail-item>
+              <detail-item label="Start Date" [value]="getFormattedDob(selectedAssignment.start_date || selectedAssignment.created_at)"></detail-item>
+              <detail-item label="Target / Due Date" [value]="getFormattedDob(selectedAssignment.end_date)"></detail-item>
+            </div>
+            @if (selectedAssignment.notes) {
+              <detail-item label="Instructions & Notes" [value]="selectedAssignment.notes" [multiline]="true" [fullWidth]="true"></detail-item>
+            }
+          </div>
+        }
+      </app-dialog-layout>
+    </div>
+  </ng-template>
+
+  <!-- Image Preview Dialog Template (rendered via MatDialog) -->
+  <ng-template #previewDialog>
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-w-lg w-full">
+      <!-- Header -->
+      <div class="px-5 py-3.5 border-b border-slate-200 bg-slate-50/90 flex items-center justify-between">
+        <div class="min-w-0 pr-4">
+          <h3 class="text-base font-bold text-slate-900 truncate">
+            {{ formatName(attorney?.full_name) }}
+          </h3>
+          <p class="text-xs text-slate-500 font-medium">State Attorney Profile Photo</p>
+        </div>
+        <button
+          type="button"
+          (click)="closePreview()"
+          mat-dialog-close
+          class="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 transition-colors cursor-pointer focus:outline-none"
+          title="Close dialog"
+          aria-label="Close dialog">
+          <svg lucideX class="size-5"></svg>
+        </button>
+      </div>
+
+      <!-- Image Body -->
+      <div class="p-6 bg-slate-100/70 flex items-center justify-center min-h-65 max-h-[65vh] overflow-hidden">
+        <img
+          [src]="attorney?.avatar_url"
+          [alt]="attorney?.full_name"
+          class="max-h-[58vh] max-w-full rounded-xl object-contain shadow-md border border-slate-200 bg-white"
+        />
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="px-5 py-3.5 border-t border-slate-200 bg-white flex items-center justify-between gap-3">
+        <app-button
+          variant="outline"
+          [icon]="externalLinkIcon"
+          (btnClick)="openInNewTab()">
+          Full Size
+        </app-button>
+
+        <div class="flex items-center gap-2">
+          <app-button
+            variant="primary"
+            [icon]="cameraIcon"
+            (btnClick)="triggerFileInput(); closePreview()"
+            (click)="triggerFileInput(); closePreview()">
+            Change Photo
+          </app-button>
+          <app-button
+            variant="outline"
+            (btnClick)="closePreview()"
+            (click)="closePreview()">
+            Close
+          </app-button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
 </div>

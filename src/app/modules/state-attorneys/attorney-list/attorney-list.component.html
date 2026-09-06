@@ -25,10 +25,18 @@
     (edit)="onEdit($event)"
     (delete)="onDelete($event)"
     [columnTemplates]="{
+      'full_name': fullNameTpl,
       'status': statusTpl
     }"
   >
   </app-data-table>
+
+  <!-- Full Name Column Template (Always formatted in Capitalized Case) -->
+  <ng-template #fullNameTpl let-row>
+    <span class="font-medium text-slate-900">
+      {{ formatName(row.full_name) }}
+    </span>
+  </ng-template>
 
   <!-- Status Column Template -->
   <ng-template #statusTpl let-row>

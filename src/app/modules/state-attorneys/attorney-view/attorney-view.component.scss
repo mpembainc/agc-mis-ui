@@ -1,1 +1,11 @@
-/* Styles for AttorneyViewComponent */
+::ng-deep .image-preview-dialog-panel {
+  .mat-mdc-dialog-container,
+  .mdc-dialog__surface {
+    padding: 0 !important;
+    border-radius: 1rem !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+}
+

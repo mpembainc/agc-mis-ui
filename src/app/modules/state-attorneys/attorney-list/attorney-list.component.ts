@@ -13,6 +13,8 @@ import { DataTableComponent, TableColumn, TableFilter } from '@shared/components
 import { ActionButtonComponent } from '@shared/components/action-button/action-button.component';
 import { HeaderComponent } from '@shared/components/header/header.component';
 
+import { toCapitalizedCase } from '@shared/utilities/utils';
+
 @Component({
   selector: 'app-attorney-list',
   imports: [
@@ -35,6 +37,7 @@ export class AttorneyListComponent implements OnInit {
   private swalService = inject(SwalService);
   private cdr = inject(ChangeDetectorRef);
 
+  @ViewChild('fullNameTpl', { static: true }) fullNameTpl!: TemplateRef<any>;
   @ViewChild('statusTpl', { static: true }) statusTpl!: TemplateRef<any>;
   @ViewChild('mdaTpl', { static: true }) mdaTpl!: TemplateRef<any>;
   @ViewChild('gradeTpl', { static: true }) gradeTpl!: TemplateRef<any>;
@@ -51,7 +54,12 @@ export class AttorneyListComponent implements OnInit {
   searchText = '';
 
   columns: TableColumn[] = [
-    { key: 'full_name', label: 'Full Name', type: 'text' },
+    {
+      key: 'full_name',
+      label: 'Full Name',
+      type: 'text',
+      generated: (row: StateAttorney) => this.formatName(row.full_name),
+    },
     { key: 'email', label: 'Email', type: 'text' },
     { key: 'phone', label: 'Phone', type: 'text' },
     { key: 'zanid', label: 'Zan ID', type: 'text' },
@@ -204,6 +212,10 @@ export class AttorneyListComponent implements OnInit {
           });
         }
       });
+  }
+
+  formatName(name?: string): string {
+    return toCapitalizedCase(name);
   }
 
   getMdaCode(id?: string): string {

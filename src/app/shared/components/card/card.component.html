@@ -1,0 +1,47 @@
+<div [class]="computedContainerClass">
+  <!-- Custom Projected Header -->
+  <ng-content select="app-card-header, card-header, [card-header]"></ng-content>
+
+  <!-- Built-in Configurable Header -->
+  @if (isHeaderVisible) {
+    <div [class]="computedHeaderClass">
+      <div class="flex items-center gap-2.5 min-w-0">
+        @if (icon) {
+          <svg [lucideIcon]="icon" [class]="iconClass"></svg>
+        }
+        <ng-content select="[card-icon]"></ng-content>
+
+        <div class="min-w-0">
+          @if (title) {
+            <h3 [class]="titleClass">{{ title }}</h3>
+          }
+          <ng-content select="[card-title]"></ng-content>
+
+          @if (subtitle) {
+            <p [class]="subtitleClass">{{ subtitle }}</p>
+          }
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <ng-content select="[card-actions], [header-actions], card-actions"></ng-content>
+      </div>
+    </div>
+  }
+
+  <!-- Card Body -->
+  <div [class]="computedBodyClass">
+    <!-- Loading Overlay -->
+    @if (loading) {
+      <div class="absolute inset-0 bg-white/75 backdrop-blur-[1px] flex flex-col items-center justify-center gap-2 z-10">
+        <div class="size-8 rounded-full border-2 border-slate-200 border-t-[#d99414] animate-spin"></div>
+        <span class="text-xs font-medium text-slate-500">Loading...</span>
+      </div>
+    }
+
+    <ng-content></ng-content>
+  </div>
+
+  <!-- Projected Card Footer -->
+  <ng-content select="app-card-footer, card-footer, [card-footer]"></ng-content>
+</div>

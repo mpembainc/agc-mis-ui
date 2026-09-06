@@ -72,6 +72,16 @@ export class StateAttorneysService {
     return this.http.delete<ApiResponse<null>>(`${this.baseUrl}/${id}`);
   }
 
+  uploadAvatar(id: string, file: File): Observable<ApiResponse<StateAttorney>> {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return this.http.post<ApiResponse<StateAttorney>>(`${this.baseUrl}/${id}/avatar`, formData);
+  }
+
+  deleteAvatar(id: string): Observable<ApiResponse<StateAttorney>> {
+    return this.http.delete<ApiResponse<StateAttorney>>(`${this.baseUrl}/${id}/avatar`);
+  }
+
   // ── Lookup Data Fetchers ──
   getMdas(): Observable<ApiResponse<Mda[]>> {
     return this.http.get<ApiResponse<Mda[]>>(`${this.setupUrl}/mdas`);

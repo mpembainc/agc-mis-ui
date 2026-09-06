@@ -29,3 +29,12 @@ export function localDate(dateValue: string | Date | null | undefined): string |
     return null;
   }
 }
+
+export function toCapitalizedCase(value?: string | null): string {
+  if (!value) return '';
+  return value
+    .trim()
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
