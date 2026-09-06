@@ -1,12 +1,14 @@
-import { Component, inject, OnInit, signal, ViewChild, ElementRef, TemplateRef } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ViewChild, ElementRef, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatTabsModule } from '@angular/material/tabs';
 import { StateAttorneysService } from '../services/state-attorneys.service';
 import { AttorneyAssignmentsService } from '../services/attorney-assignments.service';
 import { AccomplishmentsService } from '../services/accomplishments.service';
 import { QualificationsDossierService } from '../services/qualifications-dossier.service';
+import { WorkSchedulesService } from '../services/work-schedules.service';
 import {
   StateAttorney,
   Mda,
@@ -21,6 +23,15 @@ import {
   DocumentTypeLookup,
   QualificationsSummary,
   DossierSummary,
+  ScheduleSlot,
+  DailySchedule,
+  ScheduleHoursSummary,
+  WeeklyScheduleData,
+  WorkSchedule,
+  AttorneyScheduleResponse,
+  AttorneyAvailabilityInfo,
+  ScheduleActivityType,
+  SchedulePeriod,
 } from '../models/state-attorney.model';
 import { SwalService } from '@shared/services/swal.service';
 import { ButtonComponent } from '@shared/components/button/button.component';
@@ -54,6 +65,13 @@ import {
   LucideUpload,
   LucideDownload,
   LucideFile,
+  LucideCalendar,
+  LucideCalendarDays,
+  LucideChevronLeft,
+  LucideChevronRight,
+  LucideCopy,
+  LucideSend,
+  LucideMapPin,
 } from '@lucide/angular';
 import { toCapitalizedCase } from '@shared/utilities/utils';
 
@@ -72,6 +90,7 @@ import { DataTableComponent, TableColumn } from '@shared/components/data-table/d
     FormsModule,
     RouterLink,
     MatDialogModule,
+    MatTabsModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -96,7 +115,6 @@ import { DataTableComponent, TableColumn } from '@shared/components/data-table/d
     LucideEye,
     LucideX,
     LucidePlus,
-    LucideCheckCircle2,
     LucideClock,
     LucideTrash2,
     LucideFileText,
@@ -107,6 +125,11 @@ import { DataTableComponent, TableColumn } from '@shared/components/data-table/d
     LucideUpload,
     LucideDownload,
     LucideFile,
+    LucideCalendar,
+    LucideCalendarDays,
+    LucideChevronLeft,
+    LucideChevronRight,
+    LucideMapPin,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './attorney-view.component.html',
@@ -125,6 +148,15 @@ export class AttorneyViewComponent implements OnInit {
   @ViewChild('viewCertificationDialog') viewCertificationDialogTpl!: TemplateRef<any>;
   @ViewChild('uploadDossierDialog') uploadDossierDialogTpl!: TemplateRef<any>;
   @ViewChild('viewDossierDialog') viewDossierDialogTpl!: TemplateRef<any>;
+  @ViewChild('slotDialog') slotDialogTpl!: TemplateRef<any>;
+
+  protected readonly calendarIcon = LucideCalendar;
+  protected readonly calendarDaysIcon = LucideCalendarDays;
+  protected readonly chevronLeftIcon = LucideChevronLeft;
+  protected readonly chevronRightIcon = LucideChevronRight;
+  protected readonly copyIcon = LucideCopy;
+  protected readonly sendIcon = LucideSend;
+  protected readonly mapPinIcon = LucideMapPin;
 
   protected readonly editIcon = LucidePencil;
   protected readonly cameraIcon = LucideCamera;
@@ -150,6 +182,7 @@ export class AttorneyViewComponent implements OnInit {
   private assignmentsService = inject(AttorneyAssignmentsService);
   private accomplishmentsService = inject(AccomplishmentsService);
   private qualificationsService = inject(QualificationsDossierService);
+  private schedulesService = inject(WorkSchedulesService);
   private swalService = inject(SwalService);
   private dialog = inject(MatDialog);
 
@@ -158,6 +191,13 @@ export class AttorneyViewComponent implements OnInit {
   uploadingAvatar = signal(false);
   avatarError = signal(false);
   activeTab = 'profile';
+  selectedTabIndex = 0;
+  readonly tabKeys = ['profile', 'assignments', 'accomplishments', 'qualifications', 'dossier', 'schedule'];
+
+  onTabChange(index: number): void {
+    this.selectedTabIndex = index;
+    this.activeTab = this.tabKeys[index] || 'profile';
+  }
 
   // Accomplishments state
   accomplishments = signal<Accomplishment[]>([]);
@@ -268,6 +308,35 @@ export class AttorneyViewComponent implements OnInit {
     { key: 'uploaded_by', label: 'Uploaded By' },
   ];
 
+  // Weekly Work Schedules & Availability state (IMP-SA-02)
+  currentSchedule = signal<WorkSchedule | null>(null);
+  scheduleResponse = signal<AttorneyScheduleResponse | null>(null);
+  selectedWeekStart = signal<string>(this.schedulesService.getMondayDateString());
+  loadingSchedule = signal<boolean>(false);
+  savingSchedule = signal<boolean>(false);
+  copyingSchedule = signal<boolean>(false);
+  submittingSchedule = signal<boolean>(false);
+  availabilityInfo = signal<AttorneyAvailabilityInfo | null>(null);
+  isScheduleSubmitted = computed(() => {
+    const s = this.currentSchedule();
+    return !!(s?.submitted_at || s?.schedule_data?.status === 'submitted');
+  });
+
+  selectedDayKey = signal<string>('monday');
+  editingSlotIndex = signal<number | null>(null);
+  private slotDialogRef: MatDialogRef<any> | null = null;
+
+  slotForm = {
+    day_key: 'monday',
+    period: 'morning' as SchedulePeriod,
+    activity_type: 'court' as ScheduleActivityType,
+    title: '',
+    location: '',
+    hours: 3.5,
+    description: '',
+    assignment_id: '',
+  };
+
   private previewDialogRef: MatDialogRef<any> | null = null;
   private assignDialogRef: MatDialogRef<any> | null = null;
   private viewDialogRef: MatDialogRef<any> | null = null;
@@ -358,6 +427,8 @@ export class AttorneyViewComponent implements OnInit {
         this.loadQualificationsData(id);
         this.loadDossierData(id);
         this.loadDocumentTypes();
+        this.loadScheduleData(id);
+        this.loadAvailability(id);
       },
       error: () => {
         this.loading.set(false);
@@ -1277,5 +1348,444 @@ export class AttorneyViewComponent implements OnInit {
     if (lower.includes('oath') || lower.includes('allegiance')) return 'neutral';
     if (lower.includes('id') || lower.includes('zanid')) return 'info';
     return 'secondary';
+  }
+
+  // ── Weekly Work Schedules & Availability Methods (IMP-SA-02) ──
+
+  loadScheduleData(attorneyId: string, weekStart?: string): void {
+    this.loadingSchedule.set(true);
+    const targetWeek = weekStart || this.selectedWeekStart();
+    this.selectedWeekStart.set(targetWeek);
+
+    this.schedulesService.getSchedule(attorneyId, targetWeek).subscribe({
+      next: (res) => {
+        this.scheduleResponse.set(res.data);
+        this.currentSchedule.set(res.data.schedule);
+        this.loadingSchedule.set(false);
+      },
+      error: () => {
+        this.loadingSchedule.set(false);
+      },
+    });
+  }
+
+  loadAvailability(attorneyId: string): void {
+    this.schedulesService.getAttorneyAvailability(attorneyId).subscribe({
+      next: (res) => {
+        this.availabilityInfo.set(res.data);
+      },
+    });
+  }
+
+  navigateWeek(offset: number): void {
+    if (!this.attorney?.id) return;
+    const nextMonday = this.schedulesService.offsetWeek(this.selectedWeekStart(), offset);
+    this.loadScheduleData(this.attorney.id, nextMonday);
+  }
+
+  goToCurrentWeek(): void {
+    if (!this.attorney?.id) return;
+    const currentMonday = this.schedulesService.getMondayDateString();
+    this.loadScheduleData(this.attorney.id, currentMonday);
+  }
+
+  getWeekRangeLabel(): string {
+    return this.schedulesService.formatWeekRangeLabel(this.selectedWeekStart());
+  }
+
+  getDaySchedule(dayKey: string): DailySchedule | null {
+    const sched = this.currentSchedule();
+    if (!sched || !sched.schedule_data?.days) return null;
+    return sched.schedule_data.days[dayKey] || null;
+  }
+
+  getDaySlots(dayKey: string): ScheduleSlot[] {
+    const day = this.getDaySchedule(dayKey);
+    return day?.slots || [];
+  }
+
+  getDayDate(dayKey: string): string {
+    const res = this.scheduleResponse();
+    if (res?.week_days && res.week_days[dayKey]) {
+      return res.week_days[dayKey].date;
+    }
+    return '';
+  }
+
+  isDayToday(dayKey: string): boolean {
+    const res = this.scheduleResponse();
+    return res?.week_days?.[dayKey]?.is_today || false;
+  }
+
+  getDayLeave(dayKey: string): any {
+    const date = this.getDayDate(dayKey);
+    if (!date) return null;
+    const leaves = this.scheduleResponse()?.overlapping_leaves || [];
+    return leaves.find((l: any) => l.start_date <= date && l.end_date >= date) || null;
+  }
+
+  openAddSlotDialog(dayKey: string, period: SchedulePeriod = 'morning'): void {
+    this.selectedDayKey.set(dayKey);
+    this.editingSlotIndex.set(null);
+    this.slotForm = {
+      day_key: dayKey,
+      period: period,
+      activity_type: period === 'morning' ? 'court' : 'in_office',
+      title: '',
+      location: '',
+      hours: 3.5,
+      description: '',
+      assignment_id: '',
+    };
+    this.slotDialogRef = this.dialog.open(this.slotDialogTpl, {
+      width: '560px',
+      maxWidth: '95vw',
+      panelClass: 'custom-dialog-container',
+      disableClose: true,
+    });
+  }
+
+  openEditSlotDialog(dayKey: string, index: number): void {
+    this.selectedDayKey.set(dayKey);
+    this.editingSlotIndex.set(index);
+    const slots = this.getDaySlots(dayKey);
+    const slot = slots[index];
+    if (slot) {
+      this.slotForm = {
+        day_key: dayKey,
+        period: slot.period || 'morning',
+        activity_type: slot.activity_type || 'court',
+        title: slot.title || '',
+        location: slot.location || '',
+        hours: slot.hours || 3.5,
+        description: slot.description || '',
+        assignment_id: slot.assignment_id || '',
+      };
+      this.slotDialogRef = this.dialog.open(this.slotDialogTpl, {
+        width: '560px',
+        maxWidth: '95vw',
+        panelClass: 'custom-dialog-container',
+        disableClose: true,
+      });
+    }
+  }
+
+  closeSlotDialog(): void {
+    this.slotDialogRef?.close();
+    this.slotDialogRef = null;
+    this.editingSlotIndex.set(null);
+  }
+
+  onAssignmentSelected(assignmentId: string): void {
+    if (!assignmentId) return;
+    const assignments = this.scheduleResponse()?.active_assignments || [];
+    const found = assignments.find((a: any) => a.id === assignmentId);
+    if (found) {
+      this.slotForm.title = found.contract?.subject_matter || found.contract?.contract_title || found.title || found.entity_title || this.slotForm.title;
+      if (found.entity_type === 'case') {
+        this.slotForm.activity_type = 'court';
+        this.slotForm.location = 'High Court Vuga';
+      } else if (found.entity_type === 'contract') {
+        this.slotForm.activity_type = 'in_office';
+        this.slotForm.location = 'Chambers / Vetting Desk';
+      }
+    }
+  }
+
+  saveSlot(): void {
+    if (!this.attorney?.id) return;
+    if (!this.slotForm.title.trim()) {
+      this.swalService.error('Please enter the activity or matter title.');
+      return;
+    }
+
+    const dayKey = this.slotForm.day_key;
+    const currentSched = this.currentSchedule();
+    const scheduleData: WeeklyScheduleData = currentSched?.schedule_data
+      ? JSON.parse(JSON.stringify(currentSched.schedule_data))
+      : {
+          status: 'draft',
+          days: {},
+        };
+
+    if (!scheduleData.days) {
+      scheduleData.days = {};
+    }
+
+    const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    dayNames.forEach((key) => {
+      if (!scheduleData.days[key]) {
+        scheduleData.days[key] = {
+          date: this.getDayDate(key),
+          day_name: key.charAt(0).toUpperCase() + key.slice(1),
+          status: 'available',
+          slots: [],
+        };
+      }
+    });
+
+    const daySlots = [...(scheduleData.days[dayKey].slots || [])];
+    const newSlot: ScheduleSlot = {
+      period: this.slotForm.period,
+      activity_type: this.slotForm.activity_type,
+      title: this.slotForm.title.trim(),
+      location: this.slotForm.location?.trim() || undefined,
+      hours: Number(this.slotForm.hours) || 0,
+      description: this.slotForm.description?.trim() || undefined,
+      assignment_id: this.slotForm.assignment_id || undefined,
+    };
+
+    const editIdx = this.editingSlotIndex();
+    if (editIdx !== null && editIdx >= 0 && editIdx < daySlots.length) {
+      daySlots[editIdx] = newSlot;
+    } else {
+      daySlots.push(newSlot);
+    }
+
+    scheduleData.days[dayKey].slots = daySlots;
+
+    this.savingSchedule.set(true);
+    this.schedulesService
+      .saveSchedule(this.attorney.id, {
+        week_start_date: this.selectedWeekStart(),
+        schedule_data: scheduleData,
+        is_submitted: scheduleData.status === 'submitted',
+      })
+      .subscribe({
+        next: (res) => {
+          this.savingSchedule.set(false);
+          this.currentSchedule.set(res.data);
+          this.closeSlotDialog();
+          this.swalService.successToast('Activity block saved.');
+          if (this.attorney?.id) {
+            this.loadAvailability(this.attorney.id);
+          }
+        },
+        error: (err) => {
+          this.savingSchedule.set(false);
+          this.swalService.error(err.error?.message || 'Failed to save activity slot.');
+        },
+      });
+  }
+
+  async onDeleteSlot(dayKey: string, slotIndex: number): Promise<void> {
+    if (!this.attorney?.id) return;
+    const result = await this.swalService.confirm(
+      'Are you sure you want to remove this scheduled activity block?',
+      'Delete Slot',
+      'Yes, Remove'
+    );
+
+    if (result?.isConfirmed) {
+      const currentSched = this.currentSchedule();
+      if (!currentSched?.schedule_data?.days?.[dayKey]?.slots) return;
+
+      const scheduleData: WeeklyScheduleData = JSON.parse(JSON.stringify(currentSched.schedule_data));
+      scheduleData.days[dayKey].slots.splice(slotIndex, 1);
+
+      this.savingSchedule.set(true);
+      this.schedulesService
+        .saveSchedule(this.attorney.id, {
+          week_start_date: this.selectedWeekStart(),
+          schedule_data: scheduleData,
+          is_submitted: scheduleData.status === 'submitted',
+        })
+        .subscribe({
+          next: (res) => {
+            this.savingSchedule.set(false);
+            this.currentSchedule.set(res.data);
+            this.swalService.successToast('Activity slot removed.');
+            if (this.attorney?.id) {
+              this.loadAvailability(this.attorney.id);
+            }
+          },
+          error: () => {
+            this.savingSchedule.set(false);
+            this.swalService.error('Failed to update schedule.');
+          },
+        });
+    }
+  }
+
+  async onCopyPreviousWeek(): Promise<void> {
+    if (!this.attorney?.id) return;
+    if (this.isScheduleSubmitted()) {
+      this.swalService.infoToast('This weekly schedule has already been submitted to the Directorate and cannot be modified.');
+      return;
+    }
+    const result = await this.swalService.confirm(
+      'Do you want to copy recurring activities from last week into this week? Any unsaved changes will be replaced.',
+      'Copy Previous Week',
+      'Yes, Copy'
+    );
+
+    if (result?.isConfirmed) {
+      this.copyingSchedule.set(true);
+      this.schedulesService.copyPreviousWeek(this.attorney.id, this.selectedWeekStart()).subscribe({
+        next: (res) => {
+          this.copyingSchedule.set(false);
+          this.currentSchedule.set(res.data);
+          this.swalService.successToast('Previous week schedule copied successfully.');
+          if (this.attorney?.id) {
+            this.loadScheduleData(this.attorney.id, this.selectedWeekStart());
+            this.loadAvailability(this.attorney.id);
+          }
+        },
+        error: (err) => {
+          this.copyingSchedule.set(false);
+          this.swalService.error(err.error?.message || 'Could not copy previous week schedule.');
+        },
+      });
+    }
+  }
+
+  async onSubmitWeeklySchedule(): Promise<void> {
+    if (!this.attorney?.id) return;
+    const currentSched = this.currentSchedule();
+    if (!currentSched?.schedule_data) {
+      this.swalService.error('Please add at least one planned activity before submitting.');
+      return;
+    }
+
+    const result = await this.swalService.confirm(
+      'Are you ready to submit your weekly work schedule to your Directorate supervisor?',
+      'Submit Work Schedule',
+      'Yes, Submit'
+    );
+
+    if (result?.isConfirmed) {
+      this.submittingSchedule.set(true);
+      const scheduleData: WeeklyScheduleData = JSON.parse(JSON.stringify(currentSched.schedule_data));
+      scheduleData.status = 'submitted';
+
+      this.schedulesService
+        .saveSchedule(this.attorney.id, {
+          week_start_date: this.selectedWeekStart(),
+          schedule_data: scheduleData,
+          is_submitted: true,
+        })
+        .subscribe({
+          next: (res) => {
+            this.submittingSchedule.set(false);
+            this.currentSchedule.set(res.data);
+            this.swalService.successToast('Weekly schedule formally submitted.');
+            if (this.attorney?.id) {
+              this.loadAvailability(this.attorney.id);
+            }
+          },
+          error: (err) => {
+            this.submittingSchedule.set(false);
+            this.swalService.error(err.error?.message || 'Failed to submit schedule.');
+          },
+        });
+    }
+  }
+
+  async onClearWeeklySchedule(): Promise<void> {
+    if (!this.attorney?.id) return;
+    if (this.isScheduleSubmitted()) {
+      this.swalService.infoToast('This weekly schedule has already been submitted to the Directorate and cannot be cleared.');
+      return;
+    }
+    const currentSched = this.currentSchedule();
+    if (!currentSched?.id) return;
+
+    const result = await this.swalService.confirm(
+      'Are you sure you want to clear this weekly schedule?',
+      'Clear Schedule',
+      'Yes, Clear'
+    );
+
+    if (result?.isConfirmed) {
+      this.schedulesService.deleteSchedule(this.attorney.id, currentSched.id).subscribe({
+        next: () => {
+          this.swalService.successToast('Weekly schedule cleared.');
+          this.currentSchedule.set(null);
+          if (this.attorney?.id) {
+            this.loadScheduleData(this.attorney.id, this.selectedWeekStart());
+            this.loadAvailability(this.attorney.id);
+          }
+        },
+        error: () => this.swalService.error('Failed to clear schedule.'),
+      });
+    }
+  }
+
+  getActivityBadgeVariant(type?: string | null): BadgeVariant {
+    switch (type?.toLowerCase()) {
+      case 'court':
+        return 'warning';
+      case 'in_office':
+        return 'primary';
+      case 'advisory':
+        return 'info';
+      case 'meeting':
+        return 'purple';
+      case 'field_work':
+        return 'neutral';
+      case 'training':
+        return 'secondary';
+      case 'leave':
+        return 'danger';
+      default:
+        return 'secondary';
+    }
+  }
+
+  formatActivityType(type?: string | null): string {
+    switch (type?.toLowerCase()) {
+      case 'court':
+        return 'Court Session';
+      case 'in_office':
+        return 'Office / Drafting';
+      case 'advisory':
+        return 'Legal Advisory';
+      case 'meeting':
+        return 'Consultation / Meeting';
+      case 'field_work':
+        return 'Field Inspection';
+      case 'training':
+        return 'CPD / Training';
+      case 'leave':
+        return 'Official Leave';
+      default:
+        return type ? toCapitalizedCase(type) : 'Activity';
+    }
+  }
+
+  getAvailabilityBadgeVariant(status?: string | null): BadgeVariant {
+    switch (status?.toLowerCase()) {
+      case 'available':
+        return 'success';
+      case 'in_court':
+        return 'warning';
+      case 'meeting':
+      case 'advisory':
+        return 'info';
+      case 'field_work':
+        return 'purple';
+      case 'on_leave':
+        return 'danger';
+      default:
+        return 'secondary';
+    }
+  }
+
+  getAvailabilityBadgeText(info?: AttorneyAvailabilityInfo | null): string {
+    if (!info) return 'Available';
+    switch (info.current_status) {
+      case 'available':
+        return 'Available in Chambers';
+      case 'in_court':
+        return 'In Court Session';
+      case 'meeting':
+        return 'In Advisory / Meeting';
+      case 'field_work':
+        return 'Field / On Duty';
+      case 'on_leave':
+        return 'On Official Leave';
+      default:
+        return toCapitalizedCase(info.current_status);
+    }
   }
 }

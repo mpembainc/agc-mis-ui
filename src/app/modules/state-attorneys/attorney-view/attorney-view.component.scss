@@ -9,3 +9,76 @@
   }
 }
 
+::ng-deep .state-attorney-tabs {
+  .mat-mdc-tab-header {
+    border-bottom: 1px solid #e2e8f0;
+    --mdc-tab-indicator-active-indicator-color: #d99414;
+    background-color: #ffffff;
+  }
+
+  .mat-mdc-tab {
+    letter-spacing: normal;
+    min-width: 0 !important;
+    padding: 0 1.125rem !important;
+
+    .mdc-tab__text-label {
+      color: #475569;
+      font-weight: 500;
+      transition: color 0.15s ease;
+    }
+
+    &:hover .mdc-tab__text-label {
+      color: #0f172a;
+    }
+
+    &.mdc-tab--active .mdc-tab__text-label {
+      color: #d99414 !important;
+      font-weight: 600;
+    }
+
+    .mdc-tab-indicator__content--underline {
+      border-color: #d99414 !important;
+      border-top-width: 2.5px !important;
+    }
+  }
+
+  .mat-mdc-tab-header-pagination {
+    display: none !important;
+  }
+
+  .mat-mdc-tab-label-container {
+    overflow-x: auto !important;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  /* Eliminate internal vertical scrollbar so page scrolls naturally */
+  .mat-mdc-tab-body-wrapper {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  .mat-mdc-tab-body {
+    overflow: visible !important;
+    height: auto !important;
+
+    &.mat-mdc-tab-body-active {
+      overflow: visible !important;
+      overflow-x: visible !important;
+      overflow-y: visible !important;
+      height: auto !important;
+      position: static !important;
+    }
+  }
+
+  .mat-mdc-tab-body-content {
+    overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    height: auto !important;
+  }
+}
+
+

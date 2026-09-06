@@ -253,3 +253,124 @@ export interface StateAttorneyDashboardData {
   recent_activities: RecentActivityMetric[];
   performance_metrics: DashboardPerformanceMetrics;
 }
+
+// ── Weekly Work Schedules & Availability Interfaces (IMP-SA-02) ──
+
+export type ScheduleActivityType =
+  | 'court'
+  | 'in_office'
+  | 'advisory'
+  | 'meeting'
+  | 'field_work'
+  | 'training'
+  | 'leave';
+
+export type SchedulePeriod = 'morning' | 'afternoon' | 'extended' | 'all_day';
+
+export interface ScheduleSlot {
+  id?: string;
+  period: SchedulePeriod;
+  activity_type: ScheduleActivityType;
+  title: string;
+  location?: string;
+  hours: number;
+  description?: string;
+  assignment_id?: string;
+  case_number?: string;
+}
+
+export interface DailySchedule {
+  date: string;
+  day_name?: string;
+  status?: 'available' | 'in_court' | 'meeting' | 'field_work' | 'on_leave' | 'office';
+  slots: ScheduleSlot[];
+  leave_info?: {
+    leave_type: string;
+    total_days: number;
+  } | null;
+}
+
+export interface ScheduleHoursSummary {
+  total_hours: number;
+  court_hours: number;
+  office_hours: number;
+  advisory_hours: number;
+  meeting_hours: number;
+  other_hours: number;
+}
+
+export interface WeeklyScheduleData {
+  notes?: string;
+  status: 'draft' | 'submitted';
+  days: Record<string, DailySchedule>;
+  summary?: ScheduleHoursSummary;
+  copied_from_week?: string;
+}
+
+export interface WorkSchedule {
+  id: string;
+  attorney_id: string;
+  week_start_date: string;
+  schedule_data: WeeklyScheduleData;
+  submitted_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface AttorneyScheduleResponse {
+  attorney_id: string;
+  attorney_name: string;
+  week_start_date: string;
+  week_end_date: string;
+  week_days: Record<string, { day_name: string; date: string; is_today: boolean }>;
+  schedule: WorkSchedule | null;
+  overlapping_leaves: any[];
+  active_assignments: any[];
+}
+
+export interface AttorneyAvailabilityInfo {
+  attorney_id: string;
+  attorney_name: string;
+  current_status: 'available' | 'in_court' | 'meeting' | 'field_work' | 'on_leave';
+  current_activity: string;
+  location?: string;
+  active_leave?: {
+    id: string;
+    leave_type: string;
+    start_date: string;
+    end_date: string;
+    total_days: number;
+    reason?: string;
+  } | null;
+  weekly_summary?: ScheduleHoursSummary | null;
+  is_submitted: boolean;
+}
+
+export interface RosterAttorneyDay {
+  date: string;
+  status: 'available' | 'in_court' | 'meeting' | 'field_work' | 'on_leave' | 'office';
+  label: string;
+  location?: string | null;
+}
+
+export interface RosterAttorneyItem {
+  id: string;
+  full_name: string;
+  grade: string;
+  email?: string;
+  days: Record<string, RosterAttorneyDay>;
+  summary: {
+    court_hours: number;
+    office_hours: number;
+    total_hours: number;
+  };
+  is_submitted: boolean;
+  schedule_id?: string | null;
+}
+
+export interface RosterAvailabilityResponse {
+  week_start_date: string;
+  week_end_date: string;
+  roster: RosterAttorneyItem[];
+}
+

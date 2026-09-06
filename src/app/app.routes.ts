@@ -165,6 +165,13 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'schedules',
+            loadComponent: () =>
+              import('./modules/state-attorneys/attorney-schedule-roster/attorney-schedule-roster.component').then(
+                (m) => m.AttorneyScheduleRosterComponent
+              ),
+          },
+          {
             path: 'create',
             loadComponent: () =>
               import('./modules/state-attorneys/attorney-form/attorney-form.component').then(

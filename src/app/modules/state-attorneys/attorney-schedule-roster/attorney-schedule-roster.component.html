@@ -1,0 +1,238 @@
+<div class="space-y-6">
+  <!-- Page Header -->
+  <app-header
+    title="State Attorneys Work Schedules & Availability"
+    subtitle="Team-wide weekly court appearances, chamber availability, and official leave tracking for case allocations">
+    <div class="flex items-center gap-2.5">
+      <app-button
+        variant="outline"
+        [icon]="dashboardIcon"
+        routerLink="/state-attorneys/dashboard">
+        Executive Dashboard
+      </app-button>
+      <app-button
+        variant="primary"
+        [icon]="usersIcon"
+        routerLink="/state-attorneys">
+        Attorneys Directory
+      </app-button>
+    </div>
+  </app-header>
+
+  <!-- Summary KPI Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+      <div class="p-3 bg-blue-50 rounded-lg text-blue-600 border border-blue-100 shrink-0">
+        <svg lucideUsers class="size-6"></svg>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Attorneys</p>
+        <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ totalAttorneys() }}</h4>
+        <p class="text-[11px] text-slate-500 mt-0.5">Total Roster Count</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+      <div class="p-3 bg-emerald-50 rounded-lg text-emerald-600 border border-emerald-100 shrink-0">
+        <svg lucideUserCheck class="size-6"></svg>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Available in Chambers</p>
+        <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ availableCount() }}</h4>
+        <p class="text-[11px] text-slate-500 mt-0.5">Ready for Allocation</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+      <div class="p-3 bg-amber-50 rounded-lg text-[#d99414] border border-amber-100 shrink-0">
+        <svg lucideLandmark class="size-6"></svg>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">In Court Hearings</p>
+        <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ courtCount() }}</h4>
+        <p class="text-[11px] text-slate-500 mt-0.5">Trials & Appeals This Week</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+      <div class="p-3 bg-rose-50 rounded-lg text-rose-600 border border-rose-100 shrink-0">
+        <svg lucideBriefcase class="size-6"></svg>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">On Official Leave</p>
+        <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ onLeaveCount() }}</h4>
+        <p class="text-[11px] text-slate-500 mt-0.5">HR Approved Absences</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Week Navigation & Filter Toolbar Card -->
+  <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <!-- Week Navigation Controls -->
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        (click)="navigateWeek(-1)"
+        title="Previous Week"
+        aria-label="Previous Week"
+        class="size-9 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center justify-center cursor-pointer transition-colors">
+        <svg lucideChevronLeft class="size-5"></svg>
+      </button>
+
+      <button
+        type="button"
+        (click)="goToCurrentWeek()"
+        class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 cursor-pointer transition-colors">
+        Current Week
+      </button>
+
+      <button
+        type="button"
+        (click)="navigateWeek(1)"
+        title="Next Week"
+        aria-label="Next Week"
+        class="size-9 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center justify-center cursor-pointer transition-colors">
+        <svg lucideChevronRight class="size-5"></svg>
+      </button>
+
+      <div class="ml-2 flex items-center gap-2">
+        <svg lucideCalendarDays class="size-5 text-[#d99414]"></svg>
+        <span class="text-sm font-bold text-slate-900">{{ getWeekRangeLabel() }}</span>
+      </div>
+    </div>
+
+    <!-- Search Box -->
+    <div class="flex items-center gap-3 w-full md:w-80">
+      <div class="relative w-full">
+        <svg lucideSearch class="size-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></svg>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearch($event)"
+          placeholder="Filter attorney or grade..."
+          class="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#d99414]/30 focus:border-[#d99414] transition-all bg-white"
+        />
+      </div>
+      <button
+        type="button"
+        (click)="loadRoster()"
+        title="Refresh roster"
+        aria-label="Refresh roster"
+        class="size-9 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center justify-center cursor-pointer transition-colors shrink-0">
+        <svg lucideRefreshCw class="size-4" [class.animate-spin]="loading()"></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Roster Matrix Table -->
+  <card>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs border-collapse">
+        <thead>
+          <tr class="border-b border-slate-200 bg-slate-50/80 text-slate-600 font-semibold uppercase tracking-wider">
+            <th class="py-3 px-4 min-w-[180px]">State Attorney</th>
+            @for (d of daysOfWeek; track d.key) {
+              <th class="py-3 px-3 min-w-[150px]">
+                <div class="flex items-center justify-between">
+                  <span>{{ d.name }}</span>
+                  <span class="text-[10px] font-normal text-slate-500 normal-case">{{ getDayDateFormatted(d.key) }}</span>
+                </div>
+              </th>
+            }
+            <th class="py-3 px-3 text-center min-w-[100px]">Weekly Hours</th>
+            <th class="py-3 px-4 text-right min-w-[90px]">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @if (loading()) {
+            <tr>
+              <td colspan="8" class="py-12 text-center text-slate-500">
+                <div class="flex items-center justify-center gap-2">
+                  <svg lucideRefreshCw class="size-5 animate-spin text-[#d99414]"></svg>
+                  <span>Loading weekly availability roster...</span>
+                </div>
+              </td>
+            </tr>
+          } @else if (filteredRoster().length === 0) {
+            <tr>
+              <td colspan="8" class="py-12 text-center text-slate-500">
+                <svg lucideCalendar class="size-10 mx-auto mb-2 text-slate-400"></svg>
+                <p class="font-medium text-slate-700">No State Attorneys found matching your search</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Try clearing filters or checking another week</p>
+              </td>
+            </tr>
+          } @else {
+            @for (attorney of filteredRoster(); track attorney.id) {
+              <tr class="hover:bg-slate-50/60 transition-colors">
+                <!-- Attorney Name & Grade -->
+                <td class="py-3.5 px-4">
+                  <a
+                    [routerLink]="['/state-attorneys/view', attorney.id]"
+                    class="font-semibold text-slate-900 hover:text-blue-600 transition-colors block truncate max-w-[180px]">
+                    {{ attorney.full_name }}
+                  </a>
+                  <p class="text-[11px] text-slate-500 truncate max-w-[180px]">{{ attorney.grade }}</p>
+                  @if (attorney.is_submitted) {
+                    <span class="inline-block mt-0.5 px-1.5 py-0.2 rounded text-[9px] font-semibold bg-emerald-100 text-emerald-800">
+                      Submitted
+                    </span>
+                  }
+                </td>
+
+                <!-- Mon to Fri Columns -->
+                @for (d of daysOfWeek; track d.key) {
+                  <td class="py-3.5 px-3">
+                    @if (attorney.days?.[d.key]; as dayInfo) {
+                      <div class="space-y-1">
+                        <app-badge
+                          [variant]="getDayStatusBadgeVariant(dayInfo.status)"
+                          [pill]="false"
+                          [text]="getDayStatusLabel(dayInfo.status)">
+                        </app-badge>
+                        @if (dayInfo.label && dayInfo.status !== 'available') {
+                          <p class="text-[11px] text-slate-700 font-medium truncate max-w-[140px]" [title]="dayInfo.label">
+                            {{ dayInfo.label }}
+                          </p>
+                        }
+                        @if (dayInfo.location) {
+                          <p class="text-[10px] text-slate-500 truncate max-w-[140px]" [title]="dayInfo.location">
+                            {{ dayInfo.location }}
+                          </p>
+                        }
+                      </div>
+                    } @else {
+                      <span class="text-slate-400 text-xs">Available</span>
+                    }
+                  </td>
+                }
+
+                <!-- Weekly Hours -->
+                <td class="py-3.5 px-3 text-center">
+                  <div class="space-y-0.5">
+                    <span class="font-bold text-slate-900">{{ attorney.summary?.total_hours || 0 }}h</span>
+                    @if ((attorney.summary?.court_hours || 0) > 0) {
+                      <p class="text-[10px] text-amber-700 font-semibold">
+                        {{ attorney.summary.court_hours }}h Court
+                      </p>
+                    }
+                  </div>
+                </td>
+
+                <!-- Actions -->
+                <td class="py-3.5 px-4 text-right">
+                  <app-button
+                    size="sm"
+                    variant="outline"
+                    [icon]="eyeIcon"
+                    [routerLink]="['/state-attorneys/view', attorney.id]">
+                    Schedule
+                  </app-button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </card>
+</div>

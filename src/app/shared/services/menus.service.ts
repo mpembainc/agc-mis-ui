@@ -28,6 +28,11 @@ export class MenusService {
             exact: true
           },
           {
+            label: 'Weekly Work Schedules',
+            route: '/state-attorneys/schedules',
+            exact: true
+          },
+          {
             label: 'Add New Attorney',
             route: '/state-attorneys/create',
             exact: true

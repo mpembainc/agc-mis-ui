@@ -122,6 +122,14 @@
               [variant]="attorney.is_active ? 'success' : 'danger'"
               [text]="attorney.is_active ? 'Account Active' : 'Account Disabled'">
             </app-badge>
+            <!-- Real-time Availability Badge -->
+            @if (availabilityInfo()) {
+              <app-badge
+                [variant]="getAvailabilityBadgeVariant(availabilityInfo()?.current_status)"
+                [pill]="false"
+                [text]="getAvailabilityBadgeText(availabilityInfo())">
+              </app-badge>
+            }
           </div>
           <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-0.5">
             <p class="text-slate-700 font-semibold  uppercase text-sm flex items-center gap-1.5">
@@ -137,95 +145,23 @@
         </div>
       </div>
 
-      <!-- Tab Navigation -->
-      <div class="border-b border-slate-200">
-        <nav class="flex space-x-8">
-          <button (click)="activeTab = 'profile'"
-            class="pb-3.5 text-sm font-semibold border-b-2 px-1 transition-all cursor-pointer flex items-center gap-2"
-            [class.border-[#d99414]]="activeTab === 'profile'"
-            [class.text-[#d99414]]="activeTab === 'profile'"
-            [class.border-transparent]="activeTab !== 'profile'"
-            [class.text-slate-600]="activeTab !== 'profile'"
-            [class.hover:text-slate-900]="activeTab !== 'profile'"
-            [class.hover:border-slate-300]="activeTab !== 'profile'"
-          >
-            <svg lucideUser class="size-4.5 shrink-0" [class.text-[#d99414]]="activeTab === 'profile'" [class.text-slate-400]="activeTab !== 'profile'"></svg>
-            Personal & Career Info
-          </button>
-          <button (click)="activeTab = 'assignments'"
-            class="pb-3.5 text-sm font-semibold border-b-2 px-1 transition-all cursor-pointer flex items-center gap-2"
-            [class.border-[#d99414]]="activeTab === 'assignments'"
-            [class.text-[#d99414]]="activeTab === 'assignments'"
-            [class.border-transparent]="activeTab !== 'assignments'"
-            [class.text-slate-600]="activeTab !== 'assignments'"
-            [class.hover:text-slate-900]="activeTab !== 'assignments'"
-            [class.hover:border-slate-300]="activeTab !== 'assignments'"
-          >
-            <svg lucideBriefcase class="size-4.5 shrink-0" [class.text-[#d99414]]="activeTab === 'assignments'" [class.text-slate-400]="activeTab !== 'assignments'"></svg>
-            Work Assignments
-            <app-badge
-              [variant]="activeTab === 'assignments' ? 'warning' : 'secondary'"
-              [pill]="false"
-              [text]="attorney.assignments?.length || 0">
-            </app-badge>
-          </button>
-          <button (click)="activeTab = 'accomplishments'"
-            class="pb-3.5 text-sm font-semibold border-b-2 px-1 transition-all cursor-pointer flex items-center gap-2"
-            [class.border-[#d99414]]="activeTab === 'accomplishments'"
-            [class.text-[#d99414]]="activeTab === 'accomplishments'"
-            [class.border-transparent]="activeTab !== 'accomplishments'"
-            [class.text-slate-600]="activeTab !== 'accomplishments'"
-            [class.hover:text-slate-900]="activeTab !== 'accomplishments'"
-            [class.hover:border-slate-300]="activeTab !== 'accomplishments'"
-          >
-            <svg lucideAward class="size-4.5 shrink-0" [class.text-[#d99414]]="activeTab === 'accomplishments'" [class.text-slate-400]="activeTab !== 'accomplishments'"></svg>
-            Accomplishments & Outputs
-            <app-badge
-              [variant]="activeTab === 'accomplishments' ? 'warning' : 'secondary'"
-              [pill]="false"
-              [text]="accomplishments().length">
-            </app-badge>
-          </button>
-          <button (click)="activeTab = 'qualifications'"
-            class="pb-3.5 text-sm font-semibold border-b-2 px-1 transition-all cursor-pointer flex items-center gap-2"
-            [class.border-[#d99414]]="activeTab === 'qualifications'"
-            [class.text-[#d99414]]="activeTab === 'qualifications'"
-            [class.border-transparent]="activeTab !== 'qualifications'"
-            [class.text-slate-600]="activeTab !== 'qualifications'"
-            [class.hover:text-slate-900]="activeTab !== 'qualifications'"
-            [class.hover:border-slate-300]="activeTab !== 'qualifications'"
-          >
-            <svg lucideGraduationCap class="size-4.5 shrink-0" [class.text-[#d99414]]="activeTab === 'qualifications'" [class.text-slate-400]="activeTab !== 'qualifications'"></svg>
-            Qualifications & Credentials
-            <app-badge
-              [variant]="activeTab === 'qualifications' ? 'warning' : 'secondary'"
-              [pill]="false"
-              [text]="educationList().length + certificationsList().length">
-            </app-badge>
-          </button>
-          <button (click)="activeTab = 'dossier'"
-            class="pb-3.5 text-sm font-semibold border-b-2 px-1 transition-all cursor-pointer flex items-center gap-2"
-            [class.border-[#d99414]]="activeTab === 'dossier'"
-            [class.text-[#d99414]]="activeTab === 'dossier'"
-            [class.border-transparent]="activeTab !== 'dossier'"
-            [class.text-slate-600]="activeTab !== 'dossier'"
-            [class.hover:text-slate-900]="activeTab !== 'dossier'"
-            [class.hover:border-slate-300]="activeTab !== 'dossier'"
-          >
-            <svg lucideFileText class="size-4.5 shrink-0" [class.text-[#d99414]]="activeTab === 'dossier'" [class.text-slate-400]="activeTab !== 'dossier'"></svg>
-            Digital Dossier
-            <app-badge
-              [variant]="activeTab === 'dossier' ? 'warning' : 'secondary'"
-              [pill]="false"
-              [text]="dossierDocuments().length">
-            </app-badge>
-          </button>
-        </nav>
-      </div>
+      <!-- Tab Navigation & Content Groups -->
+      <mat-tab-group
+        [(selectedIndex)]="selectedTabIndex"
+        (selectedIndexChange)="onTabChange($event)"
+        [dynamicHeight]="true"
+        class="state-attorney-tabs"
+        animationDuration="0ms">
 
-      <!-- Tab Content: Profile -->
-      @if (activeTab === 'profile') {
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <!-- Tab 1: Personal & Career Info -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="flex items-center gap-2 py-1">
+              <svg lucideUser class="size-4.5 shrink-0"></svg>
+              <span>Personal & Career Info</span>
+            </div>
+          </ng-template>
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start mt-6">
           <!-- Info Details Card (2/3 width) -->
           <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex items-center justify-between">
@@ -299,13 +235,24 @@
                 [value]="getMdaName(attorney.mda_id)">
               </detail-item>
             </div>
+            </div>
           </div>
-        </div>
-      }
+        </mat-tab>
 
-      <!-- Tab Content: Assignments -->
-      @if (activeTab === 'assignments') {
-        <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+        <!-- Tab 2: Work Assignments -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="flex items-center gap-2 py-1">
+              <svg lucideBriefcase class="size-4.5 shrink-0"></svg>
+              <span>Work Assignments</span>
+              <app-badge
+                [variant]="selectedTabIndex === 1 ? 'warning' : 'secondary'"
+                [pill]="false"
+                [text]="attorney.assignments?.length || 0">
+              </app-badge>
+            </div>
+          </ng-template>
+          <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden mt-6">
           <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div class="flex items-center gap-2">
               <svg lucideFolderKanban class="size-4.5 text-slate-500 shrink-0"></svg>
@@ -381,13 +328,24 @@
                 </app-button>
               </div>
             }
+            </div>
           </div>
-        </div>
-      }
+        </mat-tab>
 
-      <!-- Tab Content: Accomplishments & Outputs -->
-      @if (activeTab === 'accomplishments') {
-        <div class="space-y-6">
+        <!-- Tab 3: Accomplishments & Outputs -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="flex items-center gap-2 py-1">
+              <svg lucideAward class="size-4.5 shrink-0"></svg>
+              <span>Accomplishments & Outputs</span>
+              <app-badge
+                [variant]="selectedTabIndex === 2 ? 'warning' : 'secondary'"
+                [pill]="false"
+                [text]="accomplishments().length">
+              </app-badge>
+            </div>
+          </ng-template>
+          <div class="space-y-6 mt-6">
           <!-- Summary Metrics Cards -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
@@ -509,13 +467,24 @@
                 </div>
               }
             </div>
+            </div>
           </div>
-        </div>
-      }
+        </mat-tab>
 
-      <!-- Tab Content: Qualifications & Credentials (IMP-SA-05) -->
-      @if (activeTab === 'qualifications') {
-        <div class="space-y-6">
+        <!-- Tab 4: Qualifications & Credentials -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="flex items-center gap-2 py-1">
+              <svg lucideGraduationCap class="size-4.5 shrink-0"></svg>
+              <span>Qualifications & Credentials</span>
+              <app-badge
+                [variant]="selectedTabIndex === 3 ? 'warning' : 'secondary'"
+                [pill]="false"
+                [text]="educationList().length + certificationsList().length">
+              </app-badge>
+            </div>
+          </ng-template>
+          <div class="space-y-6 mt-6">
           <!-- Summary Metrics Cards -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
@@ -754,13 +723,24 @@
                 </div>
               }
             </div>
+            </div>
           </div>
-        </div>
-      }
+        </mat-tab>
 
-      <!-- Tab Content: Digital Dossier (IMP-SA-05) -->
-      @if (activeTab === 'dossier') {
-        <div class="space-y-6">
+        <!-- Tab 5: Digital Dossier -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="flex items-center gap-2 py-1">
+              <svg lucideFileText class="size-4.5 shrink-0"></svg>
+              <span>Digital Dossier</span>
+              <app-badge
+                [variant]="selectedTabIndex === 4 ? 'warning' : 'secondary'"
+                [pill]="false"
+                [text]="dossierDocuments().length">
+              </app-badge>
+            </div>
+          </ng-template>
+          <div class="space-y-6 mt-6">
           <!-- Summary Metrics Cards -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
@@ -840,7 +820,7 @@
                     <span class="text-xs font-semibold text-slate-800 hover:text-blue-600 transition-colors cursor-pointer" (click)="onViewDossierDoc(row)">
                       {{ row.original_name }}
                     </span>
-                    @if (attorney?.cv_document_id === row.id) {
+                    @if (attorney.cv_document_id === row.id) {
                       <app-badge variant="purple" [pill]="false" text="Official CV"></app-badge>
                     }
                   </div>
@@ -887,9 +867,308 @@
                 </div>
               }
             </div>
+            </div>
           </div>
-        </div>
-      }
+        </mat-tab>
+
+        <!-- Tab 6: Weekly Work Schedule & Availability -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <div class="flex items-center gap-2 py-1">
+              <svg lucideCalendar class="size-4.5 shrink-0"></svg>
+              <span>Work Schedule & Availability</span>
+              @if (currentSchedule()?.submitted_at) {
+                <app-badge variant="success" [pill]="false" text="Submitted"></app-badge>
+              } @else if (currentSchedule()) {
+                <app-badge variant="warning" [pill]="false" text="Draft"></app-badge>
+              }
+            </div>
+          </ng-template>
+          <div class="space-y-6 mt-6">
+          <!-- Top Stats Strip -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+              <div class="p-3 bg-amber-50 rounded-lg text-[#d99414] border border-amber-100 shrink-0">
+                <svg lucideClock class="size-6"></svg>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Scheduled</p>
+                <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ currentSchedule()?.schedule_data?.summary?.total_hours || 0 }} hrs</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5">Planned Workload for Week</p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+              <div class="p-3 bg-amber-500/10 rounded-lg text-amber-700 border border-amber-200 shrink-0">
+                <svg lucideLandmark class="size-6"></svg>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Court Hearings</p>
+                <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ currentSchedule()?.schedule_data?.summary?.court_hours || 0 }} hrs</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5">Litigation & Appeals</p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+              <div class="p-3 bg-blue-50 rounded-lg text-blue-600 border border-blue-100 shrink-0">
+                <svg lucideFileText class="size-6"></svg>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Office & Drafting</p>
+                <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ currentSchedule()?.schedule_data?.summary?.office_hours || 0 }} hrs</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5">Vetting & Research</p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+              <div class="p-3 bg-purple-50 rounded-lg text-purple-600 border border-purple-100 shrink-0">
+                <svg lucideBriefcase class="size-6"></svg>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Advisory & Meetings</p>
+                <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ (currentSchedule()?.schedule_data?.summary?.advisory_hours || 0) + (currentSchedule()?.schedule_data?.summary?.meeting_hours || 0) }} hrs</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5">Consultations & Taskforces</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Overlapping Leave Warning Banner -->
+          @if (scheduleResponse()?.overlapping_leaves && (scheduleResponse()?.overlapping_leaves)!.length > 0) {
+            <div class="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3.5">
+              <div class="p-1.5 bg-amber-100 rounded-lg text-amber-800 shrink-0">
+                <svg lucideBriefcase class="size-5"></svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-semibold text-amber-900">Official Leave Notice During This Week</h4>
+                <p class="text-xs text-amber-800 mt-0.5">
+                  State Attorney has active or pending official leave scheduled during this week:
+                </p>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  @for (l of scheduleResponse()?.overlapping_leaves; track l.id) {
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-100 text-amber-900 text-xs font-medium border border-amber-300">
+                      <strong>{{ l.leave_type | uppercase | removeUnderscore }}</strong>:
+                      {{ getFormattedDob(l.start_date) }} – {{ getFormattedDob(l.end_date) }} ({{ l.total_days }} days)
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Schedule Week Toolbar Card -->
+          <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <!-- Week Navigation Controls -->
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                (click)="navigateWeek(-1)"
+                title="Previous Week"
+                aria-label="Previous Week"
+                class="size-9 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center justify-center cursor-pointer transition-colors">
+                <svg lucideChevronLeft class="size-5"></svg>
+              </button>
+
+              <button
+                type="button"
+                (click)="goToCurrentWeek()"
+                class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 cursor-pointer transition-colors">
+                Current Week
+              </button>
+
+              <button
+                type="button"
+                (click)="navigateWeek(1)"
+                title="Next Week"
+                aria-label="Next Week"
+                class="size-9 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center justify-center cursor-pointer transition-colors">
+                <svg lucideChevronRight class="size-5"></svg>
+              </button>
+
+              <div class="ml-2 flex items-center gap-2">
+                <svg lucideCalendarDays class="size-5 text-[#d99414]"></svg>
+                <span class="text-sm font-bold text-slate-900">{{ getWeekRangeLabel() }}</span>
+              </div>
+            </div>
+
+            <!-- Schedule Status & Actions -->
+            <div class="flex flex-wrap items-center gap-2.5">
+              @if (currentSchedule()?.submitted_at) {
+                <app-badge variant="success" [pill]="false" text="Schedule Submitted to Directorate"></app-badge>
+              } @else if (currentSchedule()) {
+                <app-badge variant="warning" [pill]="false" text="Draft Schedule"></app-badge>
+              } @else {
+                <app-badge variant="secondary" [pill]="false" text="No Schedule Planned"></app-badge>
+              }
+
+              <app-button
+                variant="outline"
+                [icon]="copyIcon"
+                [disabled]="copyingSchedule() || isScheduleSubmitted()"
+                (btnClick)="onCopyPreviousWeek()">
+                Copy Previous Week
+              </app-button>
+
+              @if (currentSchedule()) {
+                <app-button
+                  variant="outline"
+                  [icon]="trashIcon"
+                  [disabled]="isScheduleSubmitted()"
+                  (btnClick)="onClearWeeklySchedule()">
+                  Clear Week
+                </app-button>
+              }
+
+              <app-button
+                variant="primary"
+                [icon]="sendIcon"
+                [disabled]="submittingSchedule() || isScheduleSubmitted()"
+                (btnClick)="onSubmitWeeklySchedule()">
+                {{ isScheduleSubmitted() ? 'Submitted' : 'Submit Schedule' }}
+              </app-button>
+            </div>
+          </div>
+
+          <!-- 5-Day Schedule Matrix Grid (Monday to Friday) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-start">
+            @for (dayKey of ['monday', 'tuesday', 'wednesday', 'thursday', 'friday']; track dayKey) {
+              <div
+                class="bg-white rounded-xl border transition-all shadow-xs flex flex-col min-h-[380px]"
+                [class.border-[#d99414]]="isDayToday(dayKey)"
+                [class.ring-2]="isDayToday(dayKey)"
+                [class.ring-[#d99414]/20]="isDayToday(dayKey)"
+                [class.border-slate-200]="!isDayToday(dayKey)">
+
+                <!-- Day Column Header -->
+                <div
+                  class="px-3.5 py-3 border-b rounded-t-xl flex items-center justify-between gap-2"
+                  [class.bg-amber-50/70]="isDayToday(dayKey)"
+                  [class.border-amber-200]="isDayToday(dayKey)"
+                  [class.bg-slate-50/80]="!isDayToday(dayKey)"
+                  [class.border-slate-200]="!isDayToday(dayKey)">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                      <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                        {{ dayKey | uppercase }}
+                      </h4>
+                      @if (isDayToday(dayKey)) {
+                        <span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-[#d99414] text-white">TODAY</span>
+                      }
+                    </div>
+                    <p class="text-[11px] text-slate-500 font-medium mt-0.5">
+                      {{ getFormattedDob(getDayDate(dayKey)) }}
+                    </p>
+                  </div>
+
+                  <!-- Quick Add Slot Button -->
+                  <button
+                    type="button"
+                    (click)="openAddSlotDialog(dayKey)"
+                    title="Add Activity Slot"
+                    aria-label="Add Activity Slot"
+                    class="size-7 rounded-lg border border-slate-200 hover:bg-white hover:border-[#d99414] text-slate-600 hover:text-[#d99414] flex items-center justify-center cursor-pointer transition-colors shadow-2xs">
+                    <svg lucidePlus class="size-3.5"></svg>
+                  </button>
+                </div>
+
+                <!-- Day Content Body -->
+                <div class="p-3 space-y-3 flex-1 flex flex-col justify-between">
+                  <!-- Check if on leave this day -->
+                  @if (getDayLeave(dayKey); as leave) {
+                    <div class="p-2.5 bg-amber-100/70 border border-amber-300 rounded-lg text-amber-950">
+                      <p class="text-[11px] font-bold uppercase tracking-wide flex items-center gap-1">
+                        <svg lucideBriefcase class="size-3.5 text-amber-800 shrink-0"></svg>
+                        Official Leave
+                      </p>
+                      <p class="text-xs font-semibold mt-0.5 capitalize">{{ leave.leave_type | removeUnderscore }}</p>
+                      <p class="text-[10px] text-amber-800 mt-0.5">HR Approved</p>
+                    </div>
+                  }
+
+                  <!-- Activity Slots List -->
+                  <div class="space-y-2.5">
+                    @if (getDaySlots(dayKey).length > 0) {
+                      @for (slot of getDaySlots(dayKey); track $index) {
+                        <div class="p-3 rounded-lg border border-slate-200 bg-slate-50/50 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-2xs group relative">
+                          <!-- Period & Type Badge -->
+                          <div class="flex items-center justify-between gap-1 mb-1.5">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                              {{ slot.period === 'all_day' ? 'Full Day' : (slot.period | uppercase) }}
+                            </span>
+                            <div class="flex items-center gap-1.5">
+                              <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded-md bg-slate-200 text-slate-700">
+                                {{ slot.hours }}h
+                              </span>
+                              <app-badge
+                                [variant]="getActivityBadgeVariant(slot.activity_type)"
+                                [pill]="false"
+                                [text]="formatActivityType(slot.activity_type)">
+                              </app-badge>
+                            </div>
+                          </div>
+
+                          <!-- Slot Title -->
+                          <h5 class="text-xs font-semibold text-slate-900 leading-snug break-words">
+                            {{ slot.title }}
+                          </h5>
+
+                          <!-- Location / Court Room -->
+                          @if (slot.location) {
+                            <p class="text-[11px] text-slate-600 flex items-center gap-1 mt-1 truncate" [title]="slot.location">
+                              <svg lucideMapPin class="size-3 text-slate-400 shrink-0"></svg>
+                              {{ slot.location }}
+                            </p>
+                          }
+
+                          <!-- Description Note -->
+                          @if (slot.description) {
+                            <p class="text-[11px] text-slate-500 mt-1 line-clamp-2">
+                              {{ slot.description }}
+                            </p>
+                          }
+
+                          <!-- Slot Hover Actions -->
+                          <div class="mt-2.5 pt-2 border-t border-slate-200/80 flex items-center justify-end gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              (click)="openEditSlotDialog(dayKey, $index)"
+                              title="Edit slot"
+                              class="p-1 rounded text-slate-500 hover:text-slate-900 hover:bg-slate-200/60 cursor-pointer transition-colors">
+                              <svg lucidePencil class="size-3.5"></svg>
+                            </button>
+                            <button
+                              type="button"
+                              (click)="onDeleteSlot(dayKey, $index)"
+                              title="Delete slot"
+                              class="p-1 rounded text-slate-500 hover:text-rose-600 hover:bg-rose-50 cursor-pointer transition-colors">
+                              <svg lucideTrash2 class="size-3.5"></svg>
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    } @else if (!getDayLeave(dayKey)) {
+                      <div class="py-8 px-2 text-center text-slate-400">
+                        <svg lucideCalendar class="size-7 mx-auto mb-1.5 opacity-40"></svg>
+                        <p class="text-xs font-medium text-slate-500">Available</p>
+                        <p class="text-[11px] text-slate-400">In Chambers</p>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Bottom Add Slot Trigger -->
+                  <button
+                    type="button"
+                    (click)="openAddSlotDialog(dayKey)"
+                    class="w-full py-1.5 px-2 rounded-lg border border-dashed border-slate-300 hover:border-[#d99414] hover:bg-[#d99414]/5 text-slate-500 hover:text-[#d99414] text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer transition-colors">
+                    <svg lucidePlus class="size-3.5"></svg>
+                    Add Activity
+                  </button>
+                </div>
+              </div>
+            }
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
     </div>
   }
 
@@ -1540,5 +1819,96 @@
         }
       </app-dialog-layout>
     </div>
+  </ng-template>
+
+  <!-- Add/Edit Schedule Activity Slot Dialog Template (IMP-SA-02) -->
+  <ng-template #slotDialog>
+    <form (ngSubmit)="saveSlot()" class="w-full">
+      <app-dialog-layout
+        [title]="editingSlotIndex() !== null ? 'Edit Scheduled Activity' : 'Plan Scheduled Activity'"
+        primaryButtonLabel="Save Activity"
+        cancelButtonLabel="Cancel"
+        [disablePrimaryButton]="savingSchedule()"
+        (onConfirmed)="saveSlot()"
+        (onCancelled)="closeSlotDialog()">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 py-1">
+          <!-- Day of Week -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Day of Week</mat-label>
+            <mat-select [(ngModel)]="slotForm.day_key" name="day_key" required>
+              <mat-option value="monday">Monday ({{ getFormattedDob(getDayDate('monday')) }})</mat-option>
+              <mat-option value="tuesday">Tuesday ({{ getFormattedDob(getDayDate('tuesday')) }})</mat-option>
+              <mat-option value="wednesday">Wednesday ({{ getFormattedDob(getDayDate('wednesday')) }})</mat-option>
+              <mat-option value="thursday">Thursday ({{ getFormattedDob(getDayDate('thursday')) }})</mat-option>
+              <mat-option value="friday">Friday ({{ getFormattedDob(getDayDate('friday')) }})</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Time Period -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Schedule Time Period</mat-label>
+            <mat-select [(ngModel)]="slotForm.period" name="period" required>
+              <mat-option value="morning">Morning (08:30 – 12:30)</mat-option>
+              <mat-option value="afternoon">Afternoon (13:30 – 16:30)</mat-option>
+              <mat-option value="extended">Extended / Evening</mat-option>
+              <mat-option value="all_day">Full Day</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Activity Type -->
+          <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+            <mat-label>Activity Type</mat-label>
+            <mat-select [(ngModel)]="slotForm.activity_type" name="activity_type" required>
+              <mat-option value="court">Court Hearing / Trial (Litigation)</mat-option>
+              <mat-option value="in_office">Office Work / Legal Drafting / Vetting</mat-option>
+              <mat-option value="advisory">Advisory Opinion / Ministry Consultation</mat-option>
+              <mat-option value="meeting">Internal Meeting / Committee Session</mat-option>
+              <mat-option value="field_work">Field Visit / Site Inspection</mat-option>
+              <mat-option value="training">CPD Workshop / Professional Training</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Link Active Case / Contract Assignment -->
+          @if (scheduleResponse()?.active_assignments && (scheduleResponse()?.active_assignments)!.length > 0) {
+            <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+              <mat-label>Link Allocated Matter / Assignment (Optional)</mat-label>
+              <mat-select [(ngModel)]="slotForm.assignment_id" (ngModelChange)="onAssignmentSelected($event)" name="assignment_id">
+                <mat-option [value]="''">-- General / Standalone Task --</mat-option>
+                @for (a of scheduleResponse()?.active_assignments; track a.id) {
+                  <mat-option [value]="a.id">
+                    {{ a.contract?.contract_title || a.entity_title || 'Assigned Matter' }} ({{ a.role }})
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+
+          <!-- Matter / Activity Title -->
+          <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+            <mat-label>Activity / Matter Title</mat-label>
+            <input matInput [(ngModel)]="slotForm.title" name="title" placeholder="e.g., High Court Civil Appeal Hearing or Concession Vetting" required />
+          </mat-form-field>
+
+          <!-- Location -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Location / Court Room</mat-label>
+            <input matInput [(ngModel)]="slotForm.location" name="location" placeholder="e.g., High Court Vuga, Room 2 or AGC Chambers" />
+          </mat-form-field>
+
+          <!-- Planned Hours -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Planned Hours</mat-label>
+            <input matInput type="number" step="0.5" min="0.5" max="12" [(ngModel)]="slotForm.hours" name="hours" required />
+          </mat-form-field>
+
+          <!-- Description / Objectives -->
+          <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+            <mat-label>Scope / Notes / Objectives (Optional)</mat-label>
+            <textarea matInput rows="2" [(ngModel)]="slotForm.description" name="description" placeholder="Provide any details, witness list, draft clauses to review..."></textarea>
+          </mat-form-field>
+        </div>
+      </app-dialog-layout>
+    </form>
   </ng-template>
 </div>
