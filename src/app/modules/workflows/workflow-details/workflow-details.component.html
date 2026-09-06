@@ -26,8 +26,8 @@
         
         <!-- Entity Details Card -->
         <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-          <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-            <h2 class="text-base font-semibold text-slate-800 flex items-center gap-2">
+          <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex justify-between items-center">
+            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
               Associated {{ capitalize(workflow.entity_type) }} Information
             </h2>
           </div>
@@ -35,74 +35,40 @@
           <div class="p-6">
             @if (workflow.entity_type === 'contract' && entity) {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                <div>
-                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Contract Number</label>
-                  <span class="text-sm font-semibold text-slate-800">{{ entity.contract_number }}</span>
-                </div>
-                <div>
-                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Parties</label>
-                  <span class="text-sm text-slate-800">{{ entity.partners || 'N/A' }}</span>
-                </div>
-                <div class="md:col-span-2">
-                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Subject Matter</label>
-                  <p class="text-sm text-slate-800 whitespace-pre-line mt-0.5">{{ entity.subject_matter || 'N/A' }}</p>
-                </div>
-                <div>
-                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Contract Value</label>
-                  <span class="text-sm font-semibold text-slate-800">{{ formatCurrency(entity.value) }}</span>
-                </div>
-                <div>
-                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Interest Flag</label>
-                  <span class="inline-flex items-center mt-1 px-2.5 py-0.5 rounded text-xs font-semibold"
+                <detail-item label="Contract Number" [value]="entity.contract_number"></detail-item>
+                <detail-item label="Parties" [value]="entity.partners || 'N/A'"></detail-item>
+                <detail-item label="Subject Matter" [value]="entity.subject_matter || 'N/A'" class="md:col-span-2" [multiline]="true"></detail-item>
+                <detail-item label="Contract Value" [value]="formatCurrency(entity.value)"></detail-item>
+                <detail-item label="Interest Flag">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium border"
                         [class.bg-red-50]="entity.strategic_interest_flag"
                         [class.text-red-700]="entity.strategic_interest_flag"
+                        [class.border-red-200]="entity.strategic_interest_flag"
                         [class.bg-slate-100]="!entity.strategic_interest_flag"
-                        [class.text-slate-600]="!entity.strategic_interest_flag">
+                        [class.text-slate-700]="!entity.strategic_interest_flag"
+                        [class.border-slate-200]="!entity.strategic_interest_flag">
                     {{ entity.strategic_interest_flag ? 'Strategic Interest' : 'Normal Priority' }}
                   </span>
-                </div>
-                <div>
-                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Duration</label>
-                  <span class="text-sm text-slate-800">{{ entity.duration_months }} Months</span>
-                </div>
-                <div>
-                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Submission Date</label>
-                  <span class="text-sm text-slate-800">{{ formatDate(entity.submission_date) }}</span>
-                </div>
+                </detail-item>
+                <detail-item label="Duration" [value]="entity.duration_months ? (entity.duration_months + ' Months') : 'N/A'"></detail-item>
+                <detail-item label="Submission Date" [value]="formatDate(entity.submission_date)"></detail-item>
               </div>
             } @else if (workflow.entity_type === 'leave_request' && entity) {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                <div>
-                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Requesting Attorney</label>
-                  <span class="text-sm font-semibold text-slate-800">{{ entity.attorney?.full_name || 'N/A' }}</span>
-                </div>
-                <div>
-                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Leave Type</label>
-                  <span class="text-sm text-slate-800 capitalize">{{ entity.leave_type }}</span>
-                </div>
-                <div>
-                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Duration Period</label>
-                  <span class="text-sm text-slate-800">
-                    {{ formatDate(entity.start_date) }} to {{ formatDate(entity.end_date) }}
-                  </span>
-                </div>
-                <div>
-                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Working Days</label>
-                  <span class="text-sm font-semibold text-slate-800">{{ entity.total_days || 'N/A' }} Days</span>
-                </div>
-                <div class="md:col-span-2">
-                  <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Reason / Description</label>
-                  <p class="text-sm text-slate-800 whitespace-pre-line mt-0.5">{{ entity.reason || 'No reason specified' }}</p>
-                </div>
+                <detail-item label="Requesting Attorney" [value]="entity.attorney?.full_name || 'N/A'"></detail-item>
+                <detail-item label="Leave Type" [value]="capitalize(entity.leave_type)"></detail-item>
+                <detail-item label="Duration Period" [value]="formatDate(entity.start_date) + ' to ' + formatDate(entity.end_date)"></detail-item>
+                <detail-item label="Total Working Days" [value]="(entity.total_days || 'N/A') + ' Days'"></detail-item>
+                <detail-item label="Reason / Description" [value]="entity.reason || 'No reason specified'" class="md:col-span-2" [multiline]="true"></detail-item>
                 @if (entity.approver_remarks) {
-                  <div class="md:col-span-2 p-3 bg-amber-50 rounded border border-amber-100">
-                    <label class="text-[11px] font-bold text-amber-800 uppercase tracking-wider block">Approver's Remarks</label>
-                    <p class="text-sm text-amber-900 mt-0.5">{{ entity.approver_remarks }}</p>
+                  <div class="md:col-span-2 p-3.5 bg-amber-50 rounded-lg border border-amber-200">
+                    <label class="text-[11px] font-bold text-amber-900 uppercase tracking-wider block mb-1">Approver's Remarks</label>
+                    <p class="text-sm font-medium text-amber-950 leading-relaxed">{{ entity.approver_remarks }}</p>
                   </div>
                 }
               </div>
             } @else {
-              <div class="flex justify-center py-6 text-slate-400 text-sm italic">
+              <div class="flex justify-center py-6 text-slate-500 text-sm font-medium italic">
                 No detailed metadata loaded for this entity.
               </div>
             }

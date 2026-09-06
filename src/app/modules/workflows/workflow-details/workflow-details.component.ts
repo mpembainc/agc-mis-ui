@@ -14,6 +14,7 @@ import { UsersService } from '@modules/administration/services/users.service';
 import { SwalService } from '@shared/services/swal.service';
 import { catchError, forkJoin, of } from 'rxjs';
 import { HeaderComponent } from '@shared/components/header/header.component';
+import { DetailItemComponent } from '@shared/components/detail-item/detail-item.component';
 
 interface ExtendedTask {
   id: string;
@@ -61,6 +62,7 @@ const LEAVE_TRANSITIONS: Record<string, string[]> = {
     MatFormFieldModule,
     MatInputModule,
     HeaderComponent,
+    DetailItemComponent,
   ],
   templateUrl: './workflow-details.component.html',
   styleUrls: ['./workflow-details.component.scss'],

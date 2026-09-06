@@ -1,0 +1,15 @@
+<div class="space-y-1">
+  <label [class]="computedLabelClass">{{ label }}</label>
+
+  @if (value !== undefined) {
+    @if (multiline) {
+      <p [class]="computedValueClass">{{ displayValue }}</p>
+    } @else {
+      <span [class]="computedValueClass">{{ displayValue }}</span>
+    }
+  }
+
+  <div class="mt-1.25">
+    <ng-content></ng-content>
+  </div>
+</div>
