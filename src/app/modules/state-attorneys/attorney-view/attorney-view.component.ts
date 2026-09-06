@@ -1,36 +1,48 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { StateAttorneysService } from '../services/state-attorneys.service';
 import { StateAttorney, Mda, Grade } from '../models/state-attorney.model';
 import { SwalService } from '@shared/services/swal.service';
-import { ActionButtonComponent } from '@shared/components/action-button/action-button.component';
+import { ButtonComponent } from '@shared/components/button/button.component';
 import { RemoveUnderscorePipe } from '@shared/pipes/remove-underscore.pipe';
 import { HeaderComponent } from '@shared/components/header/header.component';
 import { BadgeComponent, BadgeVariant } from '@shared/components/badge/badge.component';
 import { DetailItemComponent } from '@shared/components/detail-item/detail-item.component';
+import {
+  LucideShieldCheck,
+  LucideLandmark,
+  LucideUser,
+  LucideBriefcase,
+  LucideIdCard,
+  LucidePhone,
+  LucideFolderKanban,
+  LucidePencil,
+} from '@lucide/angular';
 
 @Component({
   selector: 'app-attorney-view',
   imports: [
     CommonModule,
     RouterLink,
-    MatButtonModule,
-    MatIconModule,
-    MatTooltipModule,
-    ActionButtonComponent,
-    RemoveUnderscorePipe,
     HeaderComponent,
     BadgeComponent,
     DetailItemComponent,
+    ButtonComponent,
+    RemoveUnderscorePipe,
+    LucideShieldCheck,
+    LucideLandmark,
+    LucideUser,
+    LucideBriefcase,
+    LucideIdCard,
+    LucidePhone,
+    LucideFolderKanban,
   ],
   templateUrl: './attorney-view.component.html',
   styleUrls: ['./attorney-view.component.scss'],
 })
 export class AttorneyViewComponent implements OnInit {
+  protected readonly editIcon = LucidePencil;
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private service = inject(StateAttorneysService);

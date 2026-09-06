@@ -4,11 +4,12 @@
     subTitle="View registry logs, active case allocations, and leave balances."
     [canGoBack]="true">
     @if (attorney) {
-      <app-action-button
-        label="Edit Profile"
-        icon="edit"
-        [routerLink]="['/state-attorneys/edit', attorney.id]"
-      ></app-action-button>
+      <app-button
+        variant="primary"
+        [icon]="editIcon"
+        [routerLink]="['/state-attorneys/edit', attorney.id]">
+        Edit Profile
+      </app-button>
     }
   </app-header>
 
@@ -51,12 +52,12 @@
           </div>
           <div class="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-0.5">
             <p class="text-slate-700 font-semibold text-sm flex items-center gap-1.5">
-              <mat-icon class="text-amber-600 text-[18px]! w-4.5! h-4.5!">verified_user</mat-icon>
+              <svg lucideShieldCheck class="size-4.5 text-amber-600 shrink-0"></svg>
               {{ getGradeName(attorney.current_grade_id) || attorney.current_grade || 'State Attorney' }}
             </p>
             <span class="text-slate-300 hidden md:inline">•</span>
             <p class="text-slate-600 text-sm font-medium flex items-center gap-1.5">
-              <mat-icon class="text-slate-500 text-[18px]! w-4.5! h-4.5!">account_balance</mat-icon>
+              <svg lucideLandmark class="size-4.5 text-slate-500 shrink-0"></svg>
               {{ getMdaName(attorney.mda_id) }}
             </p>
           </div>
@@ -75,7 +76,7 @@
             [class.hover:text-slate-900]="activeTab !== 'profile'"
             [class.hover:border-slate-300]="activeTab !== 'profile'"
           >
-            <mat-icon class="text-[18px]! w-4.5! h-4.5!" [class.text-[#d99414]]="activeTab === 'profile'" [class.text-slate-400]="activeTab !== 'profile'">person</mat-icon>
+            <svg lucideUser class="size-4.5 shrink-0" [class.text-[#d99414]]="activeTab === 'profile'" [class.text-slate-400]="activeTab !== 'profile'"></svg>
             Personal & Career Info
           </button>
           <button (click)="activeTab = 'assignments'"
@@ -87,7 +88,7 @@
             [class.hover:text-slate-900]="activeTab !== 'assignments'"
             [class.hover:border-slate-300]="activeTab !== 'assignments'"
           >
-            <mat-icon class="text-[18px]! w-4.5! h-4.5!" [class.text-[#d99414]]="activeTab === 'assignments'" [class.text-slate-400]="activeTab !== 'assignments'">assignment</mat-icon>
+            <svg lucideBriefcase class="size-4.5 shrink-0" [class.text-[#d99414]]="activeTab === 'assignments'" [class.text-slate-400]="activeTab !== 'assignments'"></svg>
             Work Assignments
             <app-badge
               [variant]="activeTab === 'assignments' ? 'warning' : 'secondary'"
@@ -105,7 +106,7 @@
           <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex items-center justify-between">
               <h3 class="text-sm font-semibold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                <mat-icon class="text-slate-500 text-[18px]! w-4.5! h-4.5!">badge</mat-icon>
+                <svg lucideIdCard class="size-4.5 text-slate-500 shrink-0"></svg>
                 Registry Dossier
               </h3>
             </div>
@@ -150,7 +151,7 @@
           <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex items-center justify-between">
               <h3 class="text-sm font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                <mat-icon class="text-slate-500 text-[18px]! w-4.5! h-4.5!">contact_phone</mat-icon>
+                <svg lucidePhone class="size-4.5 text-slate-500 shrink-0"></svg>
                 Contact Details
               </h3>
             </div>
@@ -184,7 +185,7 @@
         <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
           <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex items-center justify-between">
             <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-              <mat-icon class="text-slate-500 text-[18px]! w-[18px]! h-[18px]!">folder_shared</mat-icon>
+              <svg lucideFolderKanban class="size-4.5 text-slate-500 shrink-0"></svg>
               Active Case Allocations & Assignments
             </h3>
             <app-badge
@@ -226,7 +227,7 @@
               </div>
             } @else {
               <div class="flex flex-col items-center justify-center p-12 bg-slate-50/60 border border-dashed border-slate-300 rounded-xl">
-                <mat-icon class="text-slate-400 text-[48px]! w-12! h-12! mb-3">assignment_late</mat-icon>
+                <svg lucideBriefcase class="size-12 text-slate-400 mb-3 stroke-[1.5]"></svg>
                 <h4 class="text-sm font-bold text-slate-800 mb-1">No Active Assignments</h4>
                 <p class="text-slate-600 text-sm text-center max-w-md">No work assignments or active case allocations are currently registered for this state attorney.</p>
               </div>
