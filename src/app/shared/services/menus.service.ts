@@ -18,6 +18,11 @@ export class MenusService {
         icon: 'groups',
         children: [
           {
+            label: 'Attorneys Dashboard',
+            route: '/state-attorneys/dashboard',
+            exact: true
+          },
+          {
             label: 'Attorneys Directory',
             route: '/state-attorneys',
             exact: true

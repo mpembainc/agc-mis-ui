@@ -158,6 +158,13 @@ export const routes: Routes = [
               ),
           },
           {
+            path: 'dashboard',
+            loadComponent: () =>
+              import('./modules/state-attorneys/attorney-dashboard/attorney-dashboard.component').then(
+                (m) => m.AttorneyDashboardComponent
+              ),
+          },
+          {
             path: 'create',
             loadComponent: () =>
               import('./modules/state-attorneys/attorney-form/attorney-form.component').then(

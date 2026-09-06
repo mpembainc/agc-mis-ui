@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
-import { StateAttorney, Mda, Grade, LegalSpecialisation } from '../models/state-attorney.model';
+import { StateAttorney, Mda, Grade, LegalSpecialisation, StateAttorneyDashboardData } from '../models/state-attorney.model';
 
 export interface PaginatedResponse<T> {
   success: boolean;
@@ -93,5 +93,9 @@ export class StateAttorneysService {
 
   getSpecialisations(): Observable<ApiResponse<LegalSpecialisation[]>> {
     return this.http.get<ApiResponse<LegalSpecialisation[]>>(`${this.setupUrl}/legal-specialisations`);
+  }
+
+  getDashboardMetrics(): Observable<ApiResponse<StateAttorneyDashboardData>> {
+    return this.http.get<ApiResponse<StateAttorneyDashboardData>>(`${this.baseUrl}/dashboard`);
   }
 }

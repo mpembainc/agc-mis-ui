@@ -1,0 +1,356 @@
+<div class="font-figtree space-y-6">
+  <!-- Loading Indicator -->
+  <mat-progress-bar *ngIf="loading()" mode="indeterminate" class="rounded-full"></mat-progress-bar>
+
+  <!-- Page Header -->
+  <app-header
+    title="State Attorneys Executive Dashboard"
+    subTitle="Monitor deployment readiness, active workload distribution, upcoming leaves, and performance indicators.">
+    <div class="flex items-center gap-2.5">
+      <app-button
+        variant="outline"
+        [icon]="refreshIcon"
+        (btnClick)="loadDashboardData()">
+        Refresh
+      </app-button>
+      <app-button
+        variant="outline"
+        [icon]="listIcon"
+        routerLink="/state-attorneys">
+        Directory
+      </app-button>
+      <app-button
+        variant="primary"
+        [icon]="addIcon"
+        routerLink="/state-attorneys/create">
+        Add Attorney
+      </app-button>
+    </div>
+  </app-header>
+
+  <ng-container *ngIf="metrics() as data">
+    <!-- 1. Executive Summary KPIs (6 Cards) -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <app-stats-card
+        label="Total Attorneys"
+        [value]="data.summary.total_state_attorneys"
+        icon="groups"
+        iconClass="bg-slate-100 text-slate-700"
+        valueClass="text-slate-900"
+      ></app-stats-card>
+
+      <app-stats-card
+        label="Active Assignments"
+        [value]="data.summary.active_assignments"
+        icon="assignment"
+        iconClass="bg-blue-50 text-blue-700"
+        valueClass="text-blue-900"
+      ></app-stats-card>
+
+      <app-stats-card
+        label="On Leave"
+        [value]="data.summary.on_leave"
+        icon="event_busy"
+        iconClass="bg-amber-50 text-amber-700"
+        valueClass="text-amber-700"
+      ></app-stats-card>
+
+      <app-stats-card
+        label="Promotion Eligible"
+        [value]="data.summary.eligible_for_promotion"
+        icon="military_tech"
+        iconClass="bg-indigo-50 text-indigo-700"
+        valueClass="text-indigo-700"
+      ></app-stats-card>
+
+      <app-stats-card
+        label="Avg. Performance"
+        [value]="data.summary.avg_performance"
+        icon="trending_up"
+        iconClass="bg-emerald-50 text-emerald-700"
+        valueClass="text-emerald-700"
+      ></app-stats-card>
+
+      <app-stats-card
+        label="New This Month"
+        [value]="data.summary.new_this_month"
+        icon="person_add"
+        iconClass="bg-sky-50 text-sky-700"
+        valueClass="text-sky-700"
+      ></app-stats-card>
+    </div>
+
+    <!-- 2. Deployment Status Breakdown & Workload Distribution -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Deployment Status Breakdown -->
+      <app-card
+        title="Deployment Status Breakdown"
+        subtitle="Current operational status and availability of state attorneys"
+        [icon]="deploymentIcon">
+        
+        <!-- Stacked Distribution Bar -->
+        <div class="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden flex my-3">
+          <div
+            *ngFor="let item of data.attorneys_by_deployment_status"
+            class="h-full transition-all duration-500"
+            [ngClass]="getDeploymentColor(item.status)"
+            [style.width.%]="item.percentage"
+            [title]="item.status + ': ' + item.count + ' (' + item.percentage + '%)'">
+          </div>
+        </div>
+
+        <!-- Breakdown List -->
+        <div class="divide-y divide-slate-100 mt-4">
+          <div
+            *ngFor="let item of data.attorneys_by_deployment_status"
+            class="py-3 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full shrink-0" [ngClass]="getDeploymentColor(item.status)"></span>
+              <span class="font-medium text-slate-800">{{ item.status }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-900">{{ item.count }} attorneys</span>
+              <app-badge
+                [variant]="getDeploymentBadgeVariant(item.status)"
+                [pill]="false"
+                [text]="item.percentage + '%'">
+              </app-badge>
+            </div>
+          </div>
+        </div>
+      </app-card>
+
+      <!-- Workload Distribution Bands -->
+      <app-card
+        title="Workload Distribution Bands"
+        subtitle="Active matters and contract allocations per individual attorney"
+        [icon]="workloadIcon">
+
+        <div class="space-y-4">
+          <div
+            *ngFor="let band of data.workload_distribution"
+            class="space-y-1.5">
+            <div class="flex justify-between items-center text-xs">
+              <div class="flex items-center gap-2">
+                <span class="font-semibold text-slate-800">{{ band.range }} Cases</span>
+                <span class="text-slate-500 text-[11px]" *ngIf="band.range === '0-5'">(Available / Light)</span>
+                <span class="text-slate-500 text-[11px]" *ngIf="band.range === '6-10'">(Balanced Load)</span>
+                <span class="text-slate-500 text-[11px]" *ngIf="band.range === '11-15'">(High Volume)</span>
+                <span class="text-slate-500 text-[11px]" *ngIf="band.range === '16-20'">(Heavy Load)</span>
+                <span class="text-rose-600 font-semibold text-[11px]" *ngIf="band.range === '21+'">(Overload Alert)</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-900">{{ band.count }} attorneys</span>
+                <app-badge
+                  [variant]="getWorkloadBandConfig(band.range).badge"
+                  [pill]="false"
+                  [text]="band.percentage + '%'">
+                </app-badge>
+              </div>
+            </div>
+            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                class="h-full rounded-full transition-all duration-500"
+                [ngClass]="getWorkloadBandConfig(band.range).bar"
+                [style.width.%]="band.percentage">
+              </div>
+            </div>
+          </div>
+        </div>
+      </app-card>
+    </div>
+
+    <!-- 3. Monthly Trend & Promotion Readiness -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Monthly Assignments vs Completed -->
+      <app-card
+        title="Workload Allocation & Completion Trend"
+        subtitle="Matters assigned vs. completed over the past 6 months"
+        [icon]="trendIcon">
+
+        <div class="space-y-3.5">
+          <div
+            *ngFor="let m of data.assignments_overview"
+            class="space-y-1 text-xs">
+            <div class="flex justify-between items-center text-slate-700">
+              <span class="font-bold text-slate-900 w-10">{{ m.month }}</span>
+              <div class="flex items-center gap-4 text-[11px]">
+                <span class="text-blue-700 font-medium">Assigned: <strong>{{ m.assigned }}</strong></span>
+                <span class="text-emerald-700 font-medium">Completed: <strong>{{ m.completed }}</strong></span>
+              </div>
+            </div>
+            
+            <!-- Dual Bars -->
+            <div class="space-y-1">
+              <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-blue-600 rounded-full transition-all duration-500"
+                  [style.width.%]="(m.assigned / getMaxMonthlyCount(data.assignments_overview)) * 100">
+                </div>
+              </div>
+              <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                  [style.width.%]="(m.completed / getMaxMonthlyCount(data.assignments_overview)) * 100">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="flex items-center justify-center gap-6 pt-4 mt-2 border-t border-slate-100 text-xs text-slate-600">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-600 block"></span>
+            <span>Matters Assigned</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 block"></span>
+            <span>Matters Completed</span>
+          </div>
+        </div>
+      </app-card>
+
+      <!-- Promotion Readiness -->
+      <app-card
+        title="Promotion Readiness & Appraisal Status"
+        subtitle="Evaluation tracking based on service grade, tenure, and review scores"
+        [icon]="awardIcon">
+
+        <!-- Stacked Bar -->
+        <div class="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden flex my-3">
+          <div
+            *ngFor="let item of data.promotion_eligibility_status"
+            class="h-full transition-all duration-500"
+            [ngClass]="getPromotionBarColor(item.status)"
+            [style.width.%]="item.percentage"
+            [title]="item.status + ': ' + item.count + ' (' + item.percentage + '%)'">
+          </div>
+        </div>
+
+        <div class="divide-y divide-slate-100 mt-4">
+          <div
+            *ngFor="let item of data.promotion_eligibility_status"
+            class="py-3 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full shrink-0" [ngClass]="getPromotionBarColor(item.status)"></span>
+              <span class="font-medium text-slate-800">{{ item.status }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-900">{{ item.count }} attorneys</span>
+              <app-badge
+                [variant]="getPromotionBadgeVariant(item.status)"
+                [pill]="false"
+                [text]="item.percentage + '%'">
+              </app-badge>
+            </div>
+          </div>
+        </div>
+      </app-card>
+    </div>
+
+    <!-- 4. Upcoming Leaves & Recent Workforce Activities -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Upcoming Leaves -->
+      <app-card
+        title="Upcoming Approved Leaves (Next 15 Days)"
+        subtitle="Scheduled leave periods for active attorney workforce planning"
+        [icon]="calendarIcon">
+
+        <div *ngIf="data.upcoming_leaves && data.upcoming_leaves.length > 0; else noLeaves" class="divide-y divide-slate-100">
+          <div
+            *ngFor="let leave of data.upcoming_leaves"
+            class="py-3 flex items-center justify-between text-xs">
+            <div class="space-y-0.5">
+              <span class="font-bold text-slate-800 block">{{ leave.attorney_name }}</span>
+              <span class="text-slate-500 text-[11px] block">
+                {{ leave.start_date | date:'mediumDate' }} – {{ leave.end_date | date:'mediumDate' }}
+              </span>
+            </div>
+            <app-badge
+              [variant]="getLeaveBadgeVariant(leave.leave_type)"
+              [pill]="false"
+              [text]="leave.leave_type">
+            </app-badge>
+          </div>
+        </div>
+
+        <ng-template #noLeaves>
+          <div class="py-8 text-center text-xs text-slate-400">
+            No upcoming approved leaves in the next 15 days.
+          </div>
+        </ng-template>
+      </app-card>
+
+      <!-- Recent Activities -->
+      <app-card
+        title="Recent Workforce Activities"
+        subtitle="Chronological log of attorney registrations, assignments, and evaluations"
+        [icon]="activityIcon">
+
+        <div class="relative pl-6 border-l border-slate-100 space-y-4">
+          <div
+            *ngFor="let act of data.recent_activities"
+            class="relative text-xs">
+            <!-- Timeline dot -->
+            <span class="absolute -left-[31px] top-0.5 w-2.5 h-2.5 rounded-full bg-slate-900 border-2 border-white ring-4 ring-slate-100/50 block"></span>
+            <div class="space-y-0.5">
+              <p class="font-semibold text-slate-800">{{ act.description }}</p>
+              <div class="flex justify-between text-[11px] text-slate-500 font-medium">
+                <span>{{ act.meta || 'System Event' }}</span>
+                <span>{{ act.time }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </app-card>
+    </div>
+
+    <!-- 5. Operational Performance Indicators (4-card banner) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex items-center gap-4">
+        <div class="p-3 rounded-lg bg-emerald-50 text-emerald-700 shrink-0">
+          <mat-icon>verified</mat-icon>
+        </div>
+        <div>
+          <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider block">Advice Issued</span>
+          <span class="text-xl font-bold text-slate-900">{{ data.performance_metrics.total_advice_issued_this_month }}</span>
+          <span class="text-[11px] text-slate-400 block">Completed this month</span>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex items-center gap-4">
+        <div class="p-3 rounded-lg bg-blue-50 text-blue-700 shrink-0">
+          <mat-icon>pending_actions</mat-icon>
+        </div>
+        <div>
+          <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider block">Pending Reviews</span>
+          <span class="text-xl font-bold text-slate-900">{{ data.performance_metrics.pending_reviews }}</span>
+          <span class="text-[11px] text-slate-400 block">In attorney queue</span>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex items-center gap-4">
+        <div class="p-3 rounded-lg bg-rose-50 text-rose-700 shrink-0">
+          <mat-icon>warning_amber</mat-icon>
+        </div>
+        <div>
+          <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider block">Overdue Tasks</span>
+          <span class="text-xl font-bold text-rose-700">{{ data.performance_metrics.overdue_assignments }}</span>
+          <span class="text-[11px] text-rose-600 block">Requires supervisor attention</span>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs flex items-center gap-4">
+        <div class="p-3 rounded-lg bg-amber-50 text-amber-700 shrink-0">
+          <mat-icon>schedule</mat-icon>
+        </div>
+        <div>
+          <span class="text-slate-500 text-xs font-semibold uppercase tracking-wider block">Turnaround SLA</span>
+          <span class="text-xl font-bold text-slate-900">{{ data.performance_metrics.avg_turnaround_time_days }} days</span>
+          <span class="text-[11px] text-slate-400 block">{{ data.performance_metrics.satisfaction_rating }} / 5.0 satisfaction</span>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

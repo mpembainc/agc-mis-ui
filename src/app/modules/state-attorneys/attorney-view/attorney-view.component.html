@@ -165,8 +165,59 @@
             Work Assignments
             <app-badge
               [variant]="activeTab === 'assignments' ? 'warning' : 'secondary'"
-              [pill]="true"
+              [pill]="false"
               [text]="attorney.assignments?.length || 0">
+            </app-badge>
+          </button>
+          <button (click)="activeTab = 'accomplishments'"
+            class="pb-3.5 text-sm font-semibold border-b-2 px-1 transition-all cursor-pointer flex items-center gap-2"
+            [class.border-[#d99414]]="activeTab === 'accomplishments'"
+            [class.text-[#d99414]]="activeTab === 'accomplishments'"
+            [class.border-transparent]="activeTab !== 'accomplishments'"
+            [class.text-slate-600]="activeTab !== 'accomplishments'"
+            [class.hover:text-slate-900]="activeTab !== 'accomplishments'"
+            [class.hover:border-slate-300]="activeTab !== 'accomplishments'"
+          >
+            <svg lucideAward class="size-4.5 shrink-0" [class.text-[#d99414]]="activeTab === 'accomplishments'" [class.text-slate-400]="activeTab !== 'accomplishments'"></svg>
+            Accomplishments & Outputs
+            <app-badge
+              [variant]="activeTab === 'accomplishments' ? 'warning' : 'secondary'"
+              [pill]="false"
+              [text]="accomplishments().length">
+            </app-badge>
+          </button>
+          <button (click)="activeTab = 'qualifications'"
+            class="pb-3.5 text-sm font-semibold border-b-2 px-1 transition-all cursor-pointer flex items-center gap-2"
+            [class.border-[#d99414]]="activeTab === 'qualifications'"
+            [class.text-[#d99414]]="activeTab === 'qualifications'"
+            [class.border-transparent]="activeTab !== 'qualifications'"
+            [class.text-slate-600]="activeTab !== 'qualifications'"
+            [class.hover:text-slate-900]="activeTab !== 'qualifications'"
+            [class.hover:border-slate-300]="activeTab !== 'qualifications'"
+          >
+            <svg lucideGraduationCap class="size-4.5 shrink-0" [class.text-[#d99414]]="activeTab === 'qualifications'" [class.text-slate-400]="activeTab !== 'qualifications'"></svg>
+            Qualifications & Credentials
+            <app-badge
+              [variant]="activeTab === 'qualifications' ? 'warning' : 'secondary'"
+              [pill]="false"
+              [text]="educationList().length + certificationsList().length">
+            </app-badge>
+          </button>
+          <button (click)="activeTab = 'dossier'"
+            class="pb-3.5 text-sm font-semibold border-b-2 px-1 transition-all cursor-pointer flex items-center gap-2"
+            [class.border-[#d99414]]="activeTab === 'dossier'"
+            [class.text-[#d99414]]="activeTab === 'dossier'"
+            [class.border-transparent]="activeTab !== 'dossier'"
+            [class.text-slate-600]="activeTab !== 'dossier'"
+            [class.hover:text-slate-900]="activeTab !== 'dossier'"
+            [class.hover:border-slate-300]="activeTab !== 'dossier'"
+          >
+            <svg lucideFileText class="size-4.5 shrink-0" [class.text-[#d99414]]="activeTab === 'dossier'" [class.text-slate-400]="activeTab !== 'dossier'"></svg>
+            Digital Dossier
+            <app-badge
+              [variant]="activeTab === 'dossier' ? 'warning' : 'secondary'"
+              [pill]="false"
+              [text]="dossierDocuments().length">
             </app-badge>
           </button>
         </nav>
@@ -330,6 +381,512 @@
                 </app-button>
               </div>
             }
+          </div>
+        </div>
+      }
+
+      <!-- Tab Content: Accomplishments & Outputs -->
+      @if (activeTab === 'accomplishments') {
+        <div class="space-y-6">
+          <!-- Summary Metrics Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+              <div class="p-3 bg-amber-50 rounded-lg text-[#d99414] border border-amber-100 shrink-0">
+                <svg lucideAward class="size-6"></svg>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Recorded</p>
+                <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ accomplishments().length }}</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5">Tasks & Deliverables</p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+              <div class="p-3 bg-blue-50 rounded-lg text-blue-600 border border-blue-100 shrink-0">
+                <svg lucideLayers class="size-6"></svg>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Output Units</p>
+                <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ accomplishmentStats()?.total_quantity ?? 0 }}</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5">Cumulative deliverables</p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+              <div class="p-3 bg-emerald-50 rounded-lg text-emerald-600 border border-emerald-100 shrink-0">
+                <svg lucideHash class="size-6"></svg>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">This Month</p>
+                <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ accomplishmentStats()?.this_month_count ?? 0 }}</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5">Outputs logged recently</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Table Card -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <svg lucideAward class="size-4.5 text-[#d99414] shrink-0"></svg>
+                <h3 class="text-sm font-semibold text-slate-800 tracking-wider">
+                  Logged Deliverables & Task Outputs
+                </h3>
+              </div>
+              <div class="flex items-center gap-3">
+                <app-button
+                  variant="primary"
+                  [icon]="plusIcon"
+                  (btnClick)="openLogAccomplishmentDialog()">
+                  Log Accomplishment
+                </app-button>
+              </div>
+            </div>
+
+            <div class="p-6">
+              @if (accomplishments() && accomplishments().length > 0) {
+                <app-data-table
+                  [data]="accomplishments()"
+                  [columns]="accomplishmentColumns"
+                  [columnTemplates]="{
+                    date: accDateColTpl,
+                    type: accTypeColTpl,
+                    matter: accMatterColTpl,
+                    description: accDescColTpl,
+                    quantity: accQtyColTpl
+                  }"
+                  [showOuterCard]="false"
+                  [hidePagination]="true"
+                  (view)="onViewAccomplishment($event)"
+                  (delete)="onDeleteAccomplishment($event)">
+                </app-data-table>
+
+                <!-- Column Templates for Accomplishments DataTable -->
+                <ng-template #accDateColTpl let-row>
+                  <span class="text-xs font-medium text-slate-700">
+                    {{ getFormattedDob(row.date) }}
+                  </span>
+                </ng-template>
+
+                <ng-template #accTypeColTpl let-row>
+                  <app-badge
+                    [variant]="getAccomplishmentTypeBadgeVariant(row.accomplishment_type?.type_name)"
+                    [pill]="false"
+                    [text]="row.accomplishment_type?.type_name || 'Deliverable'">
+                  </app-badge>
+                </ng-template>
+
+                <ng-template #accMatterColTpl let-row>
+                  <div class="text-xs font-medium text-slate-800">
+                    {{ row.matter_title || (row.entity_type ? (row.entity_type | uppercase) : 'General Deliverable') }}
+                  </div>
+                </ng-template>
+
+                <ng-template #accDescColTpl let-row>
+                  <span class="text-xs text-slate-600 line-clamp-2 max-w-md" [title]="row.description">
+                    {{ row.description || '-' }}
+                  </span>
+                </ng-template>
+
+                <ng-template #accQtyColTpl let-row>
+                  <span class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200">
+                    {{ row.quantity ?? 1 }}
+                  </span>
+                </ng-template>
+              } @else {
+                <div class="flex flex-col items-center justify-center p-12 bg-slate-50/60 border border-dashed border-slate-300 rounded-xl text-center">
+                  <svg lucideAward class="size-12 text-slate-400 mb-3 stroke-[1.5]"></svg>
+                  <h4 class="text-sm font-bold text-slate-800 mb-1">No Accomplishments Logged</h4>
+                  <p class="text-slate-600 text-sm text-center max-w-md mb-4">
+                    No deliverables, legal advices, or task outputs have been recorded yet for this state attorney.
+                  </p>
+                  <app-button
+                    variant="primary"
+                    [icon]="plusIcon"
+                    (btnClick)="openLogAccomplishmentDialog()">
+                    Log First Accomplishment
+                  </app-button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Tab Content: Qualifications & Credentials (IMP-SA-05) -->
+      @if (activeTab === 'qualifications') {
+        <div class="space-y-6">
+          <!-- Summary Metrics Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+              <div class="p-3 bg-amber-50 rounded-lg text-[#d99414] border border-amber-100 shrink-0">
+                <svg lucideGraduationCap class="size-6"></svg>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Academic Degrees</p>
+                <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ educationList().length }}</h4>
+                <p class="text-[11px] text-emerald-600 font-medium mt-0.5">{{ qualificationsSummary()?.verified_degrees || 0 }} verified by HR</p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+              <div class="p-3 bg-blue-50 rounded-lg text-blue-600 border border-blue-100 shrink-0">
+                <svg lucideAward class="size-6"></svg>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Certifications & Bar</p>
+                <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ certificationsList().length }}</h4>
+                <p class="text-[11px] text-blue-600 font-medium mt-0.5">{{ qualificationsSummary()?.active_certifications || 0 }} currently active</p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+              <div class="p-3 bg-emerald-50 rounded-lg text-emerald-600 border border-emerald-100 shrink-0">
+                <svg lucideShieldCheck class="size-6"></svg>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Highest Level</p>
+                <h4 class="text-lg font-bold text-slate-900 mt-0.5 truncate">{{ qualificationsSummary()?.highest_level || 'N/A' }}</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5">Formal Education Level</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Academic Degrees Section -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <svg lucideGraduationCap class="size-4.5 text-[#d99414] shrink-0"></svg>
+                <h3 class="text-sm font-semibold text-slate-800 tracking-wider">
+                  Academic Qualifications & Degrees
+                </h3>
+              </div>
+              <div class="flex items-center gap-3">
+                <app-button
+                  variant="primary"
+                  [icon]="plusIcon"
+                  (btnClick)="openAddEducationDialog()">
+                  Add Qualification
+                </app-button>
+              </div>
+            </div>
+
+            <div class="p-6">
+              @if (educationList() && educationList().length > 0) {
+                <app-data-table
+                  [data]="educationList()"
+                  [columns]="educationColumns"
+                  [columnTemplates]="{
+                    degree: eduDegreeColTpl,
+                    institution_name: eduInstColTpl,
+                    education_level: eduLevelColTpl,
+                    graduation_year: eduYearColTpl,
+                    certificate: eduCertColTpl,
+                    is_verified: eduVerifiedColTpl
+                  }"
+                  [showOuterCard]="false"
+                  [hidePagination]="true"
+                  (view)="onViewEducation($event)"
+                  (delete)="onDeleteEducation($event)">
+                </app-data-table>
+
+                <ng-template #eduDegreeColTpl let-row>
+                  <span class="text-xs font-semibold text-slate-800">
+                    {{ row.degree || '-' }}
+                  </span>
+                </ng-template>
+
+                <ng-template #eduInstColTpl let-row>
+                  <span class="text-xs text-slate-700">
+                    {{ row.institution_name || (row.institution?.name) || '-' }}
+                  </span>
+                </ng-template>
+
+                <ng-template #eduLevelColTpl let-row>
+                  <app-badge
+                    variant="neutral"
+                    [pill]="false"
+                    [text]="row.education_level">
+                  </app-badge>
+                </ng-template>
+
+                <ng-template #eduYearColTpl let-row>
+                  <span class="text-xs font-medium text-slate-700">
+                    {{ row.graduation_year || '-' }}
+                  </span>
+                </ng-template>
+
+                <ng-template #eduCertColTpl let-row>
+                  @if (row.certificate_document) {
+                    <button
+                      type="button"
+                      (click)="onDownloadDocument(row.certificate_document)"
+                      class="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 cursor-pointer">
+                      <svg lucideDownload class="size-3.5"></svg>
+                      Certificate
+                    </button>
+                  } @else {
+                    <span class="text-xs text-slate-400">None attached</span>
+                  }
+                </ng-template>
+
+                <ng-template #eduVerifiedColTpl let-row>
+                  <app-badge
+                    [variant]="row.is_verified ? 'success' : 'warning'"
+                    [pill]="false"
+                    [text]="row.is_verified ? 'Verified' : 'Pending Verification'">
+                  </app-badge>
+                </ng-template>
+              } @else {
+                <div class="flex flex-col items-center justify-center p-10 bg-slate-50/60 border border-dashed border-slate-300 rounded-xl text-center">
+                  <svg lucideGraduationCap class="size-12 text-slate-400 mb-3 stroke-[1.5]"></svg>
+                  <h4 class="text-sm font-bold text-slate-800 mb-1">No Academic Qualifications</h4>
+                  <p class="text-slate-600 text-sm text-center max-w-md mb-4">
+                    No university degrees or educational records have been recorded yet for this state attorney.
+                  </p>
+                  <app-button
+                    variant="primary"
+                    [icon]="plusIcon"
+                    (btnClick)="openAddEducationDialog()">
+                    Add First Qualification
+                  </app-button>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Professional Certifications Section -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <svg lucideAward class="size-4.5 text-blue-600 shrink-0"></svg>
+                <h3 class="text-sm font-semibold text-slate-800 tracking-wider">
+                  Professional Certifications & Bar Admissions
+                </h3>
+              </div>
+              <div class="flex items-center gap-3">
+                <app-button
+                  variant="primary"
+                  [icon]="plusIcon"
+                  (btnClick)="openAddCertificationDialog()">
+                  Add Certification
+                </app-button>
+              </div>
+            </div>
+
+            <div class="p-6">
+              @if (certificationsList() && certificationsList().length > 0) {
+                <app-data-table
+                  [data]="certificationsList()"
+                  [columns]="certificationColumns"
+                  [columnTemplates]="{
+                    certification_name: certNameColTpl,
+                    issuing_body: certIssuerColTpl,
+                    issue_date: certIssueColTpl,
+                    expiry_date: certExpiryColTpl,
+                    is_active: certStatusColTpl,
+                    certificate: certDocColTpl
+                  }"
+                  [showOuterCard]="false"
+                  [hidePagination]="true"
+                  (view)="onViewCertification($event)"
+                  (delete)="onDeleteCertification($event)">
+                </app-data-table>
+
+                <ng-template #certNameColTpl let-row>
+                  <span class="text-xs font-semibold text-slate-800">
+                    {{ row.certification_name || '-' }}
+                  </span>
+                </ng-template>
+
+                <ng-template #certIssuerColTpl let-row>
+                  <span class="text-xs text-slate-700">
+                    {{ row.issuing_body || '-' }}
+                  </span>
+                </ng-template>
+
+                <ng-template #certIssueColTpl let-row>
+                  <span class="text-xs text-slate-600">
+                    {{ getFormattedDob(row.issue_date) }}
+                  </span>
+                </ng-template>
+
+                <ng-template #certExpiryColTpl let-row>
+                  <span class="text-xs text-slate-600">
+                    {{ row.expiry_date ? getFormattedDob(row.expiry_date) : 'Permanent / No Expiry' }}
+                  </span>
+                </ng-template>
+
+                <ng-template #certStatusColTpl let-row>
+                  <app-badge
+                    [variant]="row.is_active ? 'success' : 'secondary'"
+                    [pill]="false"
+                    [text]="row.is_active ? 'Active' : 'Expired / Inactive'">
+                  </app-badge>
+                </ng-template>
+
+                <ng-template #certDocColTpl let-row>
+                  @if (row.certificate_document) {
+                    <button
+                      type="button"
+                      (click)="onDownloadDocument(row.certificate_document)"
+                      class="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 cursor-pointer">
+                      <svg lucideDownload class="size-3.5"></svg>
+                      Document
+                    </button>
+                  } @else {
+                    <span class="text-xs text-slate-400">None attached</span>
+                  }
+                </ng-template>
+              } @else {
+                <div class="flex flex-col items-center justify-center p-10 bg-slate-50/60 border border-dashed border-slate-300 rounded-xl text-center">
+                  <svg lucideAward class="size-12 text-slate-400 mb-3 stroke-[1.5]"></svg>
+                  <h4 class="text-sm font-bold text-slate-800 mb-1">No Certifications Recorded</h4>
+                  <p class="text-slate-600 text-sm text-center max-w-md mb-4">
+                    No bar admissions, notary public licenses, or professional legal certifications recorded yet.
+                  </p>
+                  <app-button
+                    variant="primary"
+                    [icon]="plusIcon"
+                    (btnClick)="openAddCertificationDialog()">
+                    Add First Certification
+                  </app-button>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Tab Content: Digital Dossier (IMP-SA-05) -->
+      @if (activeTab === 'dossier') {
+        <div class="space-y-6">
+          <!-- Summary Metrics Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+              <div class="p-3 bg-amber-50 rounded-lg text-[#d99414] border border-amber-100 shrink-0">
+                <svg lucideFileText class="size-6"></svg>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Dossier Files</p>
+                <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ dossierDocuments().length }}</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5">Official Personnel Records</p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+              <div class="p-3 bg-blue-50 rounded-lg text-blue-600 border border-blue-100 shrink-0">
+                <svg lucideBriefcase class="size-6"></svg>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Repository Volume</p>
+                <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ dossierSummary()?.total_size_formatted || '0 B' }}</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5">Secure Document Storage</p>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex items-center gap-4">
+              <div class="p-3 bg-purple-50 rounded-lg text-purple-600 border border-purple-100 shrink-0">
+                <svg lucideLayers class="size-6"></svg>
+              </div>
+              <div>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Document Categories</p>
+                <h4 class="text-2xl font-bold text-slate-900 mt-0.5">{{ (dossierSummary()?.categories_count || 0) + ' Types' }}</h4>
+                <p class="text-[11px] text-slate-500 mt-0.5">Appointment, Oaths, Transcripts</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Dossier Table Card -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div class="flex items-center gap-2">
+                <svg lucideFileText class="size-4.5 text-[#d99414] shrink-0"></svg>
+                <h3 class="text-sm font-semibold text-slate-800 tracking-wider">
+                  Official Digital Personnel Dossier & Documents
+                </h3>
+              </div>
+              <div class="flex items-center gap-3">
+                <app-button
+                  variant="primary"
+                  [icon]="uploadIcon"
+                  (btnClick)="openUploadDossierDialog()">
+                  Upload Document
+                </app-button>
+              </div>
+            </div>
+
+            <div class="p-6">
+              @if (dossierDocuments() && dossierDocuments().length > 0) {
+                <app-data-table
+                  [data]="dossierDocuments()"
+                  [columns]="dossierColumns"
+                  [columnTemplates]="{
+                    original_name: docNameColTpl,
+                    category: docCategoryColTpl,
+                    size_bytes: docSizeColTpl,
+                    created_at: docDateColTpl,
+                    uploaded_by: docUploaderColTpl
+                  }"
+                  [showOuterCard]="false"
+                  [hidePagination]="true"
+                  (view)="onViewDossierDoc($event)"
+                  (delete)="onDeleteDossierDoc($event)">
+                </app-data-table>
+
+                <ng-template #docNameColTpl let-row>
+                  <div class="flex items-center gap-2">
+                    <svg lucideFile class="size-4 text-slate-400 shrink-0"></svg>
+                    <span class="text-xs font-semibold text-slate-800 hover:text-blue-600 transition-colors cursor-pointer" (click)="onViewDossierDoc(row)">
+                      {{ row.original_name }}
+                    </span>
+                    @if (attorney?.cv_document_id === row.id) {
+                      <app-badge variant="purple" [pill]="false" text="Official CV"></app-badge>
+                    }
+                  </div>
+                </ng-template>
+
+                <ng-template #docCategoryColTpl let-row>
+                  <app-badge
+                    [variant]="getDocumentTypeBadgeVariant(row.document_type?.type_name)"
+                    [pill]="false"
+                    [text]="row.document_type?.type_name || 'General Document'">
+                  </app-badge>
+                </ng-template>
+
+                <ng-template #docSizeColTpl let-row>
+                  <span class="text-xs text-slate-600 font-medium">
+                    {{ row.file_size_formatted || '-' }}
+                  </span>
+                </ng-template>
+
+                <ng-template #docDateColTpl let-row>
+                  <span class="text-xs text-slate-600">
+                    {{ getFormattedDob(row.created_at) }}
+                  </span>
+                </ng-template>
+
+                <ng-template #docUploaderColTpl let-row>
+                  <span class="text-xs text-slate-700 font-medium">
+                    {{ row.uploader?.name || row.uploader?.first_name || 'System Admin' }}
+                  </span>
+                </ng-template>
+              } @else {
+                <div class="flex flex-col items-center justify-center p-12 bg-slate-50/60 border border-dashed border-slate-300 rounded-xl text-center">
+                  <svg lucideFileText class="size-12 text-slate-400 mb-3 stroke-[1.5]"></svg>
+                  <h4 class="text-sm font-bold text-slate-800 mb-1">Dossier is Empty</h4>
+                  <p class="text-slate-600 text-sm text-center max-w-md mb-4">
+                    No official personnel documents, appointment gazettes, bar admission certificates, or CV files uploaded yet.
+                  </p>
+                  <app-button
+                    variant="primary"
+                    [icon]="uploadIcon"
+                    (btnClick)="openUploadDossierDialog()">
+                    Upload First Document
+                  </app-button>
+                </div>
+              }
+            </div>
           </div>
         </div>
       }
@@ -503,6 +1060,485 @@
           </app-button>
         </div>
       </div>
+    </div>
+  </ng-template>
+
+  <!-- Log Accomplishment Dialog Template -->
+  <ng-template #logAccomplishmentDialog>
+    <form (ngSubmit)="saveAccomplishment()" class="w-full">
+      <app-dialog-layout
+        title="Log Deliverable / Accomplishment"
+        primaryButtonLabel="Save Deliverable"
+        cancelButtonLabel="Cancel"
+        [disablePrimaryButton]="savingAccomplishment()"
+        (onConfirmed)="saveAccomplishment()">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 py-1">
+          <!-- Type -->
+          <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+            <mat-label>Accomplishment / Deliverable Type</mat-label>
+            <mat-select [(ngModel)]="accomplishmentForm.type_id" name="type_id" required>
+              @for (t of accomplishmentTypes(); track t.id) {
+                <mat-option [value]="t.id">{{ t.type_name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Associated Matter Type -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Related Matter Category</mat-label>
+            <mat-select [(ngModel)]="accomplishmentForm.entity_type" name="entity_type">
+              @for (t of entityTypes; track t.value) {
+                <mat-option [value]="t.value">{{ t.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Quantity / Units -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Number of Units / Outputs</mat-label>
+            <input matInput type="number" min="1" [(ngModel)]="accomplishmentForm.quantity" name="quantity" required />
+          </mat-form-field>
+
+          <!-- Contract linkage if entity_type is contract -->
+          @if (accomplishmentForm.entity_type === 'contract') {
+            <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+              <mat-label>Related Contract (Optional)</mat-label>
+              <mat-select [(ngModel)]="accomplishmentForm.entity_id" name="entity_id">
+                <mat-option [value]="''">-- Standalone / None --</mat-option>
+                @for (c of availableContracts(); track c.id) {
+                  <mat-option [value]="c.id">
+                    {{ c.contract_number }} - {{ c.subject_matter || 'No description' }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+
+          <!-- Completion Date -->
+          <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+            <mat-label>Date of Output / Completion</mat-label>
+            <input matInput [matDatepicker]="accDatePicker" [(ngModel)]="accomplishmentForm.date" name="date" placeholder="Choose date" required>
+            <mat-datepicker-toggle matIconSuffix [for]="accDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #accDatePicker></mat-datepicker>
+          </mat-form-field>
+
+          <!-- Description / Deliverable Summary -->
+          <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+            <mat-label>Deliverable Summary & Scope</mat-label>
+            <textarea matInput rows="3" [(ngModel)]="accomplishmentForm.description" name="description" placeholder="e.g., Reviewed draft concession agreement, drafted advisory opinion on sovereign guarantees..." required></textarea>
+          </mat-form-field>
+        </div>
+      </app-dialog-layout>
+    </form>
+  </ng-template>
+
+  <!-- View Accomplishment Details Dialog Template -->
+  <ng-template #viewAccomplishmentDialog>
+    <div class="w-full">
+      <app-dialog-layout
+        title="Accomplishment Output Details"
+        [showPrimaryButton]="false"
+        cancelButtonLabel="Close">
+        @if (selectedAccomplishment()) {
+          <div class="space-y-4 py-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <detail-item label="Deliverable Type">
+                <app-badge
+                  [variant]="getAccomplishmentTypeBadgeVariant(selectedAccomplishment()?.accomplishment_type?.type_name)"
+                  [pill]="false"
+                  [text]="selectedAccomplishment()?.accomplishment_type?.type_name || 'Deliverable'">
+                </app-badge>
+              </detail-item>
+
+              <detail-item label="Output Date" [value]="getFormattedDob(selectedAccomplishment()?.date)"></detail-item>
+
+              <detail-item label="Related Matter" [value]="selectedAccomplishment()?.matter_title || formatEntityType(selectedAccomplishment()?.entity_type)"></detail-item>
+
+              <detail-item label="Delivered Quantity" [value]="(selectedAccomplishment()?.quantity ?? 1) + ' Units'"></detail-item>
+            </div>
+
+            <detail-item
+              label="Deliverable Scope & Description"
+              [value]="selectedAccomplishment()?.description"
+              [multiline]="true"
+              [fullWidth]="true">
+            </detail-item>
+          </div>
+        }
+      </app-dialog-layout>
+    </div>
+  </ng-template>
+
+  <!-- Add Academic Qualification Dialog Template (IMP-SA-05) -->
+  <ng-template #educationDialog>
+    <form (ngSubmit)="saveEducation()" class="w-full">
+      <app-dialog-layout
+        title="Add Academic Qualification"
+        primaryButtonLabel="Save Qualification"
+        cancelButtonLabel="Cancel"
+        [disablePrimaryButton]="savingEducation()"
+        (onConfirmed)="saveEducation()">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 py-1">
+          <!-- Education Level -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Education Level</mat-label>
+            <mat-select [(ngModel)]="educationForm.education_level" name="education_level" required>
+              @for (lvl of educationLevels; track lvl) {
+                <mat-option [value]="lvl">{{ lvl }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Graduation Year -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Graduation Year</mat-label>
+            <input matInput type="number" min="1950" max="2050" [(ngModel)]="educationForm.graduation_year" name="graduation_year" required />
+          </mat-form-field>
+
+          <!-- Degree Title -->
+          <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+            <mat-label>Degree / Award Title</mat-label>
+            <input matInput [(ngModel)]="educationForm.degree" name="degree" placeholder="e.g. Bachelor of Laws (LL.B) or Master of International Law" required />
+          </mat-form-field>
+
+          <!-- Institution Name -->
+          <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+            <mat-label>Awarding University / Institution</mat-label>
+            <input matInput [(ngModel)]="educationForm.institution_name" name="institution_name" placeholder="e.g. State University of Zanzibar (SUZA) / University of Dar es Salaam" required />
+          </mat-form-field>
+
+          <!-- Certificate File Attachment -->
+          <div class="col-span-1 sm:col-span-2 py-2">
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">
+              Academic Certificate or Transcript (Optional PDF/Image)
+            </label>
+            <div class="flex items-center gap-3">
+              <input
+                type="file"
+                (change)="onEducationFileSelected($event)"
+                accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#d99414]/10 file:text-[#d99414] hover:file:bg-[#d99414]/20 cursor-pointer"
+              />
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">Accepted formats: PDF, PNG, JPG, DOCX (Max 25MB)</p>
+          </div>
+        </div>
+      </app-dialog-layout>
+    </form>
+  </ng-template>
+
+  <!-- View Academic Qualification Dialog Template (IMP-SA-05) -->
+  <ng-template #viewEducationDialog>
+    <div class="w-full">
+      <app-dialog-layout
+        title="Academic Qualification Dossier"
+        [showPrimaryButton]="false"
+        cancelButtonLabel="Close"
+        (onCancelled)="closeViewEducationDialog()">
+        @if (selectedEducation()) {
+          <div class="space-y-4 py-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="col-span-1 sm:col-span-2">
+                <detail-item label="Degree / Programme" [value]="selectedEducation()?.degree" [fullWidth]="true"></detail-item>
+              </div>
+
+              <detail-item label="Awarding Institution" [value]="selectedEducation()?.institution_name || selectedEducation()?.institution?.name"></detail-item>
+
+              <detail-item label="Education Level" [value]="selectedEducation()?.education_level"></detail-item>
+
+              <detail-item label="Graduation Year" [value]="selectedEducation()?.graduation_year"></detail-item>
+
+              <detail-item label="Verification Status">
+                <app-badge
+                  [variant]="selectedEducation()?.is_verified ? 'success' : 'warning'"
+                  [pill]="false"
+                  [text]="selectedEducation()?.is_verified ? 'Verified & Validated' : 'Pending HR Verification'">
+                </app-badge>
+              </detail-item>
+            </div>
+
+            <!-- Certificate Attachment Action -->
+            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <svg lucideFileText class="size-5 text-[#d99414] shrink-0"></svg>
+                <div class="min-w-0">
+                  <p class="text-xs font-semibold text-slate-800">Certificate File</p>
+                  <p class="text-[11px] text-slate-500 truncate" [title]="selectedEducation()?.certificate_document ? selectedEducation()?.certificate_document?.original_name : ''">
+                    {{ selectedEducation()?.certificate_document ? selectedEducation()?.certificate_document?.original_name : 'No certificate document uploaded' }}
+                  </p>
+                </div>
+              </div>
+
+              @if (selectedEducation()?.certificate_document) {
+                <div class="flex items-center gap-2 shrink-0">
+                  <app-button
+                    variant="outline"
+                    [icon]="eyeIcon"
+                    (btnClick)="onPreviewDocument(selectedEducation()?.certificate_document)">
+                    Preview
+                  </app-button>
+                  <app-button
+                    variant="primary"
+                    [icon]="downloadIcon"
+                    (btnClick)="onDownloadDocument(selectedEducation()?.certificate_document)">
+                    Download
+                  </app-button>
+                </div>
+              }
+            </div>
+
+            <!-- HR Verification Action -->
+            <div class="pt-2 border-t border-slate-200 flex items-center justify-between gap-3">
+              <p class="text-xs text-slate-500">
+                {{ selectedEducation()?.is_verified ? 'Credential has been formally verified.' : 'Verification requires official transcript cross-check.' }}
+              </p>
+              <app-button
+                [variant]="selectedEducation()?.is_verified ? 'outline' : 'primary'"
+                [icon]="checkCircleIcon"
+                (btnClick)="onVerifyEducation(selectedEducation()!)">
+                {{ selectedEducation()?.is_verified ? 'Revoke Verification' : 'Verify Credential' }}
+              </app-button>
+            </div>
+          </div>
+        }
+      </app-dialog-layout>
+    </div>
+  </ng-template>
+
+  <!-- Add Professional Certification Dialog Template (IMP-SA-05) -->
+  <ng-template #certificationDialog>
+    <form (ngSubmit)="saveCertification()" class="w-full">
+      <app-dialog-layout
+        title="Record Professional Certification / Admission"
+        primaryButtonLabel="Save Certification"
+        cancelButtonLabel="Cancel"
+        [disablePrimaryButton]="savingCertification()"
+        (onConfirmed)="saveCertification()">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 py-1">
+          <!-- Certification Title -->
+          <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+            <mat-label>Certification / Bar Admission Title</mat-label>
+            <input matInput [(ngModel)]="certificationForm.certification_name" name="certification_name" placeholder="e.g. Advocate of the High Court of Zanzibar" required />
+          </mat-form-field>
+
+          <!-- Issuing Authority -->
+          <mat-form-field appearance="outline" class="col-span-1 sm:col-span-2 w-full">
+            <mat-label>Issuing Body / Authority</mat-label>
+            <input matInput [(ngModel)]="certificationForm.issuing_body" name="issuing_body" placeholder="e.g. Zanzibar Legal Services Board, Tanganyika Law Society (TLS)" />
+          </mat-form-field>
+
+          <!-- Issue Date -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Issue / Admission Date</mat-label>
+            <input matInput [matDatepicker]="certIssuePicker" [(ngModel)]="certificationForm.issue_date" name="issue_date" placeholder="Choose issue date">
+            <mat-datepicker-toggle matIconSuffix [for]="certIssuePicker"></mat-datepicker-toggle>
+            <mat-datepicker #certIssuePicker></mat-datepicker>
+          </mat-form-field>
+
+          <!-- Expiry Date -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Expiry Date (Optional)</mat-label>
+            <input matInput [matDatepicker]="certExpiryPicker" [(ngModel)]="certificationForm.expiry_date" name="expiry_date" placeholder="Leave empty if permanent">
+            <mat-datepicker-toggle matIconSuffix [for]="certExpiryPicker"></mat-datepicker-toggle>
+            <mat-datepicker #certExpiryPicker></mat-datepicker>
+          </mat-form-field>
+
+          <!-- Certificate File Attachment -->
+          <div class="col-span-1 sm:col-span-2 py-2">
+            <label class="block text-xs font-semibold text-slate-700 mb-1.5">
+              Certificate Document / Practicing License (Optional)
+            </label>
+            <input
+              type="file"
+              (change)="onCertificationFileSelected($event)"
+              accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+              class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+            />
+            <p class="text-[11px] text-slate-500 mt-1">Accepted formats: PDF, PNG, JPG, DOCX (Max 25MB)</p>
+          </div>
+        </div>
+      </app-dialog-layout>
+    </form>
+  </ng-template>
+
+  <!-- View Professional Certification Dialog Template (IMP-SA-05) -->
+  <ng-template #viewCertificationDialog>
+    <div class="w-full">
+      <app-dialog-layout
+        title="Professional Certification Details"
+        [showPrimaryButton]="false"
+        cancelButtonLabel="Close"
+        (onCancelled)="closeViewCertificationDialog()">
+        @if (selectedCertification()) {
+          <div class="space-y-4 py-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="col-span-1 sm:col-span-2">
+                <detail-item label="Certification / Bar Admission" [value]="selectedCertification()?.certification_name" [fullWidth]="true"></detail-item>
+              </div>
+
+              <detail-item label="Issuing Body / Authority" [value]="selectedCertification()?.issuing_body || 'National Bar Authority'"></detail-item>
+
+              <detail-item label="Current Status">
+                <app-badge
+                  [variant]="selectedCertification()?.is_active ? 'success' : 'secondary'"
+                  [pill]="false"
+                  [text]="selectedCertification()?.is_active ? 'Active & Valid' : 'Expired / Inactive'">
+                </app-badge>
+              </detail-item>
+
+              <detail-item label="Issue Date" [value]="getFormattedDob(selectedCertification()?.issue_date)"></detail-item>
+
+              <detail-item label="Expiry Date" [value]="selectedCertification()?.expiry_date ? getFormattedDob(selectedCertification()?.expiry_date) : 'Permanent / No Expiry'"></detail-item>
+            </div>
+
+            @if (selectedCertification()?.certificate_document) {
+              <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <svg lucideAward class="size-5 text-blue-600 shrink-0"></svg>
+                  <div class="min-w-0">
+                    <p class="text-xs font-semibold text-slate-800">Practicing License / Certificate Document</p>
+                    <p class="text-[11px] text-slate-500 truncate" [title]="selectedCertification()?.certificate_document?.original_name">
+                      {{ selectedCertification()?.certificate_document?.original_name }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                  <app-button
+                    variant="outline"
+                    [icon]="eyeIcon"
+                    (btnClick)="onPreviewDocument(selectedCertification()?.certificate_document)">
+                    Preview
+                  </app-button>
+                  <app-button
+                    variant="primary"
+                    [icon]="downloadIcon"
+                    (btnClick)="onDownloadDocument(selectedCertification()?.certificate_document)">
+                    Download
+                  </app-button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </app-dialog-layout>
+    </div>
+  </ng-template>
+
+  <!-- Upload Document to Digital Dossier Dialog Template (IMP-SA-05) -->
+  <ng-template #uploadDossierDialog>
+    <form (ngSubmit)="saveDossierDocument()" class="w-full">
+      <app-dialog-layout
+        title="Upload Document to Digital Dossier"
+        primaryButtonLabel="Upload to Dossier"
+        cancelButtonLabel="Cancel"
+        [disablePrimaryButton]="uploadingDossier()"
+        (onConfirmed)="saveDossierDocument()">
+
+        <div class="space-y-4 py-1">
+          <!-- Document Category -->
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Dossier Document Category</mat-label>
+            <mat-select [(ngModel)]="dossierForm.document_type_id" name="document_type_id">
+              <mat-option [value]="''">-- General Personnel Document --</mat-option>
+              @for (dt of documentTypes(); track dt.id) {
+                <mat-option [value]="dt.id">{{ dt.type_name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <!-- File Input -->
+          <div class="p-4 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50/75 hover:bg-slate-50 transition-colors text-center">
+            <svg lucideUpload class="size-8 text-slate-400 mx-auto mb-2"></svg>
+            <p class="text-xs font-semibold text-slate-700 mb-1">Select Official Dossier File</p>
+            <p class="text-[11px] text-slate-500 mb-3">PDF, DOCX, PNG, JPG accepted (Up to 50MB)</p>
+            <input
+              type="file"
+              (change)="onDossierFileSelected($event)"
+              accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+              class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#d99414]/10 file:text-[#d99414] hover:file:bg-[#d99414]/20 cursor-pointer"
+              required
+            />
+          </div>
+
+          <!-- Mark as CV Checkbox -->
+          <div class="flex items-center gap-2 pt-1">
+            <input
+              type="checkbox"
+              id="is_cv_check"
+              [(ngModel)]="dossierForm.is_cv"
+              name="is_cv"
+              class="size-4 rounded border-slate-300 text-[#d99414] focus:ring-[#d99414] cursor-pointer"
+            />
+            <label for="is_cv_check" class="text-xs font-medium text-slate-700 cursor-pointer">
+              Designate this file as State Attorney's primary Curriculum Vitae (CV)
+            </label>
+          </div>
+        </div>
+      </app-dialog-layout>
+    </form>
+  </ng-template>
+
+  <!-- View Dossier Document Dialog Template (IMP-SA-05) -->
+  <ng-template #viewDossierDialog>
+    <div class="w-full">
+      <app-dialog-layout
+        title="Personnel Document Details"
+        [showPrimaryButton]="false"
+        cancelButtonLabel="Close"
+        (onCancelled)="closeViewDossierDialog()">
+        @if (selectedDossierDoc()) {
+          <div class="space-y-4 py-1">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="col-span-1 sm:col-span-2">
+                <detail-item label="Document Name" [value]="selectedDossierDoc()?.original_name" [fullWidth]="true" valueClass="break-all font-medium text-slate-900"></detail-item>
+              </div>
+
+              <detail-item label="Document Category">
+                <app-badge
+                  [variant]="getDocumentTypeBadgeVariant(selectedDossierDoc()?.document_type?.type_name)"
+                  [pill]="false"
+                  [text]="selectedDossierDoc()?.document_type?.type_name || 'General Personnel File'">
+                </app-badge>
+              </detail-item>
+
+              <detail-item label="File Size" [value]="selectedDossierDoc()?.file_size_formatted || '-'"></detail-item>
+
+              <detail-item label="Uploaded On" [value]="getFormattedDob(selectedDossierDoc()?.created_at)"></detail-item>
+
+              <detail-item label="Uploaded By" [value]="selectedDossierDoc()?.uploader?.name || selectedDossierDoc()?.uploader?.first_name || 'System Admin'"></detail-item>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-2 min-w-0">
+                <svg lucideFile class="size-5 text-slate-500 shrink-0"></svg>
+                <span class="text-xs font-medium text-slate-600 truncate" [title]="selectedDossierDoc()?.original_name">
+                  {{ selectedDossierDoc()?.original_name }}
+                </span>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <app-button
+                  variant="outline"
+                  [icon]="externalLinkIcon"
+                  (btnClick)="onPreviewDocument(selectedDossierDoc())">
+                  Preview in Tab
+                </app-button>
+                <app-button
+                  variant="primary"
+                  [icon]="downloadIcon"
+                  (btnClick)="onDownloadDocument(selectedDossierDoc())">
+                  Download File
+                </app-button>
+              </div>
+            </div>
+          </div>
+        }
+      </app-dialog-layout>
     </div>
   </ng-template>
 </div>

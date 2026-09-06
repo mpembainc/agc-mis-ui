@@ -5,7 +5,23 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { StateAttorneysService } from '../services/state-attorneys.service';
 import { AttorneyAssignmentsService } from '../services/attorney-assignments.service';
-import { StateAttorney, Mda, Grade, AttorneyAssignment } from '../models/state-attorney.model';
+import { AccomplishmentsService } from '../services/accomplishments.service';
+import { QualificationsDossierService } from '../services/qualifications-dossier.service';
+import {
+  StateAttorney,
+  Mda,
+  Grade,
+  AttorneyAssignment,
+  Accomplishment,
+  AccomplishmentType,
+  AccomplishmentStats,
+  AttorneyEducation,
+  AttorneyCertification,
+  DossierDocument,
+  DocumentTypeLookup,
+  QualificationsSummary,
+  DossierSummary,
+} from '../models/state-attorney.model';
 import { SwalService } from '@shared/services/swal.service';
 import { ButtonComponent } from '@shared/components/button/button.component';
 import { RemoveUnderscorePipe } from '@shared/pipes/remove-underscore.pipe';
@@ -31,6 +47,13 @@ import {
   LucideClock,
   LucideTrash2,
   LucideFileText,
+  LucideAward,
+  LucideHash,
+  LucideLayers,
+  LucideGraduationCap,
+  LucideUpload,
+  LucideDownload,
+  LucideFile,
 } from '@lucide/angular';
 import { toCapitalizedCase } from '@shared/utilities/utils';
 
@@ -77,6 +100,13 @@ import { DataTableComponent, TableColumn } from '@shared/components/data-table/d
     LucideClock,
     LucideTrash2,
     LucideFileText,
+    LucideAward,
+    LucideHash,
+    LucideLayers,
+    LucideGraduationCap,
+    LucideUpload,
+    LucideDownload,
+    LucideFile,
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './attorney-view.component.html',
@@ -87,6 +117,14 @@ export class AttorneyViewComponent implements OnInit {
   @ViewChild('previewDialog') previewDialogTpl!: TemplateRef<any>;
   @ViewChild('assignWorkDialog') assignWorkDialogTpl!: TemplateRef<any>;
   @ViewChild('viewAssignmentDialog') viewAssignmentDialogTpl!: TemplateRef<any>;
+  @ViewChild('logAccomplishmentDialog') logAccomplishmentDialogTpl!: TemplateRef<any>;
+  @ViewChild('viewAccomplishmentDialog') viewAccomplishmentDialogTpl!: TemplateRef<any>;
+  @ViewChild('educationDialog') educationDialogTpl!: TemplateRef<any>;
+  @ViewChild('viewEducationDialog') viewEducationDialogTpl!: TemplateRef<any>;
+  @ViewChild('certificationDialog') certificationDialogTpl!: TemplateRef<any>;
+  @ViewChild('viewCertificationDialog') viewCertificationDialogTpl!: TemplateRef<any>;
+  @ViewChild('uploadDossierDialog') uploadDossierDialogTpl!: TemplateRef<any>;
+  @ViewChild('viewDossierDialog') viewDossierDialogTpl!: TemplateRef<any>;
 
   protected readonly editIcon = LucidePencil;
   protected readonly cameraIcon = LucideCamera;
@@ -98,11 +136,20 @@ export class AttorneyViewComponent implements OnInit {
   protected readonly clockIcon = LucideClock;
   protected readonly trashIcon = LucideTrash2;
   protected readonly fileTextIcon = LucideFileText;
+  protected readonly awardIcon = LucideAward;
+  protected readonly hashIcon = LucideHash;
+  protected readonly layersIcon = LucideLayers;
+  protected readonly graduationCapIcon = LucideGraduationCap;
+  protected readonly uploadIcon = LucideUpload;
+  protected readonly downloadIcon = LucideDownload;
+  protected readonly fileIcon = LucideFile;
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private service = inject(StateAttorneysService);
   private assignmentsService = inject(AttorneyAssignmentsService);
+  private accomplishmentsService = inject(AccomplishmentsService);
+  private qualificationsService = inject(QualificationsDossierService);
   private swalService = inject(SwalService);
   private dialog = inject(MatDialog);
 
@@ -111,6 +158,115 @@ export class AttorneyViewComponent implements OnInit {
   uploadingAvatar = signal(false);
   avatarError = signal(false);
   activeTab = 'profile';
+
+  // Accomplishments state
+  accomplishments = signal<Accomplishment[]>([]);
+  accomplishmentTypes = signal<AccomplishmentType[]>([]);
+  accomplishmentStats = signal<AccomplishmentStats | null>(null);
+  loadingAccomplishments = signal(false);
+  savingAccomplishment = signal(false);
+  selectedAccomplishment = signal<Accomplishment | null>(null);
+  private logAccomplishmentDialogRef: MatDialogRef<any> | null = null;
+  private viewAccomplishmentDialogRef: MatDialogRef<any> | null = null;
+
+  accomplishmentForm = {
+    type_id: '',
+    entity_type: 'contract',
+    entity_id: '',
+    quantity: 1,
+    date: new Date().toISOString().split('T')[0] as any,
+    description: '',
+  };
+
+  accomplishmentColumns: TableColumn[] = [
+    { key: 'date', label: 'Output Date', type: 'date' },
+    { key: 'type', label: 'Deliverable Type' },
+    { key: 'matter', label: 'Related Matter' },
+    { key: 'description', label: 'Description & Scope' },
+    { key: 'quantity', label: 'Units' },
+  ];
+
+  // Qualifications & Credentials state (IMP-SA-05)
+  educationList = signal<AttorneyEducation[]>([]);
+  certificationsList = signal<AttorneyCertification[]>([]);
+  qualificationsSummary = signal<QualificationsSummary | null>(null);
+  loadingQualifications = signal(false);
+  savingEducation = signal(false);
+  savingCertification = signal(false);
+  selectedEducation = signal<AttorneyEducation | null>(null);
+  selectedCertification = signal<AttorneyCertification | null>(null);
+  private educationDialogRef: MatDialogRef<any> | null = null;
+  private viewEducationDialogRef: MatDialogRef<any> | null = null;
+  private certificationDialogRef: MatDialogRef<any> | null = null;
+  private viewCertificationDialogRef: MatDialogRef<any> | null = null;
+
+  educationLevels = [
+    'Certificate',
+    'Diploma',
+    'Post-Graduate Diploma',
+    'Bachelor Degree',
+    'Master Degree',
+    'Doctorate (PhD)',
+  ];
+
+  educationForm = {
+    institution_name: '',
+    education_level: 'Bachelor Degree',
+    degree: '',
+    graduation_year: new Date().getFullYear(),
+    certificate_file: null as File | null,
+  };
+
+  certificationForm = {
+    certification_name: '',
+    issuing_body: '',
+    issue_date: '' as any,
+    expiry_date: '' as any,
+    is_active: true,
+    certificate_file: null as File | null,
+  };
+
+  educationColumns: TableColumn[] = [
+    { key: 'degree', label: 'Degree & Programme' },
+    { key: 'institution_name', label: 'Institution' },
+    { key: 'education_level', label: 'Level' },
+    { key: 'graduation_year', label: 'Graduation Year' },
+    { key: 'certificate', label: 'Certificate' },
+    { key: 'is_verified', label: 'Status' },
+  ];
+
+  certificationColumns: TableColumn[] = [
+    { key: 'certification_name', label: 'Certification / Admission' },
+    { key: 'issuing_body', label: 'Issuing Authority' },
+    { key: 'issue_date', label: 'Issue Date', type: 'date' },
+    { key: 'expiry_date', label: 'Expiry Date', type: 'date' },
+    { key: 'is_active', label: 'Status' },
+    { key: 'certificate', label: 'Attachment' },
+  ];
+
+  // Digital Dossier state (IMP-SA-05)
+  dossierDocuments = signal<DossierDocument[]>([]);
+  documentTypes = signal<DocumentTypeLookup[]>([]);
+  dossierSummary = signal<DossierSummary | null>(null);
+  loadingDossier = signal(false);
+  uploadingDossier = signal(false);
+  selectedDossierDoc = signal<DossierDocument | null>(null);
+  private uploadDossierDialogRef: MatDialogRef<any> | null = null;
+  private viewDossierDialogRef: MatDialogRef<any> | null = null;
+
+  dossierForm = {
+    document_type_id: '',
+    is_cv: false,
+    file: null as File | null,
+  };
+
+  dossierColumns: TableColumn[] = [
+    { key: 'original_name', label: 'Document Name' },
+    { key: 'category', label: 'Category' },
+    { key: 'size_bytes', label: 'File Size' },
+    { key: 'created_at', label: 'Uploaded On', type: 'date' },
+    { key: 'uploaded_by', label: 'Uploaded By' },
+  ];
 
   private previewDialogRef: MatDialogRef<any> | null = null;
   private assignDialogRef: MatDialogRef<any> | null = null;
@@ -185,7 +341,23 @@ export class AttorneyViewComponent implements OnInit {
     this.service.getAttorney(id).subscribe({
       next: (res) => {
         this.attorney = res.data;
+        if (res.data.accomplishments) {
+          this.accomplishments.set(res.data.accomplishments);
+        }
+        if (res.data.education) {
+          this.educationList.set(res.data.education);
+        }
+        if (res.data.certifications) {
+          this.certificationsList.set(res.data.certifications);
+        }
+        if (res.data.dossier_documents) {
+          this.dossierDocuments.set(res.data.dossier_documents);
+        }
         this.loading.set(false);
+        this.loadAccomplishmentData(id);
+        this.loadQualificationsData(id);
+        this.loadDossierData(id);
+        this.loadDocumentTypes();
       },
       error: () => {
         this.loading.set(false);
@@ -195,22 +367,23 @@ export class AttorneyViewComponent implements OnInit {
     });
   }
 
-  getMdaName(id?: string): string {
+  getMdaName(id?: string | null): string {
     if (!id) return '-';
     const mda = this.mdas.find((m) => m.id === id);
     return mda ? `${mda.code} - ${mda.name}` : '-';
   }
 
-  getGradeName(id?: string): string {
+  getGradeName(id?: string | null): string {
     if (!id) return '-';
     const grade = this.grades.find((g) => g.id === id);
     return grade ? grade.grade_name : '-';
   }
 
-  getFormattedDob(dob?: string): string {
+  getFormattedDob(dob?: string | null): string {
     if (!dob) return '-';
     try {
       const date = new Date(dob);
+      if (isNaN(date.getTime())) return dob;
       return date.toLocaleDateString('en-GB', {
         day: '2-digit',
         month: 'long',
@@ -221,7 +394,7 @@ export class AttorneyViewComponent implements OnInit {
     }
   }
 
-  getStatusVariant(status?: string): BadgeVariant {
+  getStatusVariant(status?: string | null): BadgeVariant {
     switch (status?.toLowerCase()) {
       case 'active':
         return 'success';
@@ -240,7 +413,7 @@ export class AttorneyViewComponent implements OnInit {
     }
   }
 
-  getAssignmentStatusVariant(status?: string): BadgeVariant {
+  getAssignmentStatusVariant(status?: string | null): BadgeVariant {
     switch (status?.toLowerCase()) {
       case 'completed':
       case 'closed':
@@ -255,7 +428,7 @@ export class AttorneyViewComponent implements OnInit {
     }
   }
 
-  getInitials(name?: string): string {
+  getInitials(name?: string | null): string {
     if (!name) return 'SA';
     const parts = name.trim().split(/\s+/);
     if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
@@ -356,8 +529,8 @@ export class AttorneyViewComponent implements OnInit {
     this.fileInputRef?.nativeElement?.click();
   }
 
-  formatName(name?: string): string {
-    return toCapitalizedCase(name);
+  formatName(name?: string | null): string {
+    return toCapitalizedCase(name || '');
   }
 
   openAssignWorkDialog(): void {
@@ -519,7 +692,7 @@ export class AttorneyViewComponent implements OnInit {
     }
   }
 
-  getEntityTypeVariant(type?: string): BadgeVariant {
+  getEntityTypeVariant(type?: string | null): BadgeVariant {
     switch (type?.toLowerCase()) {
       case 'contract':
         return 'primary';
@@ -536,7 +709,7 @@ export class AttorneyViewComponent implements OnInit {
     }
   }
 
-  formatEntityType(type?: string): string {
+  formatEntityType(type?: string | null): string {
     switch (type?.toLowerCase()) {
       case 'contract':
         return 'Contract';
@@ -551,5 +724,558 @@ export class AttorneyViewComponent implements OnInit {
       default:
         return type ? toCapitalizedCase(type) : 'General';
     }
+  }
+
+  // ── Accomplishments & Task Outputs Methods ──
+
+  loadAccomplishmentData(attorneyId: string): void {
+    this.loadingAccomplishments.set(true);
+    this.accomplishmentsService.getAccomplishments({ attorney_id: attorneyId, per_page: 100 }).subscribe({
+      next: (res) => {
+        this.accomplishments.set(res.data.data || []);
+        this.loadingAccomplishments.set(false);
+      },
+      error: () => {
+        this.loadingAccomplishments.set(false);
+      },
+    });
+
+    this.accomplishmentsService.getAccomplishmentTypes().subscribe({
+      next: (res) => {
+        this.accomplishmentTypes.set(res.data || []);
+      },
+    });
+
+    this.accomplishmentsService.getAccomplishmentStats(attorneyId).subscribe({
+      next: (res) => {
+        this.accomplishmentStats.set(res.data);
+      },
+    });
+  }
+
+  openLogAccomplishmentDialog(): void {
+    this.accomplishmentForm = {
+      type_id: this.accomplishmentTypes().length ? this.accomplishmentTypes()[0].id : '',
+      entity_type: 'contract',
+      entity_id: '',
+      quantity: 1,
+      date: new Date().toISOString().split('T')[0] as any,
+      description: '',
+    };
+
+    if (this.availableContracts().length === 0) {
+      this.loadAvailableContracts();
+    }
+
+    this.logAccomplishmentDialogRef = this.dialog.open(this.logAccomplishmentDialogTpl, {
+      width: '560px',
+      panelClass: 'custom-dialog-container',
+      disableClose: true,
+    });
+  }
+
+  closeLogAccomplishmentDialog(): void {
+    this.logAccomplishmentDialogRef?.close();
+    this.logAccomplishmentDialogRef = null;
+  }
+
+  saveAccomplishment(): void {
+    if (!this.attorney?.id) return;
+
+    if (!this.accomplishmentForm.type_id) {
+      this.swalService.error('Please select an accomplishment type.');
+      return;
+    }
+
+    if (!this.accomplishmentForm.description?.trim()) {
+      this.swalService.error('Please provide a description or deliverable scope.');
+      return;
+    }
+
+    if (!this.accomplishmentForm.date) {
+      this.swalService.error('Please select the date of completion.');
+      return;
+    }
+
+    const payload: Partial<Accomplishment> = {
+      attorney_id: this.attorney.id,
+      type_id: this.accomplishmentForm.type_id,
+      entity_type: this.accomplishmentForm.entity_type,
+      entity_id: this.accomplishmentForm.entity_id || null,
+      quantity: Number(this.accomplishmentForm.quantity) || 1,
+      date: this.accomplishmentForm.date,
+      description: this.accomplishmentForm.description.trim(),
+    };
+
+    this.savingAccomplishment.set(true);
+    this.accomplishmentsService.createAccomplishment(payload).subscribe({
+      next: () => {
+        this.savingAccomplishment.set(false);
+        this.swalService.successToast('Accomplishment recorded successfully.');
+        this.closeLogAccomplishmentDialog();
+        if (this.attorney?.id) {
+          this.loadAccomplishmentData(this.attorney.id);
+        }
+      },
+      error: (err) => {
+        this.savingAccomplishment.set(false);
+        const msg = err.error?.message || 'Failed to record accomplishment.';
+        this.swalService.error(msg);
+      },
+    });
+  }
+
+  onViewAccomplishment(row: Accomplishment): void {
+    this.selectedAccomplishment.set(row);
+    this.viewAccomplishmentDialogRef = this.dialog.open(this.viewAccomplishmentDialogTpl, {
+      width: '540px',
+      panelClass: 'custom-dialog-container',
+    });
+  }
+
+  closeViewAccomplishmentDialog(): void {
+    this.viewAccomplishmentDialogRef?.close();
+    this.viewAccomplishmentDialogRef = null;
+    this.selectedAccomplishment.set(null);
+  }
+
+  async onDeleteAccomplishment(item: Accomplishment): Promise<void> {
+    const result = await this.swalService.confirm(
+      'Are you sure you want to delete this recorded accomplishment output?',
+      'Delete Accomplishment',
+      'Yes, Delete'
+    );
+
+    if (result?.isConfirmed) {
+      this.accomplishmentsService.deleteAccomplishment(item.id).subscribe({
+        next: () => {
+          this.swalService.successToast('Accomplishment deleted successfully.');
+          if (this.attorney?.id) {
+            this.loadAccomplishmentData(this.attorney.id);
+          }
+        },
+        error: () => this.swalService.error('Failed to delete accomplishment.'),
+      });
+    }
+  }
+
+  getAccomplishmentTypeBadgeVariant(typeName?: string | null): BadgeVariant {
+    const lower = typeName?.toLowerCase() || '';
+    if (lower.includes('advice') || lower.includes('opinion')) return 'primary';
+    if (lower.includes('contract') || lower.includes('vetting')) return 'success';
+    if (lower.includes('court') || lower.includes('litigation')) return 'warning';
+    if (lower.includes('bill') || lower.includes('drafting')) return 'purple';
+    if (lower.includes('committee') || lower.includes('taskforce')) return 'neutral';
+    return 'secondary';
+  }
+
+  // ── Qualifications & Digital Dossier Methods (IMP-SA-05) ──
+
+  loadQualificationsData(attorneyId: string): void {
+    this.loadingQualifications.set(true);
+    this.qualificationsService.getQualifications(attorneyId).subscribe({
+      next: (res) => {
+        this.educationList.set(res.data.education || []);
+        this.certificationsList.set(res.data.certifications || []);
+        this.qualificationsSummary.set(res.data.summary);
+        this.loadingQualifications.set(false);
+      },
+      error: () => this.loadingQualifications.set(false),
+    });
+  }
+
+  loadDossierData(attorneyId: string): void {
+    this.loadingDossier.set(true);
+    this.qualificationsService.getDossier(attorneyId).subscribe({
+      next: (res) => {
+        this.dossierDocuments.set(res.data.documents || []);
+        this.dossierSummary.set(res.data.summary);
+        this.loadingDossier.set(false);
+      },
+      error: () => this.loadingDossier.set(false),
+    });
+  }
+
+  loadDocumentTypes(): void {
+    if (this.documentTypes().length > 0) return;
+    this.qualificationsService.getDocumentTypes().subscribe({
+      next: (res) => this.documentTypes.set(res.data || []),
+    });
+  }
+
+  // Academic Education Handlers
+  openAddEducationDialog(): void {
+    this.educationForm = {
+      institution_name: '',
+      education_level: 'Bachelor Degree',
+      degree: '',
+      graduation_year: new Date().getFullYear(),
+      certificate_file: null,
+    };
+    this.educationDialogRef = this.dialog.open(this.educationDialogTpl, {
+      width: '560px',
+      panelClass: 'custom-dialog-container',
+      disableClose: true,
+    });
+  }
+
+  closeEducationDialog(): void {
+    this.educationDialogRef?.close();
+    this.educationDialogRef = null;
+  }
+
+  onEducationFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.educationForm.certificate_file = input.files[0];
+    }
+  }
+
+  saveEducation(): void {
+    if (!this.attorney?.id) return;
+    if (!this.educationForm.degree?.trim()) {
+      this.swalService.error('Please enter the degree or programme title.');
+      return;
+    }
+    if (!this.educationForm.institution_name?.trim()) {
+      this.swalService.error('Please enter the educational institution name.');
+      return;
+    }
+    if (!this.educationForm.graduation_year) {
+      this.swalService.error('Please enter a valid graduation year.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('degree', this.educationForm.degree.trim());
+    formData.append('institution_name', this.educationForm.institution_name.trim());
+    formData.append('education_level', this.educationForm.education_level);
+    formData.append('graduation_year', String(this.educationForm.graduation_year));
+    if (this.educationForm.certificate_file) {
+      formData.append('certificate_file', this.educationForm.certificate_file);
+    }
+
+    this.savingEducation.set(true);
+    this.qualificationsService.addEducation(this.attorney.id, formData).subscribe({
+      next: () => {
+        this.savingEducation.set(false);
+        this.swalService.successToast('Academic qualification added successfully.');
+        this.closeEducationDialog();
+        if (this.attorney?.id) {
+          this.loadQualificationsData(this.attorney.id);
+          this.loadDossierData(this.attorney.id);
+        }
+      },
+      error: (err) => {
+        this.savingEducation.set(false);
+        this.swalService.error(err.error?.message || 'Failed to add academic qualification.');
+      },
+    });
+  }
+
+  onViewEducation(row: AttorneyEducation): void {
+    this.selectedEducation.set(row);
+    this.viewEducationDialogRef = this.dialog.open(this.viewEducationDialogTpl, {
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'custom-dialog-container',
+    });
+  }
+
+  closeViewEducationDialog(): void {
+    this.viewEducationDialogRef?.close();
+    this.viewEducationDialogRef = null;
+    this.selectedEducation.set(null);
+  }
+
+  async onVerifyEducation(item: AttorneyEducation): Promise<void> {
+    if (!this.attorney?.id) return;
+    const targetStatus = !item.is_verified;
+    const action = targetStatus ? 'Verify' : 'Unverify';
+    const result = await this.swalService.confirm(
+      `Are you sure you want to ${action.toLowerCase()} this academic qualification?`,
+      `${action} Qualification`,
+      `Yes, ${action}`
+    );
+
+    if (result?.isConfirmed) {
+      this.qualificationsService.verifyEducation(this.attorney.id, item.id, targetStatus).subscribe({
+        next: () => {
+          this.swalService.successToast(`Qualification ${action.toLowerCase()}ed successfully.`);
+          if (this.attorney?.id) {
+            this.loadQualificationsData(this.attorney.id);
+          }
+          if (this.selectedEducation()) {
+            this.selectedEducation.update((prev) => (prev ? { ...prev, is_verified: targetStatus } : null));
+          }
+        },
+        error: (err) => this.swalService.error(err.error?.message || 'Failed to update verification status.'),
+      });
+    }
+  }
+
+  async onDeleteEducation(item: AttorneyEducation): Promise<void> {
+    if (!this.attorney?.id) return;
+    const result = await this.swalService.confirm(
+      'Are you sure you want to delete this academic qualification?',
+      'Delete Qualification',
+      'Yes, Delete'
+    );
+
+    if (result?.isConfirmed) {
+      this.qualificationsService.deleteEducation(this.attorney.id, item.id).subscribe({
+        next: () => {
+          this.swalService.successToast('Academic qualification deleted successfully.');
+          if (this.attorney?.id) {
+            this.loadQualificationsData(this.attorney.id);
+          }
+        },
+        error: () => this.swalService.error('Failed to delete qualification.'),
+      });
+    }
+  }
+
+  // Professional Certification Handlers
+  openAddCertificationDialog(): void {
+    this.certificationForm = {
+      certification_name: '',
+      issuing_body: '',
+      issue_date: '' as any,
+      expiry_date: '' as any,
+      is_active: true,
+      certificate_file: null,
+    };
+    this.certificationDialogRef = this.dialog.open(this.certificationDialogTpl, {
+      width: '560px',
+      panelClass: 'custom-dialog-container',
+      disableClose: true,
+    });
+  }
+
+  closeCertificationDialog(): void {
+    this.certificationDialogRef?.close();
+    this.certificationDialogRef = null;
+  }
+
+  onCertificationFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.certificationForm.certificate_file = input.files[0];
+    }
+  }
+
+  saveCertification(): void {
+    if (!this.attorney?.id) return;
+    if (!this.certificationForm.certification_name?.trim()) {
+      this.swalService.error('Please enter the certification or bar admission title.');
+      return;
+    }
+
+    const formatDate = (val: any) => {
+      if (!val) return '';
+      if (val instanceof Date) {
+        return val.toISOString().split('T')[0];
+      }
+      return typeof val === 'string' && val.length > 10 ? val.substring(0, 10) : val;
+    };
+
+    const formData = new FormData();
+    formData.append('certification_name', this.certificationForm.certification_name.trim());
+    if (this.certificationForm.issuing_body?.trim()) {
+      formData.append('issuing_body', this.certificationForm.issuing_body.trim());
+    }
+    if (this.certificationForm.issue_date) {
+      formData.append('issue_date', formatDate(this.certificationForm.issue_date));
+    }
+    if (this.certificationForm.expiry_date) {
+      formData.append('expiry_date', formatDate(this.certificationForm.expiry_date));
+    }
+    formData.append('is_active', this.certificationForm.is_active ? '1' : '0');
+    if (this.certificationForm.certificate_file) {
+      formData.append('certificate_file', this.certificationForm.certificate_file);
+    }
+
+    this.savingCertification.set(true);
+    this.qualificationsService.addCertification(this.attorney.id, formData).subscribe({
+      next: () => {
+        this.savingCertification.set(false);
+        this.swalService.successToast('Professional certification recorded successfully.');
+        this.closeCertificationDialog();
+        if (this.attorney?.id) {
+          this.loadQualificationsData(this.attorney.id);
+          this.loadDossierData(this.attorney.id);
+        }
+      },
+      error: (err) => {
+        this.savingCertification.set(false);
+        this.swalService.error(err.error?.message || 'Failed to add professional certification.');
+      },
+    });
+  }
+
+  onViewCertification(row: AttorneyCertification): void {
+    this.selectedCertification.set(row);
+    this.viewCertificationDialogRef = this.dialog.open(this.viewCertificationDialogTpl, {
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'custom-dialog-container',
+    });
+  }
+
+  closeViewCertificationDialog(): void {
+    this.viewCertificationDialogRef?.close();
+    this.viewCertificationDialogRef = null;
+    this.selectedCertification.set(null);
+  }
+
+  async onDeleteCertification(item: AttorneyCertification): Promise<void> {
+    if (!this.attorney?.id) return;
+    const result = await this.swalService.confirm(
+      'Are you sure you want to delete this professional certification?',
+      'Delete Certification',
+      'Yes, Delete'
+    );
+
+    if (result?.isConfirmed) {
+      this.qualificationsService.deleteCertification(this.attorney.id, item.id).subscribe({
+        next: () => {
+          this.swalService.successToast('Professional certification deleted successfully.');
+          if (this.attorney?.id) {
+            this.loadQualificationsData(this.attorney.id);
+          }
+        },
+        error: () => this.swalService.error('Failed to delete certification.'),
+      });
+    }
+  }
+
+  // Digital Dossier Handlers
+  openUploadDossierDialog(): void {
+    this.loadDocumentTypes();
+    this.dossierForm = {
+      document_type_id: this.documentTypes().length > 0 ? this.documentTypes()[0].id : '',
+      is_cv: false,
+      file: null,
+    };
+    this.uploadDossierDialogRef = this.dialog.open(this.uploadDossierDialogTpl, {
+      width: '560px',
+      panelClass: 'custom-dialog-container',
+      disableClose: true,
+    });
+  }
+
+  closeUploadDossierDialog(): void {
+    this.uploadDossierDialogRef?.close();
+    this.uploadDossierDialogRef = null;
+  }
+
+  onDossierFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.dossierForm.file = input.files[0];
+    }
+  }
+
+  saveDossierDocument(): void {
+    if (!this.attorney?.id) return;
+    if (!this.dossierForm.file) {
+      this.swalService.error('Please choose a file to upload to the dossier.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', this.dossierForm.file);
+    if (this.dossierForm.document_type_id) {
+      formData.append('document_type_id', this.dossierForm.document_type_id);
+    }
+    if (this.dossierForm.is_cv) {
+      formData.append('is_cv', '1');
+    }
+
+    this.uploadingDossier.set(true);
+    this.qualificationsService.uploadDossierDocument(this.attorney.id, formData).subscribe({
+      next: () => {
+        this.uploadingDossier.set(false);
+        this.swalService.successToast('Document uploaded to digital dossier.');
+        this.closeUploadDossierDialog();
+        if (this.attorney?.id) {
+          this.loadDossierData(this.attorney.id);
+        }
+      },
+      error: (err) => {
+        this.uploadingDossier.set(false);
+        this.swalService.error(err.error?.message || 'Failed to upload document.');
+      },
+    });
+  }
+
+  onViewDossierDoc(row: DossierDocument): void {
+    this.selectedDossierDoc.set(row);
+    this.viewDossierDialogRef = this.dialog.open(this.viewDossierDialogTpl, {
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: 'custom-dialog-container',
+    });
+  }
+
+  closeViewDossierDialog(): void {
+    this.viewDossierDialogRef?.close();
+    this.viewDossierDialogRef = null;
+    this.selectedDossierDoc.set(null);
+  }
+
+  onDownloadDocument(doc?: DossierDocument | null): void {
+    if (!doc?.id) return;
+    this.qualificationsService.downloadDocument(doc.id).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = doc.original_name || 'document';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => this.swalService.error('Failed to download document file.'),
+    });
+  }
+
+  onPreviewDocument(doc?: DossierDocument | null): void {
+    if (!doc?.id) return;
+    const url = this.qualificationsService.getDocumentViewUrl(doc.id);
+    window.open(url, '_blank');
+  }
+
+  async onDeleteDossierDoc(doc: DossierDocument): Promise<void> {
+    if (!this.attorney?.id) return;
+    const result = await this.swalService.confirm(
+      `Are you sure you want to delete "${doc.original_name}" from the digital dossier?`,
+      'Delete Document',
+      'Yes, Delete'
+    );
+
+    if (result?.isConfirmed) {
+      this.qualificationsService.deleteDossierDocument(this.attorney.id, doc.id).subscribe({
+        next: () => {
+          this.swalService.successToast('Document removed from digital dossier.');
+          if (this.attorney?.id) {
+            this.loadDossierData(this.attorney.id);
+          }
+        },
+        error: () => this.swalService.error('Failed to delete dossier document.'),
+      });
+    }
+  }
+
+  getDocumentTypeBadgeVariant(typeName?: string | null): BadgeVariant {
+    const lower = typeName?.toLowerCase() || '';
+    if (lower.includes('academic') || lower.includes('degree')) return 'primary';
+    if (lower.includes('bar') || lower.includes('practicing')) return 'success';
+    if (lower.includes('appointment') || lower.includes('gazette')) return 'warning';
+    if (lower.includes('cv') || lower.includes('curriculum')) return 'purple';
+    if (lower.includes('oath') || lower.includes('allegiance')) return 'neutral';
+    if (lower.includes('id') || lower.includes('zanid')) return 'info';
+    return 'secondary';
   }
 }
