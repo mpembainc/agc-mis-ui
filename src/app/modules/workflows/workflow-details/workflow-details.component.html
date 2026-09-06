@@ -1,15 +1,14 @@
-<div class="font-figtree animate-fade-in">
+<div class="animate-fade-in">
   <app-header
     title="Workflow Details"
-    subTitle="Review workflow progress, task history, and transition actions."
-    [canGoBack]="true">
+    subTitle="Review workflow progress, task history, and transition actions.">
     @if (workflow) {
       <span header-badge [class]="'px-2.5 py-0.5 rounded-full text-xs font-semibold border ' + getStatusColorClass(workflow.current_state)">
         {{ capitalize(workflow.current_state) }}
       </span>
     }
     <button mat-stroked-button color="primary" routerLink="/workflows/my-tasks" class="flex items-center gap-1">
-      <mat-icon class="text-[18px] w-[18px] h-[18px] leading-[18px]">arrow_back</mat-icon>
+      <mat-icon class="text-[18px] w-4.5 h-4.5 leading-4.5">arrow_back</mat-icon>
       Back to Tasks
     </button>
   </app-header>
@@ -28,11 +27,9 @@
         <!-- Entity Details Card -->
         <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
           <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-            <h2 class="text-sm font-semibold text-slate-800 flex items-center gap-2">
-              <mat-icon class="text-[20px] text-slate-600 leading-[20px]">info</mat-icon>
+            <h2 class="text-base font-semibold text-slate-800 flex items-center gap-2">
               Associated {{ capitalize(workflow.entity_type) }} Information
             </h2>
-            <span class="text-xs text-slate-500 font-mono">ID: {{ workflow.entity_id }}</span>
           </div>
           
           <div class="p-6">
