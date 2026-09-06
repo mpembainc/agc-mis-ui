@@ -40,15 +40,9 @@
                 <detail-item label="Subject Matter" [value]="entity.subject_matter || 'N/A'" class="md:col-span-2" [multiline]="true"></detail-item>
                 <detail-item label="Contract Value" [value]="formatCurrency(entity.value)"></detail-item>
                 <detail-item label="Interest Flag">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium border"
-                        [class.bg-red-50]="entity.strategic_interest_flag"
-                        [class.text-red-700]="entity.strategic_interest_flag"
-                        [class.border-red-200]="entity.strategic_interest_flag"
-                        [class.bg-slate-100]="!entity.strategic_interest_flag"
-                        [class.text-slate-700]="!entity.strategic_interest_flag"
-                        [class.border-slate-200]="!entity.strategic_interest_flag">
+                  <app-badge [variant]="entity.strategic_interest_flag ? 'danger' : 'secondary'">
                     {{ entity.strategic_interest_flag ? 'Strategic Interest' : 'Normal Priority' }}
-                  </span>
+                  </app-badge>
                 </detail-item>
                 <detail-item label="Duration" [value]="entity.duration_months ? (entity.duration_months + ' Months') : 'N/A'"></detail-item>
                 <detail-item label="Submission Date" [value]="formatDate(entity.submission_date)"></detail-item>

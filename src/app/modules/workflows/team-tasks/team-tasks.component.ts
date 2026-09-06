@@ -12,6 +12,7 @@ import { SwalService } from '@shared/services/swal.service';
 import { forkJoin, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { HeaderComponent } from '@shared/components/header/header.component';
+import { BadgeComponent, BadgeVariant } from '@shared/components/badge/badge.component';
 
 interface TaskRow {
   id: string; // instance id
@@ -33,6 +34,7 @@ interface TaskRow {
     MatIconModule,
     DataTableComponent,
     HeaderComponent,
+    BadgeComponent,
   ],
   templateUrl: './team-tasks.component.html',
   styleUrls: ['./team-tasks.component.scss'],
@@ -195,6 +197,37 @@ export class TeamTasksComponent implements OnInit {
   }
 
   // --- UI Helpers ---
+
+  getModuleLabel(type: string): string {
+    if (!type) return '';
+    if (type === 'contract') return 'Contract';
+    if (type === 'leave_request') return 'Leave';
+    return this.capitalize(type);
+  }
+
+  getStatusVariant(status: string): BadgeVariant {
+    switch (status?.toLowerCase()) {
+      case 'draft':
+      case 'pending':
+        return 'warning';
+      case 'submitted':
+      case 'under_review':
+        return 'primary';
+      case 'approved':
+      case 'signed':
+      case 'active':
+        return 'success';
+      case 'rejected':
+        return 'danger';
+      case 'completed':
+        return 'purple';
+      case 'cancelled':
+      case 'terminated':
+        return 'secondary';
+      default:
+        return 'secondary';
+    }
+  }
 
   capitalize(str: string): string {
     if (!str) return '';
