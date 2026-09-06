@@ -34,7 +34,7 @@ export class BadgeComponent {
   @Input() containerClass: string = '';
 
   get classList(): string {
-    const base = 'inline-flex items-center px-2.5 py-0.5 text-xs font-medium border';
+    const base = 'inline-flex items-center px-1.5 py-0.5 text-xs font-medium border';
     const shape = this.pill ? 'rounded-full' : 'rounded';
 
     const variantClass: Record<string, string> = {

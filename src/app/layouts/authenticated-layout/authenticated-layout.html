@@ -79,7 +79,7 @@
       <div class="flex items-center gap-2 md:gap-4">
         <!-- Notification Icon with Dynamic Count -->
         <div class="icon-badge-container" [matMenuTriggerFor]="notificationsMenu" aria-label="Open notifications">
-          <svg lucideBell class="size-[22px] text-white"></svg>
+          <svg lucideBell class="size-5.5 text-white"></svg>
           @if (notificationsService.unreadCount() > 0) {
             <span class="badge">{{ notificationsService.unreadCount() }}</span>
           }

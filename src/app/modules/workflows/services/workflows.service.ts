@@ -67,14 +67,21 @@ export class WorkflowsService {
 
   // --- Workflow State Transitions ---
 
-  transitionContract(id: string, status: string): Observable<ApiResponse<any>> {
-    return this.http.put<ApiResponse<any>>(`${environment.apiUrl}/contracts/${id}`, { status });
+  transitionContract(id: string, status: string, remarks?: string): Observable<ApiResponse<any>> {
+    const payload: any = { status };
+    if (remarks !== undefined && remarks !== null && remarks.trim() !== '') {
+      payload.remarks = remarks;
+      payload.comments = remarks;
+    }
+    return this.http.put<ApiResponse<any>>(`${environment.apiUrl}/contracts/${id}`, payload);
   }
 
   transitionLeaveRequest(id: string, status: string, remarks?: string): Observable<ApiResponse<any>> {
     const payload: any = { status };
-    if (remarks !== undefined) {
+    if (remarks !== undefined && remarks !== null && remarks.trim() !== '') {
       payload.approver_remarks = remarks;
+      payload.remarks = remarks;
+      payload.comments = remarks;
     }
     return this.http.put<ApiResponse<any>>(`${environment.apiUrl}/leave-requests/${id}`, payload);
   }

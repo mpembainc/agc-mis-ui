@@ -1,10 +1,12 @@
 <button
   [type]="type"
-  [disabled]="disabled"
+  [disabled]="disabled || loading"
   [class]="buttonClasses"
   (click)="onClick($event)"
 >
-  @if (icon) {
+  @if (loading) {
+    <svg [lucideIcon]="loaderIcon" class="size-4 animate-spin"></svg>
+  } @else if (icon) {
     <svg [lucideIcon]="icon" class="size-4"></svg>
   }
   <span>

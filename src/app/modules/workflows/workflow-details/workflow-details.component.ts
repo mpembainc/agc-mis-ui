@@ -2,7 +2,6 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -15,7 +14,19 @@ import { SwalService } from '@shared/services/swal.service';
 import { catchError, forkJoin, of } from 'rxjs';
 import { HeaderComponent } from '@shared/components/header/header.component';
 import { DetailItemComponent } from '@shared/components/detail-item/detail-item.component';
-import { BadgeComponent } from '@shared/components/badge/badge.component';
+import { BadgeComponent, BadgeVariant } from '@shared/components/badge/badge.component';
+import { ButtonComponent } from '@shared/components/button/button.component';
+import {
+  LucideDynamicIcon,
+  LucideCheck,
+  LucideX,
+  LucideClock,
+  LucideIcon,
+  LucideArrowLeft,
+  LucideCheckCircle2,
+  LucideXCircle,
+  LucideSend,
+} from '@lucide/angular';
 
 interface ExtendedTask {
   id: string;
@@ -57,7 +68,6 @@ const LEAVE_TRANSITIONS: Record<string, string[]> = {
     CommonModule,
     RouterLink,
     ReactiveFormsModule,
-    MatButtonModule,
     MatIconModule,
     MatCardModule,
     MatFormFieldModule,
@@ -65,6 +75,8 @@ const LEAVE_TRANSITIONS: Record<string, string[]> = {
     HeaderComponent,
     DetailItemComponent,
     BadgeComponent,
+    ButtonComponent,
+    LucideDynamicIcon,
   ],
   templateUrl: './workflow-details.component.html',
   styleUrls: ['./workflow-details.component.scss'],
@@ -94,11 +106,17 @@ export class WorkflowDetailsComponent implements OnInit {
   // Form for remarks
   transitionForm!: FormGroup;
 
+  // Macro progress stepper
+  stageList: { key: string; label: string; status: 'completed' | 'current' | 'upcoming' | 'rejected' }[] = [];
+
   // Authorization checks
   canAction = false;
   possibleTransitions: string[] = [];
   currentUser: any = null;
   userRoleIds: string[] = [];
+
+  // Button icons
+  protected readonly arrowLeftIcon = LucideArrowLeft;
 
   ngOnInit(): void {
     this.workflowId = this.route.snapshot.paramMap.get('id');
@@ -248,6 +266,9 @@ export class WorkflowDetailsComponent implements OnInit {
     } else {
       this.possibleTransitions = [];
     }
+
+    // 4. Compute macro stage pipeline
+    this.computeStageList();
   }
 
   onTransition(nextState: string): void {
@@ -269,12 +290,15 @@ export class WorkflowDetailsComponent implements OnInit {
 
         let request$;
         if (entityType === 'contract') {
-          request$ = this.workflowsService.transitionContract(entityId, nextState);
+          request$ = this.workflowsService.transitionContract(entityId, nextState, remarks);
         } else if (entityType === 'leave_request') {
           request$ = this.workflowsService.transitionLeaveRequest(entityId, nextState, remarks);
         } else {
           // Fallback update directly to workflow instance
-          request$ = this.workflowsService.updateWorkflowInstance(this.workflowId!, { current_state: nextState });
+          request$ = this.workflowsService.updateWorkflowInstance(this.workflowId!, {
+            current_state: nextState,
+            comments: remarks
+          } as any);
         }
 
         request$.subscribe({
@@ -296,14 +320,41 @@ export class WorkflowDetailsComponent implements OnInit {
 
   // --- UI Helpers ---
 
+  goBackToTasks(): void {
+    this.router.navigate(['/workflows/my-tasks']);
+  }
+
+  getTransitionVariant(state: string): 'primary' | 'red' | 'amber' | 'outline' {
+    const s = state?.toLowerCase();
+    if (['approved', 'active', 'completed'].includes(s)) {
+      return 'primary';
+    }
+    if (['rejected', 'cancelled', 'terminated'].includes(s)) {
+      return 'red';
+    }
+    return 'amber';
+  }
+
+  getTransitionIcon(state: string): LucideIcon {
+    const s = state?.toLowerCase();
+    if (['rejected', 'cancelled', 'terminated'].includes(s)) {
+      return LucideXCircle;
+    }
+    if (['approved', 'active', 'completed'].includes(s)) {
+      return LucideCheckCircle2;
+    }
+    return LucideSend;
+  }
+
   capitalize(str: string): string {
     if (!str) return '';
     return str.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   }
 
-  formatDate(dateStr: string | null): string {
-    if (!dateStr) return 'Active';
+  formatDate(dateStr: string | null, fallback = 'N/A'): string {
+    if (!dateStr) return fallback;
     const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return fallback;
     return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
@@ -346,6 +397,40 @@ export class WorkflowDetailsComponent implements OnInit {
       default:
         return 'bg-slate-100 text-slate-700 border-slate-200';
     }
+  }
+
+  getWorkflowBadgeVariant(status: string): BadgeVariant {
+    switch (status?.toLowerCase()) {
+      case 'approved':
+      case 'signed':
+      case 'active':
+      case 'completed':
+        return 'success';
+      case 'rejected':
+      case 'cancelled':
+      case 'terminated':
+        return 'danger';
+      case 'submitted':
+      case 'under_review':
+        return 'primary';
+      case 'draft':
+      case 'pending':
+        return 'warning';
+      default:
+        return 'secondary';
+    }
+  }
+
+  getTaskBadgeVariant(task: ExtendedTask): BadgeVariant {
+    const node = (task.node_name || '').toLowerCase();
+    if (node.includes('reject') || node.includes('cancel')) return 'danger';
+    if (task.end_time) {
+      if (node.includes('approve') || node.includes('sign') || node.includes('complete') || node.includes('active')) {
+        return 'success';
+      }
+      return 'primary';
+    }
+    return 'warning';
   }
 
   getTaskBadgeClass(task: ExtendedTask): string {
@@ -398,32 +483,68 @@ export class WorkflowDetailsComponent implements OnInit {
     if (!task.end_time) {
       if (node.includes('approve')) return 'Waiting for approval';
       if (node.includes('review')) return 'Waiting for assignment & review';
-      return 'Waiting for assignment & review';
+      return 'Action currently in progress';
     }
     if (node.includes('pending')) return 'Waiting for assignment';
     if (node.includes('approve')) return 'Request has been approved';
     if (node.includes('reject')) return 'Request has been rejected';
-    if (node.includes('submit')) return 'Request submitted';
+    if (node.includes('submit')) return 'Submitted for review';
     if (node.includes('sign')) return 'Document signed';
     if (node.includes('active')) return 'Workflow active';
     if (node.includes('complete')) return 'Workflow completed';
-    return 'Transition completed';
+    return 'Stage completed';
   }
 
   getNodeIcon(task: ExtendedTask): string {
     const node = (task.node_name || '').toLowerCase();
-    if (node.includes('pending')) return 'schedule';
+    if (node.includes('pending')) return 'hourglass_empty';
     if (node.includes('approve')) return 'check_circle';
     if (node.includes('reject')) return 'cancel';
     if (node.includes('review')) return 'rate_review';
     if (node.includes('submit')) return 'send';
-    if (!task.end_time) return 'schedule';
+    if (!task.end_time) return 'pending_actions';
     return 'task_alt';
+  }
+
+  getNodeCircleClass(task: ExtendedTask): string {
+    const node = (task.node_name || '').toLowerCase();
+    if (node.includes('reject') || node.includes('cancel')) {
+      return 'bg-rose-600 text-white shadow-2xs border-2 border-white ring-2 ring-rose-100';
+    }
+    if (task.end_time) {
+      return 'bg-emerald-600 text-white shadow-2xs border-2 border-white ring-2 ring-emerald-100';
+    }
+    return 'bg-blue-600 text-white shadow-2xs border-2 border-white ring-4 ring-blue-100 animate-pulse';
+  }
+
+  getNodeCircleIcon(task: ExtendedTask): LucideIcon {
+    const node = (task.node_name || '').toLowerCase();
+    if (node.includes('reject') || node.includes('cancel')) return LucideX;
+    if (task.end_time) return LucideCheck;
+    return LucideClock;
+  }
+
+  getEventTitle(task: ExtendedTask): string {
+    const node = (task.node_name || '').toLowerCase();
+    if (!task.end_time) {
+      if (node.includes('approve')) return 'Pending Final Approval';
+      if (node.includes('review')) return 'Under Review';
+      if (node.includes('sign')) return 'Awaiting Signatures';
+      return `${this.capitalize(task.node_name)} (In Progress)`;
+    }
+    if (node.includes('draft')) return 'Draft Initialized';
+    if (node.includes('submit')) return 'Submitted for Review';
+    if (node.includes('review')) return 'Review Completed';
+    if (node.includes('approve')) return 'Contract Approved';
+    if (node.includes('sign')) return 'Document Signed';
+    if (node.includes('active')) return 'Activated';
+    if (node.includes('reject')) return 'Submission Rejected';
+    if (node.includes('complete')) return 'Workflow Completed';
+    return `${this.capitalize(task.node_name)} Completed`;
   }
 
   getCardBgClass(task: ExtendedTask): string {
     const node = (task.node_name || '').toLowerCase();
-    if (node.includes('approve')) return 'bg-emerald-50/20';
     if (node.includes('reject')) return 'bg-rose-50/20';
     if (!task.end_time) return 'bg-blue-50/20';
     return 'bg-white';
@@ -431,10 +552,12 @@ export class WorkflowDetailsComponent implements OnInit {
 
   getCardBorderClass(task: ExtendedTask): string {
     const node = (task.node_name || '').toLowerCase();
-    if (node.includes('approve')) return 'border-emerald-200';
-    if (node.includes('reject')) return 'border-rose-200';
-    if (!task.end_time) return 'border-blue-300';
-    return 'border-slate-200';
+    if (node.includes('reject')) return 'border-rose-200 border-l-4 border-l-rose-500';
+    if (!task.end_time) return 'border-blue-300 border-l-4 border-l-blue-600';
+    if (node.includes('approve') || node.includes('complete') || node.includes('active')) {
+      return 'border-slate-200 border-l-4 border-l-emerald-500';
+    }
+    return 'border-slate-200 border-l-4 border-l-slate-400';
   }
 
   getHeaderIconBoxClass(task: ExtendedTask): string {
@@ -457,9 +580,99 @@ export class WorkflowDetailsComponent implements OnInit {
 
   getBadgeText(task: ExtendedTask): string {
     const node = (task.node_name || '').toLowerCase();
-    if (!task.end_time && !node.includes('approve') && !node.includes('reject')) {
-      return 'ACTIVE';
+    if (task.end_time) {
+      if (node.includes('reject')) return 'REJECTED';
+      if (node.includes('approve')) return 'APPROVED';
+      if (node.includes('submit')) return 'SUBMITTED';
+      if (node.includes('sign')) return 'SIGNED';
+      if (node.includes('complete')) return 'COMPLETED';
+      return 'COMPLETED';
     }
-    return this.capitalize(task.node_name);
+    return 'IN PROGRESS';
+  }
+
+  computeStageList(): void {
+    if (!this.workflow) {
+      this.stageList = [];
+      return;
+    }
+
+    const current = (this.workflow.current_state || '').toLowerCase();
+    const entityType = this.workflow.entity_type;
+
+    let baseStages: { key: string; label: string }[] = [];
+    if (entityType === 'contract') {
+      baseStages = [
+        { key: 'draft', label: 'Draft' },
+        { key: 'submitted', label: 'Submitted' },
+        { key: 'under_review', label: 'Under Review' },
+        { key: 'approved', label: 'Approved' },
+        { key: 'active', label: 'Active' },
+      ];
+    } else if (entityType === 'leave_request') {
+      baseStages = [
+        { key: 'pending', label: 'Requested' },
+        { key: 'approved', label: 'Approved' },
+      ];
+    } else {
+      baseStages = [
+        { key: 'draft', label: 'Draft' },
+        { key: 'submitted', label: 'Submitted' },
+        { key: 'completed', label: 'Completed' },
+      ];
+    }
+
+    const stageOrder = baseStages.map(s => s.key);
+    const isTerminalCompleted = current === 'completed' || current === 'active';
+    const isTerminalRejected = current === 'rejected' || current === 'terminated' || current === 'cancelled';
+
+    let currentIndex = stageOrder.indexOf(current);
+    if (currentIndex === -1) {
+      if (isTerminalCompleted) currentIndex = stageOrder.length;
+      else currentIndex = 0;
+    }
+
+    this.stageList = baseStages.map((stage, idx) => {
+      let status: 'completed' | 'current' | 'upcoming' | 'rejected' = 'upcoming';
+
+      if (isTerminalRejected && idx === currentIndex) {
+        status = 'rejected';
+      } else if (isTerminalCompleted || idx < currentIndex) {
+        status = 'completed';
+      } else if (idx === currentIndex) {
+        status = 'current';
+      } else {
+        status = 'upcoming';
+      }
+
+      return {
+        key: stage.key,
+        label: stage.label,
+        status,
+      };
+    });
+  }
+
+  getStageCircleClass(stage: any): string {
+    switch (stage.status) {
+      case 'completed':
+        return 'bg-emerald-500 text-white shadow-2xs';
+      case 'current':
+        return 'bg-blue-600 text-white ring-4 ring-blue-100 shadow-2xs';
+      case 'rejected':
+        return 'bg-rose-500 text-white shadow-2xs';
+      default:
+        return 'bg-slate-100 text-slate-400 border border-slate-200';
+    }
+  }
+
+  getTotalWorkflowDuration(): string {
+    if (!this.tasks || this.tasks.length === 0) return 'N/A';
+    const firstTask = this.tasks[0];
+    const lastTask = this.tasks[this.tasks.length - 1];
+    const startTime = firstTask?.start_time;
+    const endTime = lastTask?.end_time || (this.workflow?.updated_at ?? null);
+    if (!startTime) return 'N/A';
+    return this.getDuration(startTime, endTime) || '< 1 min';
   }
 }

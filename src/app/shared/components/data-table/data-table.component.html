@@ -111,19 +111,19 @@
         <td mat-cell *matCellDef="let row">
           <div class="flex items-center action-btns">
             @if (showView) {
-            <button mat-icon-button color="primary" (click)="view.emit(row)" matTooltip="Show">
+            <button mat-icon-button class="text-primary-600! h-8! w-8!" (click)="view.emit(row)" matTooltip="Show">
               <mat-icon>visibility</mat-icon>
             </button>
             }
 
             @if (showEdit) {
-            <button mat-icon-button color="primary" (click)="edit.emit(row)" matTooltip="Edit">
+            <button mat-icon-button class="text-primary-600! h-8! w-8!" (click)="edit.emit(row)" matTooltip="Edit">
               <mat-icon>edit</mat-icon>
             </button>
             }
 
             @if (showDelete) {
-            <button mat-icon-button color="warn" (click)="delete.emit(row)" matTooltip="Delete">
+            <button mat-icon-button class="text-red-600! h-8! w-8!" (click)="delete.emit(row)" matTooltip="Delete">
               <mat-icon>delete</mat-icon>
             </button>
             }

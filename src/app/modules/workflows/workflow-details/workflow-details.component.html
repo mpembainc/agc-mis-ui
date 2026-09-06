@@ -3,14 +3,20 @@
     title="Workflow Details"
     subTitle="Review workflow progress, task history, and transition actions.">
     @if (workflow) {
-      <span header-badge [class]="'px-2.5 py-0.5 rounded-full text-xs font-semibold border ' + getStatusColorClass(workflow.current_state)">
-        {{ capitalize(workflow.current_state) }}
-      </span>
+      <app-badge
+        header-badge
+        [variant]="getWorkflowBadgeVariant(workflow.current_state)"
+        [pill]="true"
+        [text]="capitalize(workflow.current_state)">
+      </app-badge>
     }
-    <button mat-stroked-button color="primary" routerLink="/workflows/my-tasks" class="flex items-center gap-1">
-      <mat-icon class="text-[18px] w-4.5 h-4.5 leading-4.5">arrow_back</mat-icon>
+    <app-button
+      [icon]="arrowLeftIcon"
+      variant="outline"
+      routerLink="/workflows/my-tasks"
+      (btnClick)="goBackToTasks()">
       Back to Tasks
-    </button>
+    </app-button>
   </app-header>
 
   @if (loading()) {
@@ -19,17 +25,20 @@
       <p class="text-slate-500 text-sm">Loading workflow details and history...</p>
     </div>
   } @else if (workflow) {
-    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
       
       <!-- Left Column: Details & Actions (Span 6 on XL, 7 on 2XL) -->
-      <div class="xl:col-span-6 2xl:col-span-7 flex flex-col gap-6">
-        
+      <div class="xl:col-span-6 2xl:col-span-8 flex flex-col gap-4">
         <!-- Entity Details Card -->
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-          <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex justify-between items-center">
+        <div class="bg-white rounded-xl shadow-2xs border border-slate-200 overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex justify-between items-center flex-wrap gap-2">
             <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
               Associated {{ capitalize(workflow.entity_type) }} Information
             </h2>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-slate-500 font-medium">Turnaround:</span>
+              <span class="font-bold text-slate-800">{{ getTotalWorkflowDuration() }}</span>
+            </div>
           </div>
           
           <div class="p-6">
@@ -37,7 +46,13 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                 <detail-item label="Contract Number" [value]="entity.contract_number"></detail-item>
                 <detail-item label="Parties" [value]="entity.partners || 'N/A'"></detail-item>
-                <detail-item label="Subject Matter" [value]="entity.subject_matter || 'N/A'" class="md:col-span-2" [multiline]="true"></detail-item>
+                <detail-item
+                  label="Subject Matter"
+                  [value]="entity.subject_matter || 'N/A'"
+                  class="md:col-span-2"
+                  [multiline]="true"
+                  valueClass="text-justify">
+                </detail-item>
                 <detail-item label="Contract Value" [value]="formatCurrency(entity.value)"></detail-item>
                 <detail-item label="Interest Flag">
                   <app-badge [variant]="entity.strategic_interest_flag ? 'danger' : 'secondary'">
@@ -49,11 +64,17 @@
               </div>
             } @else if (workflow.entity_type === 'leave_request' && entity) {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                <detail-item label="Requesting Attorney" [value]="entity.attorney?.full_name || 'N/A'"></detail-item>
+                <detail-item label="Requesting Attorney" [value]="entity.attorney?.full_name || 'N/A'" [bold]="true"></detail-item>
                 <detail-item label="Leave Type" [value]="capitalize(entity.leave_type)"></detail-item>
                 <detail-item label="Duration Period" [value]="formatDate(entity.start_date) + ' to ' + formatDate(entity.end_date)"></detail-item>
                 <detail-item label="Total Working Days" [value]="(entity.total_days || 'N/A') + ' Days'"></detail-item>
-                <detail-item label="Reason / Description" [value]="entity.reason || 'No reason specified'" class="md:col-span-2" [multiline]="true"></detail-item>
+                <detail-item
+                  label="Reason / Description"
+                  [value]="entity.reason || 'No reason specified'"
+                  class="md:col-span-2"
+                  [multiline]="true"
+                  valueClass="mt-1.5 p-3.5 bg-slate-50 rounded-lg border border-slate-200/80 text-xs text-slate-700 leading-relaxed max-h-36 overflow-y-auto">
+                </detail-item>
                 @if (entity.approver_remarks) {
                   <div class="md:col-span-2 p-3.5 bg-amber-50 rounded-lg border border-amber-200">
                     <label class="text-[11px] font-bold text-amber-900 uppercase tracking-wider block mb-1">Approver's Remarks</label>
@@ -71,15 +92,15 @@
 
         <!-- Action Panel (Transition Steps) -->
         @if (canAction && possibleTransitions.length > 0) {
-          <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-white rounded-xl shadow-2xs border border-slate-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-2">
-              <mat-icon class="text-[20px] text-primary-600 leading-[20px]">assignment_turned_in</mat-icon>
+              <mat-icon class="text-[20px] text-primary-600 leading-5">assignment_turned_in</mat-icon>
               <h2 class="text-sm font-semibold text-slate-800">Action Required: Transition Workflow</h2>
             </div>
             
             <div class="p-6">
               <p class="text-xs text-slate-500 mb-4">
-                You are authorized to execute transitions for the current state. You can optionaly add comments or remarks.
+                You are authorized to execute transitions for the current state. You can optionally add comments or remarks.
               </p>
               
               <form [formGroup]="transitionForm" class="flex flex-col gap-4">
@@ -91,32 +112,33 @@
 
                 <div class="flex flex-wrap gap-2 mt-2">
                   @for (nextState of possibleTransitions; track nextState) {
-                    <button mat-raised-button 
-                            [color]="nextState === 'approved' || nextState === 'active' || nextState === 'completed' ? 'primary' : 
-                                     nextState === 'rejected' || nextState === 'cancelled' || nextState === 'terminated' ? 'warn' : 'accent'"
-                            [disabled]="submitting()"
-                            (click)="onTransition(nextState)">
-                      @if (submitting()) {
-                        <mat-icon class="animate-spin text-[18px] w-[18px] h-[18px] leading-[18px]">refresh</mat-icon>
-                      } @else {
-                        <mat-icon class="text-[18px] w-[18px] h-[18px] leading-[18px]">check_circle</mat-icon>
-                      }
-                      <span>{{ capitalize(nextState) }}</span>
-                    </button>
+                    <app-button
+                      [variant]="getTransitionVariant(nextState)"
+                      [icon]="getTransitionIcon(nextState)"
+                      [disabled]="submitting()"
+                      [loading]="submitting()"
+                      (btnClick)="onTransition(nextState)">
+                      {{ capitalize(nextState) }}
+                    </app-button>
                   }
                 </div>
               </form>
             </div>
           </div>
         } @else if (possibleTransitions.length === 0) {
-          <div class="p-4 bg-emerald-50 rounded-lg border border-emerald-100 text-emerald-950 flex items-center gap-3">
-            <mat-icon class="text-emerald-700">check_circle_outline</mat-icon>
-            <div class="text-xs">
-              This workflow has completed and reached a terminal state. No further actions are required.
+          <div class="p-4 bg-emerald-50/80 rounded-xl border border-emerald-200 text-emerald-950 flex items-center gap-3.5 shadow-2xs">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <mat-icon class="text-[20px] w-5 h-5 leading-5">verified</mat-icon>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="text-sm font-bold text-emerald-950">Workflow Completed</div>
+              <div class="text-xs text-emerald-800 mt-0.5">
+                This workflow has completed all stages and reached terminal state ({{ capitalize(workflow.current_state) }}). No further actions are required.
+              </div>
             </div>
           </div>
         } @else {
-          <div class="p-4 bg-slate-50 rounded-lg border border-slate-200 text-slate-700 flex items-center gap-3">
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 flex items-center gap-3 shadow-2xs">
             <mat-icon class="text-slate-500">lock</mat-icon>
             <div class="text-xs">
               You are not authorized to perform actions in the current state of this workflow.
@@ -125,155 +147,78 @@
         }
       </div>
 
-      <!-- Right Column: Vertical Timeline History -->
-      <div class="xl:col-span-6 2xl:col-span-5 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-blue-50/80 text-blue-600 border border-blue-100 flex items-center justify-center flex-shrink-0">
-            <mat-icon class="text-[20px] w-[20px] h-[20px] leading-[20px]">history</mat-icon>
-          </div>
+      <!-- Right Column: Premium Executive Activity Stream -->
+      <div class="xl:col-span-6 2xl:col-span-4 bg-white rounded-xl shadow-2xs border border-slate-200 overflow-hidden">
+        <!-- Card Header -->
+        <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
           <div>
-            <h2 class="text-base font-bold text-slate-800 leading-tight">Workflow Timeline & Log</h2>
-            <p class="text-xs text-slate-500 mt-0.5">View the history and details of this workflow</p>
+            <h2 class="text-sm font-semibold text-slate-900 tracking-tight leading-tight">Workflow Activity</h2>
+            <p class="text-xs text-slate-600 mt-0.5">Chronological audit trail of all transition events</p>
           </div>
+          <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full bg-white text-slate-700 border border-slate-200/90 shadow-2xs">
+            {{ tasks.length }} {{ tasks.length === 1 ? 'event' : 'events' }}
+          </span>
         </div>
 
         <div class="p-6">
           @if (tasks.length > 0) {
             <div class="relative">
               @for (task of tasks; track task.id; let isLast = $last; let idx = $index) {
-                <div class="flex gap-3 sm:gap-4 relative" [class.pb-8]="!isLast" [class.pb-4]="isLast">
+                <div class="relative flex items-start gap-3.5" [class.pb-7]="!isLast" [class.pb-2]="isLast">
                   
-                  <!-- Timeline Left Track: Node + Step Info (Clean, No Dates) -->
-                  <div class="relative flex flex-col items-center w-14 sm:w-16 flex-shrink-0 text-center pt-4">
-                    <!-- Connecting line centered directly through the circles -->
-                    @if (!isLast) {
-                      <div class="absolute left-1/2 -translate-x-1/2 top-8 bottom-0 w-0.5 bg-slate-200 z-0"></div>
-                    } @else {
-                      <div class="absolute left-1/2 -translate-x-1/2 top-8 bottom-0 w-0.5 bg-slate-200 z-0"></div>
-                      <div class="absolute left-1/2 -translate-x-1/2 -bottom-1 w-2.5 h-2.5 rounded-full bg-slate-300 border-2 border-white shadow-2xs z-10"></div>
-                    }
+                  <!-- Continuous Connecting Line -->
+                  @if (!isLast) {
+                    <span class="absolute top-2.5 left-3 -ml-px h-full w-0.5 bg-slate-200" aria-hidden="true"></span>
+                  }
 
-                    <!-- Node Circle (aligned with the bubble pointer) -->
-                    <div class="w-8 h-8 rounded-full flex items-center justify-center border-2 border-white shadow-xs z-10 text-white transition-all duration-200"
-                         [class.bg-emerald-500]="idx < tasks.length - 1 || (task.end_time && !isLast)"
-                         [class.bg-blue-600]="idx === tasks.length - 1 || !task.end_time"
-                         [class.ring-4]="idx === tasks.length - 1"
-                         [class.ring-blue-100]="idx === tasks.length - 1">
-                      <mat-icon class="text-[16px] w-[16px] h-[16px] leading-[16px]">check</mat-icon>
+                  <!-- Left: Centered Node Dot -->
+                  <div class="relative flex flex-col items-center shrink-0 w-6">
+                    <!-- Node Circle -->
+                    <div class="w-5 h-5 rounded-full flex items-center justify-center shrink-0 z-10 shadow-2xs border-2 border-white"
+                         [ngClass]="getNodeCircleClass(task)">
+                      <svg [lucideIcon]="getNodeCircleIcon(task)" class="size-3 stroke-[2.5]"></svg>
                     </div>
-
-                    <!-- Step Label Only (Dates removed as requested) -->
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1.5 z-10">
-                      Step {{ idx + 1 }}
-                    </span>
                   </div>
 
-                  <!-- Right Step Card: Styled as a Chat/Card Bubble -->
-                  <div class="flex-1 min-w-0">
-                    <div class="relative rounded-2xl border p-4 sm:p-5 shadow-2xs hover:shadow-xs transition-all duration-200"
-                         [ngClass]="[getCardBgClass(task), getCardBorderClass(task)]">
-
-                      <!-- Chat Bubble Arrow pointing directly to the timeline dot -->
-                      <div class="absolute -left-[7px] top-[25px] w-3.5 h-3.5 rotate-45 border-l border-b bg-inherit border-inherit z-10"></div>
-
-                      <!-- Card Header: Icon + Title/Subtitle + Badge -->
-                      <div class="flex items-start justify-between gap-3">
-                        <div class="flex items-center gap-3">
-                          <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-2xs"
-                               [ngClass]="getHeaderIconBoxClass(task)">
-                            <mat-icon class="text-[20px] w-[20px] h-[20px] leading-[20px]">
-                              {{ getNodeIcon(task) }}
-                            </mat-icon>
-                          </div>
-                          <div>
-                            <h3 class="text-sm sm:text-base font-bold text-slate-800 capitalize leading-tight">
-                              {{ capitalize(task.node_name) }} State
-                            </h3>
-                            <p class="text-xs text-slate-500 mt-0.5">
-                              {{ getNodeSubtitle(task) }}
-                            </p>
-                          </div>
-                        </div>
-
-                        <!-- Status Badge -->
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider flex-shrink-0"
-                              [ngClass]="getBadgeClass(task)">
-                          {{ getBadgeText(task) }}
-                        </span>
-                      </div>
-
-                      <!-- Metadata Rows: Assignee, Role, Started, Completed -->
-                      <div class="mt-4 space-y-2.5 text-xs">
-                        <div class="flex items-center gap-3">
-                          <mat-icon class="text-[18px] w-[18px] h-[18px] leading-[18px] text-slate-400 flex-shrink-0">person</mat-icon>
-                          <span class="text-slate-500 w-28 flex-shrink-0 font-normal">Assignee:</span>
-                          <span class="font-medium text-slate-800">{{ task.resolved_assignee_name || 'Unassigned' }}</span>
-                        </div>
-
-                        <div class="flex items-center gap-3">
-                          <mat-icon class="text-[18px] w-[18px] h-[18px] leading-[18px] text-slate-400 flex-shrink-0">security</mat-icon>
-                          <span class="text-slate-500 w-28 flex-shrink-0 font-normal">Assigned Role:</span>
-                          <span class="font-medium text-slate-800">{{ task.resolved_role_name || 'No Role' }}</span>
-                        </div>
-
-                        @if (task.start_time) {
-                          <div class="flex items-center gap-3">
-                            <mat-icon class="text-[18px] w-[18px] h-[18px] leading-[18px] text-slate-400 flex-shrink-0">schedule</mat-icon>
-                            <span class="text-slate-500 w-28 flex-shrink-0 font-normal">Started:</span>
-                            <span class="font-medium text-slate-800">{{ formatDate(task.start_time) }}</span>
-                          </div>
-                        }
-
-                        @if (task.end_time) {
-                          <div class="flex items-center gap-3">
-                            <mat-icon class="text-[18px] w-[18px] h-[18px] leading-[18px] text-slate-400 flex-shrink-0">check_circle</mat-icon>
-                            <span class="text-slate-500 w-28 flex-shrink-0 font-normal">Completed:</span>
-                            <span class="font-medium text-slate-800">{{ formatDate(task.end_time) }}</span>
-                          </div>
-                        }
-                      </div>
-
-                      <!-- Approver's Comment Box -->
-                      @if (task.comments) {
-                        <div class="mt-4 border-l-4 border-l-emerald-600 bg-emerald-50/40 border border-emerald-200/80 rounded-lg p-3.5 space-y-2.5">
-                          <div class="flex items-center justify-between text-xs">
-                            <div class="flex items-center gap-1.5 font-bold text-emerald-800">
-                              <mat-icon class="text-[16px] w-[16px] h-[16px] leading-[16px] text-emerald-600">chat_bubble_outline</mat-icon>
-                              <span>Approver's Comment</span>
-                            </div>
-                            <span class="text-[11px] text-slate-400 font-normal">
-                              {{ formatDate(task.end_time || task.start_time) }}
-                            </span>
-                          </div>
-
-                          <p class="text-xs text-slate-700 leading-relaxed italic">
-                            &ldquo;{{ task.comments }}&rdquo;
-                          </p>
-
-                          <!-- Author Signature with Avatar -->
-                          <div class="flex items-center gap-2.5 pt-1">
-                            <div class="w-8 h-8 rounded-full bg-slate-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 shadow-2xs">
-                              {{ getInitials(task.resolved_assignee_name) }}
-                            </div>
-                            <div>
-                              <div class="text-xs font-bold text-slate-800 leading-tight">
-                                {{ task.resolved_assignee_name }}
-                              </div>
-                              <div class="text-[11px] text-slate-500 leading-tight mt-0.5">
-                                {{ task.resolved_role_name }}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                  <!-- Right: Event Content Body -->
+                  <div class="flex-1 min-w-0 pt-0.5">
+                    <!-- Line 1: Header (Title on Left, Timestamp on Right) -->
+                    <div class="flex items-center justify-between gap-2">
+                      <span class="text-[13px] font-semibold text-slate-900 tracking-tight truncate">
+                        {{ getEventTitle(task) }}
+                      </span>
+                      @if (task.end_time) {
+                        <span class="text-[11px] text-slate-500 font-medium shrink-0">{{ formatDate(task.end_time) }}</span>
+                      } @else if (task.start_time) {
+                        <span class="text-[11px] text-primary-600 font-medium shrink-0">{{ formatDate(task.start_time) }}</span>
                       }
                     </div>
+
+                    <!-- Line 2: Actor Details (Avatar + Name + Role + Started Timestamp) -->
+                    <div class="flex items-center gap-2 mt-1.5 text-xs text-slate-500 flex-wrap">
+                      <div class="w-5 h-5 rounded-full bg-primary-100 text-primary-700 text-[9px] font-semibold flex items-center justify-center shrink-0 shadow-2xs">
+                        {{ getInitials(task.resolved_assignee_name) }}
+                      </div>
+                      <span class="font-medium text-slate-800">{{ task.resolved_assignee_name || 'System' }}</span>
+                      <span class="text-slate-300">•</span>
+                      <span class="text-slate-600">{{ task.resolved_role_name || 'No Role' }}</span>
+                      
+                    </div>
+
+                    <!-- Line 3: Remarks Callout (if present) -->
+                    <div class="mt-2.5 p-2 rounded-md bg-primary-50 border border-primary-200/80 text-xs text-slate-700 leading-relaxed font-normal">
+                        <p class="italic text-slate-800 leading-relaxed">
+                          &ldquo;{{ task.comments ?? "No comments provided..." }}&rdquo;
+                        </p>
+                    </div>
                   </div>
+
                 </div>
               }
             </div>
           } @else {
-            <div class="text-center py-6 text-slate-400 text-xs italic">
-              No tasks found in workflow.
+            <div class="text-center py-8 text-slate-400 text-xs italic">
+              No activity recorded for this workflow.
             </div>
           }
         </div>

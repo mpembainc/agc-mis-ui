@@ -8,7 +8,7 @@
     [data]="tasks"
     [columns]="columns"
     [loading]="loading()"
-    [actionMenuItems]="actionMenuItems"
+    (view)="onActionTask($event)"
     [showHoverBg]="true"
     [columnTemplates]="getColumnTemplates()"
   >

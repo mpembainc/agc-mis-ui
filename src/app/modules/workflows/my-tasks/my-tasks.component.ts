@@ -4,7 +4,6 @@ import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { DataTableComponent, TableColumn } from '@shared/components/data-table/data-table.component';
-import { ActionMenuItem } from '@shared/components/action-menu/action-menu';
 import { WorkflowsService } from '../services/workflows.service';
 import { AuthService } from '@modules/auth/services/auth.service';
 import { SwalService } from '@shared/services/swal.service';
@@ -57,15 +56,6 @@ export class MyTasksComponent implements OnInit {
     { key: 'entity_detail', label: 'Summary' },
     { key: 'node_name', label: 'Current State' },
     { key: 'start_time', label: 'Assigned Date', type: 'date', format: 'mediumDate' },
-  ];
-
-  actionMenuItems: ActionMenuItem<TaskRow>[] = [
-    {
-      label: 'Action Task / View Details',
-      icon: 'visibility',
-      color: 'primary',
-      action: (row) => this.onActionTask(row),
-    },
   ];
 
   ngOnInit(): void {
