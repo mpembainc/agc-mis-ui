@@ -32,13 +32,9 @@
         <!-- Entity Details Card -->
         <div class="bg-white rounded-xl shadow-2xs border border-slate-200 overflow-hidden">
           <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/75 flex justify-between items-center flex-wrap gap-2">
-            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <h2 class="text-base font-semibold text-slate-900 flex items-center gap-2">
               Associated {{ capitalize(workflow.entity_type) }} Information
             </h2>
-            <div class="flex items-center gap-2 text-xs">
-              <span class="text-slate-500 font-medium">Turnaround:</span>
-              <span class="font-bold text-slate-800">{{ getTotalWorkflowDuration() }}</span>
-            </div>
           </div>
           
           <div class="p-6">
@@ -64,7 +60,7 @@
               </div>
             } @else if (workflow.entity_type === 'leave_request' && entity) {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                <detail-item label="Requesting Attorney" [value]="entity.attorney?.full_name || 'N/A'" [bold]="true"></detail-item>
+                <detail-item label="Requesting Attorney" [value]="entity.attorney?.full_name || 'N/A'"></detail-item>
                 <detail-item label="Leave Type" [value]="capitalize(entity.leave_type)"></detail-item>
                 <detail-item label="Duration Period" [value]="formatDate(entity.start_date) + ' to ' + formatDate(entity.end_date)"></detail-item>
                 <detail-item label="Total Working Days" [value]="(entity.total_days || 'N/A') + ' Days'"></detail-item>
@@ -73,7 +69,7 @@
                   [value]="entity.reason || 'No reason specified'"
                   class="md:col-span-2"
                   [multiline]="true"
-                  valueClass="mt-1.5 p-3.5 bg-slate-50 rounded-lg border border-slate-200/80 text-xs text-slate-700 leading-relaxed max-h-36 overflow-y-auto">
+                  valueClass="text-justify">
                 </detail-item>
                 @if (entity.approver_remarks) {
                   <div class="md:col-span-2 p-3.5 bg-amber-50 rounded-lg border border-amber-200">
@@ -155,9 +151,21 @@
             <h2 class="text-sm font-semibold text-slate-900 tracking-tight leading-tight">Workflow Activity</h2>
             <p class="text-xs text-slate-600 mt-0.5">Chronological audit trail of all transition events</p>
           </div>
-          <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full bg-white text-slate-700 border border-slate-200/90 shadow-2xs">
-            {{ tasks.length }} {{ tasks.length === 1 ? 'event' : 'events' }}
-          </span>
+          <app-badge
+            [variant]="timelineStatus.variant"
+            [pill]="true"
+            [tooltip]="timelineTooltip"
+            containerClass="gap-1.5 px-2.5! py-1! shadow-2xs">
+            @if (timelineStatus.live) {
+              <span class="relative flex size-2">
+                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex size-2 rounded-full bg-emerald-500"></span>
+              </span>
+            } @else {
+              <span class="size-2 rounded-full" [ngClass]="timelineStatus.variant === 'danger' ? 'bg-rose-400' : 'bg-slate-400'"></span>
+            }
+            {{ timelineStatus.label }}
+          </app-badge>
         </div>
 
         <div class="p-6">

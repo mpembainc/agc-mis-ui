@@ -319,7 +319,6 @@ export class WorkflowDetailsComponent implements OnInit {
   }
 
   // --- UI Helpers ---
-
   goBackToTasks(): void {
     this.router.navigate(['/workflows/my-tasks']);
   }
@@ -419,6 +418,31 @@ export class WorkflowDetailsComponent implements OnInit {
       default:
         return 'secondary';
     }
+  }
+
+  get timelineStatus(): { label: string; variant: BadgeVariant; live: boolean } {
+    if (!this.workflow) return { label: 'Live', variant: 'success', live: true };
+    const current = (this.workflow.current_state || '').toLowerCase();
+    if (['rejected', 'terminated', 'cancelled'].includes(current)) {
+      return { label: 'Closed', variant: 'danger', live: false };
+    }
+    if (
+      current === 'completed' ||
+      (this.workflow.entity_type === 'contract' && current === 'active') ||
+      (this.possibleTransitions.length === 0 && !this.tasks.some(t => !t.end_time))
+    ) {
+      return { label: 'Completed', variant: 'secondary', live: false };
+    }
+    return { label: 'Live', variant: 'success', live: true };
+  }
+
+  get timelineTooltip(): string {
+    const count = this.tasks.length;
+    const eventCount = `${count} ${count === 1 ? 'event' : 'events'}`;
+    if (this.timelineStatus.live) {
+      return `${eventCount} • Live workflow activity`;
+    }
+    return `${eventCount} • Workflow ${this.timelineStatus.label.toLowerCase()}`;
   }
 
   getTaskBadgeVariant(task: ExtendedTask): BadgeVariant {
@@ -664,15 +688,5 @@ export class WorkflowDetailsComponent implements OnInit {
       default:
         return 'bg-slate-100 text-slate-400 border border-slate-200';
     }
-  }
-
-  getTotalWorkflowDuration(): string {
-    if (!this.tasks || this.tasks.length === 0) return 'N/A';
-    const firstTask = this.tasks[0];
-    const lastTask = this.tasks[this.tasks.length - 1];
-    const startTime = firstTask?.start_time;
-    const endTime = lastTask?.end_time || (this.workflow?.updated_at ?? null);
-    if (!startTime) return 'N/A';
-    return this.getDuration(startTime, endTime) || '< 1 min';
   }
 }

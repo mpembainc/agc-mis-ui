@@ -8,13 +8,13 @@
         </div>
       </div>
 
-      <mat-nav-list>
+      <mat-nav-list class="sidebar-nav-list">
         @for (nav of menuItems; track $index; let i = $index) {
         <ng-container>
           <!-- Single item -->
           @if (!nav.children) {
             <mat-list-item [routerLink]="nav.route" routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: !!nav.exact }">
+              [routerLinkActiveOptions]="{ exact: nav.exact !== undefined ? nav.exact : true }">
               <mat-icon matListItemIcon>{{ nav.icon }}</mat-icon>
               <span matLine>{{ nav.label }}</span>
             </mat-list-item>
@@ -36,7 +36,7 @@
 
             <mat-nav-list>
               @for (child of nav.children; track $index) {
-                <mat-list-item [routerLink]="child.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: !!child.exact }">
+                <mat-list-item [routerLink]="child.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: child.exact !== undefined ? child.exact : true }">
                   <mat-icon class="sidebar-child-icon">chevron_right</mat-icon>
                   <span matLine>{{ child.label }}</span>
                 </mat-list-item>

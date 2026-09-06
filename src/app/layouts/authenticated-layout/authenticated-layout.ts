@@ -1,10 +1,11 @@
 import { Component, inject, OnDestroy, signal } from '@angular/core';
-import { RouterModule, RouterOutlet } from '@angular/router';
+import { Router, RouterModule, RouterOutlet, NavigationEnd } from '@angular/router';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIcon } from '@angular/material/icon';
+import { filter, Subscription } from 'rxjs';
 
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -61,6 +62,7 @@ export class AuthenticatedLayout implements OnDestroy {
   private swalService = inject(SwalService);
   private permissionsService = inject(NgxPermissionsService);
   protected notificationsService = inject(NotificationsService);
+  private router = inject(Router);
 
   get currentUser() {
     return this.authService.currentUserSignal();
@@ -71,6 +73,7 @@ export class AuthenticatedLayout implements OnDestroy {
   protected readonly isMobile = signal(true);
   private readonly _mobileQuery: MediaQueryList;
   private readonly _mobileQueryListener: () => void;
+  private routerSub?: Subscription;
 
   protected permissions: Array<any> = [];
 
@@ -89,10 +92,30 @@ export class AuthenticatedLayout implements OnDestroy {
     if (this.currentUser) {
       this.notificationsService.loadNotifications().subscribe();
     }
+
+    this.autoExpandActiveMenu();
+    this.routerSub = this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.autoExpandActiveMenu();
+      });
+  }
+
+  private autoExpandActiveMenu(): void {
+    const currentUrl = this.router.url.split('?')[0];
+    const index = this.menuItems.findIndex((item) =>
+      item.children?.some(
+        (child) => child.route && (currentUrl === child.route || currentUrl.startsWith(child.route + '/'))
+      )
+    );
+    if (index !== -1) {
+      this.expandedMenuIndex = index;
+    }
   }
 
   ngOnDestroy(): void {
     this._mobileQuery.removeEventListener('change', this._mobileQueryListener);
+    this.routerSub?.unsubscribe();
   }
 
   async logout() {

@@ -10,6 +10,8 @@ import { SwalService } from '@shared/services/swal.service';
 import { ActionButtonComponent } from '@shared/components/action-button/action-button.component';
 import { RemoveUnderscorePipe } from '@shared/pipes/remove-underscore.pipe';
 import { HeaderComponent } from '@shared/components/header/header.component';
+import { BadgeComponent, BadgeVariant } from '@shared/components/badge/badge.component';
+import { DetailItemComponent } from '@shared/components/detail-item/detail-item.component';
 
 @Component({
   selector: 'app-attorney-view',
@@ -22,6 +24,8 @@ import { HeaderComponent } from '@shared/components/header/header.component';
     ActionButtonComponent,
     RemoveUnderscorePipe,
     HeaderComponent,
+    BadgeComponent,
+    DetailItemComponent,
   ],
   templateUrl: './attorney-view.component.html',
   styleUrls: ['./attorney-view.component.scss'],
@@ -98,5 +102,46 @@ export class AttorneyViewComponent implements OnInit {
     } catch {
       return dob;
     }
+  }
+
+  getStatusVariant(status?: string): BadgeVariant {
+    switch (status?.toLowerCase()) {
+      case 'active':
+        return 'success';
+      case 'on_leave':
+        return 'warning';
+      case 'suspended':
+        return 'danger';
+      case 'seconded':
+        return 'info';
+      case 'resigned':
+      case 'retired':
+      case 'deceased':
+        return 'neutral';
+      default:
+        return 'secondary';
+    }
+  }
+
+  getAssignmentStatusVariant(status?: string): BadgeVariant {
+    switch (status?.toLowerCase()) {
+      case 'completed':
+      case 'closed':
+        return 'success';
+      case 'in_progress':
+      case 'active':
+        return 'warning';
+      case 'pending':
+        return 'primary';
+      default:
+        return 'secondary';
+    }
+  }
+
+  getInitials(name?: string): string {
+    if (!name) return 'SA';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   }
 }
